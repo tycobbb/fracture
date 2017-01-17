@@ -11,7 +11,7 @@ class World {
   val physics = com.badlogic.gdx.physics.box2d.World(gravity, true)
 
   // MARK: Children
-  val level = Level()
+  val level = Level(world = this)
 
   // MARK: Properties
   /** accumulates frame time to determine when to run fixed-step physics simulation */

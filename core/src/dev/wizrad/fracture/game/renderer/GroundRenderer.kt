@@ -4,16 +4,13 @@ import com.badlogic.gdx.graphics.Color
 import dev.wizrad.fracture.game.renderer.core.Renderer
 import dev.wizrad.fracture.game.renderer.support.draw
 import dev.wizrad.fracture.game.renderer.support.pause
-import dev.wizrad.fracture.game.world.Level
+import dev.wizrad.fracture.game.world.Ground
 
-fun Renderer.render(level: Level, delta: Float) {
+fun Renderer.render(ground: Ground, delta: Float) {
   batch.pause {
     shaper.draw {
-      it.color = Color(0x7F89AE)
-      it.rect(level.center.x, level.center.y, level.size.x, level.size.y)
+      it.color = Color(0x596D85)
+      it.rect(ground.center.x, ground.center.y, ground.size.x, ground.size.y)
     }
   }
-
-  render(level.ground, delta)
-  render(level.hero, delta)
 }

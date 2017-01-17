@@ -7,18 +7,24 @@ import dev.wizrad.fracture.game.world.core.BaseEntity
 import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.core.World
 
-class Hero(
+class Ground(
   parent: BaseEntity, world: World): Entity(parent, world) {
 
   // MARK: BaseEntity
-  override val name = "Hero"
-  override val size = Vector2(30.0f, 30.0f)
+  override val name = "Ground"
+  override val size by lazy {
+    Vector2(parent.size.x, 200.0f)
+  }
 
   // MARK: Lifecycle
   override fun defineBody(): BodyDef {
     val body = super.defineBody()
-    body.type = BodyType.DynamicBody
-    body.position.set(transform(x = 0.0f, y = 0.0f))
+    body.type = BodyType.StaticBody
+    body.position.set(transform(
+      x = 0.0f,
+      y = parent!!.size.y - size.y
+    ))
+
     return body
   }
 }

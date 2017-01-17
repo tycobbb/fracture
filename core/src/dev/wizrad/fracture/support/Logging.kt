@@ -16,7 +16,8 @@ enum class Tag(val key: String) {
   General("STD"),
   World("WRL"),
   Physics("PHS"),
-  Interface("GUI")
+  Interface("GUI"),
+  Rendering("REN")
 }
 
 fun error(tag: Tag, message: String) {
