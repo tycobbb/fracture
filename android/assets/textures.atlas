@@ -1,0 +1,41 @@
+
+textures.png
+size: 128,64
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+minimap
+  rotate: false
+  xy: 52, 21
+  size: 1, 1
+  orig: 1, 1
+  offset: 0, 0
+  index: -1
+minimap-node
+  rotate: false
+  xy: 90, 59
+  size: 1, 1
+  orig: 1, 1
+  offset: 0, 0
+  index: -1
+planet
+  rotate: false
+  xy: 52, 24
+  size: 36, 36
+  orig: 36, 36
+  offset: 0, 0
+  index: -1
+ship
+  rotate: false
+  xy: 2, 2
+  size: 6, 8
+  orig: 6, 8
+  offset: 0, 0
+  index: -1
+star
+  rotate: false
+  xy: 2, 12
+  size: 48, 48
+  orig: 48, 48
+  offset: 0, 0
+  index: -1
