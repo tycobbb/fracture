@@ -3,6 +3,8 @@ package dev.wizrad.fracture.game.world.core
 import com.badlogic.gdx.math.Vector2
 import dev.wizrad.fracture.game.core.Updatable
 import dev.wizrad.fracture.game.world.support.EntitySequence
+import dev.wizrad.fracture.support.Tag
+import dev.wizrad.fracture.support.debug
 import dev.wizrad.fracture.support.debugPrefix
 import dev.wizrad.fracture.support.fmt
 
@@ -32,6 +34,7 @@ abstract class Entity(
   // MARK: Lifecycle
   @Suppress("ConvertLambdaToReference")
   open fun initialize() {
+    debug(Tag.World, "initializing: $this")
     children.forEach { it.initialize() }
   }
 
