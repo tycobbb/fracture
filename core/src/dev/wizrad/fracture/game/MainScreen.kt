@@ -1,22 +1,22 @@
 package dev.wizrad.fracture.game
 
 import com.badlogic.gdx.Screen
-import dev.wizrad.fracture.game.renderer.core.Camera
-import dev.wizrad.fracture.game.renderer.core.Renderer
-import dev.wizrad.fracture.game.ui.core.MainStage
-import dev.wizrad.fracture.game.world.core.World
-import dev.wizrad.fracture.support.extensions.Vector2
 import dev.wizrad.fracture.game.components.projection.Projection
 import dev.wizrad.fracture.game.components.projection.Projections
 import dev.wizrad.fracture.game.components.projection.then
+import dev.wizrad.fracture.game.renderer.core.Camera
+import dev.wizrad.fracture.game.renderer.core.Renderer
+import dev.wizrad.fracture.game.ui.core.MainStage
+import dev.wizrad.fracture.game.world.core.EntityWorld
+import dev.wizrad.fracture.support.extensions.Vector2
 
 class MainScreen: Screen {
-  private val world: World
+  private val world: EntityWorld
   private val renderer: Renderer
   private val stage: MainStage
 
   init {
-    world = World()
+    world = EntityWorld()
     renderer = Renderer(world, camera = Camera())
     stage = MainStage()
   }

@@ -1,14 +1,14 @@
 package dev.wizrad.fracture.game.world
 
 import com.badlogic.gdx.math.Vector2
-import dev.wizrad.fracture.game.world.core.BaseEntity
+import dev.wizrad.fracture.game.world.core.EntityBase
 import dev.wizrad.fracture.game.world.core.World
 import dev.wizrad.fracture.game.world.support.EntitySequence
 
 class Level(
-  world: World): BaseEntity(parent = null, world = world) {
+  world: World): EntityBase(parent = null, w = world) {
 
-  // MARK: BaseEntity
+  // MARK: EntityBase
   override val name = "Level"
   override val size = Vector2(10.0f, 17.75f)
   override val center: Vector2 = size.cpy().scl(0.5f)

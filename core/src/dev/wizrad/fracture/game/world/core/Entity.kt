@@ -5,7 +5,7 @@ import com.badlogic.gdx.physics.box2d.Body
 import com.badlogic.gdx.physics.box2d.BodyDef
 
 abstract class Entity(
-  parent: BaseEntity, world: World): BaseEntity(parent, world) {
+  parent: EntityBase, world: World): EntityBase(parent, world) {
 
   // MARK: Entity
   final override val center: Vector2 get() = body.position
@@ -17,7 +17,7 @@ abstract class Entity(
   override fun initialize() {
     super.initialize()
 
-    val body = world.physics.createBody(defineBody())
+    val body = w.physics.createBody(defineBody())
     defineFixtures(body)
     this.body = body
   }

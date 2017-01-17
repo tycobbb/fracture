@@ -7,10 +7,10 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Vector2
 import dev.wizrad.fracture.game.core.Renderable
 import dev.wizrad.fracture.game.renderer.render
-import dev.wizrad.fracture.game.world.core.World
+import dev.wizrad.fracture.game.world.core.EntityWorld
 
 class Renderer constructor(
-  val world: World,
+  val world: EntityWorld,
   val camera: Camera): Renderable {
 
   // MARK: Renderers
@@ -21,9 +21,6 @@ class Renderer constructor(
   private val _scale = Vector2(32.0f, 32.0f)
 
   // MARK: Lifecycle
-  init {
-  }
-
   override fun update(delta: Float) {
     // render background color to prevent flickering
     Gdx.gl.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);

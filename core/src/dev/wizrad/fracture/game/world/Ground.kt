@@ -6,14 +6,14 @@ import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType
 import com.badlogic.gdx.physics.box2d.FixtureDef
 import com.badlogic.gdx.physics.box2d.PolygonShape
-import dev.wizrad.fracture.game.world.core.BaseEntity
 import dev.wizrad.fracture.game.world.core.Entity
+import dev.wizrad.fracture.game.world.core.EntityBase
 import dev.wizrad.fracture.game.world.core.World
 
 class Ground(
-  parent: BaseEntity, world: World): Entity(parent, world) {
+  parent: EntityBase, world: World): Entity(parent, world) {
 
-  // MARK: BaseEntity
+  // MARK: EntityBase
   override val name = "Ground"
   override val size by lazy {
     Vector2(parent.size.x, 4.0f)
@@ -43,8 +43,7 @@ class Ground(
     val fixture = FixtureDef()
     fixture.shape = rect
     fixture.density = 1.0f
-    fixture.friction = 0.5f
-    fixture.restitution = 0.5f
+    fixture.friction = 0.2f
 
     body.createFixture(fixture)
 

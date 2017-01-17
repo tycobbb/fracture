@@ -6,16 +6,38 @@ import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType
 import com.badlogic.gdx.physics.box2d.FixtureDef
 import com.badlogic.gdx.physics.box2d.PolygonShape
-import dev.wizrad.fracture.game.world.core.BaseEntity
+import dev.wizrad.fracture.game.components.controls.Key
 import dev.wizrad.fracture.game.world.core.Entity
+import dev.wizrad.fracture.game.world.core.EntityBase
 import dev.wizrad.fracture.game.world.core.World
 
 class Hero(
-  parent: BaseEntity, world: World): Entity(parent, world) {
+  parent: EntityBase, world: World): Entity(parent, world) {
 
-  // MARK: BaseEntity
+  // MARK: EntityBase
   override val name = "Hero"
   override val size = Vector2(1.0f, 1.0f)
+
+  // MARK: Lifecycle
+  override fun update(delta: Float) {
+    super.update(delta)
+
+    val force = Vector2()
+    if(w.controls.pressed(Key.Left)) {
+      force.x -= 20.0f
+    }
+
+    if(w.controls.pressed(Key.Right)) {
+      force.x += 20.0f
+    }
+
+    body.applyForceToCenter(force, true)
+
+    if(w.controls.pressed(Key.Jump)) {
+      val center = body.worldCenter
+      body.applyLinearImpulse(0.0f, 30.0f, center.x, center.y, true)
+    }
+  }
 
   // MARK: Body
   override fun defineBody(): BodyDef {
@@ -39,6 +61,8 @@ class Hero(
     val fixture = FixtureDef()
     fixture.shape = square
     fixture.density = 1.0f
+    fixture.restitution = 0.5f
+    fixture.friction = 0.2f
 
     body.createFixture(fixture)
 

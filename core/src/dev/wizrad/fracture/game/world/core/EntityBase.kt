@@ -8,20 +8,20 @@ import dev.wizrad.fracture.support.debug
 import dev.wizrad.fracture.support.debugPrefix
 import dev.wizrad.fracture.support.fmt
 
-abstract class BaseEntity(
-  val parent: BaseEntity?,
-  val world: World): Updatable {
+abstract class EntityBase(
+  val parent: EntityBase?,
+  val w: World): Updatable {
 
   // MARK: Properties
   /** A string name for this entity */
   abstract val name: String
-  /** Local position relative to parent center in world coords */
+  /** Local position relative to parent center in w coords */
   abstract val center: Vector2
-  /** BaseEntity size in world coords */
+  /** EntityBase size in w coords */
   abstract val size: Vector2
 
   /** Cached list for traversing children in prescribed order */
-  private val children: Array<BaseEntity> by lazy { children(EntitySequence()).toArray() }
+  private val children: Array<EntityBase> by lazy { children(EntitySequence()).toArray() }
 
   // MARK: Geometry
   /** Transforms a vector from the local -> absolute coordinate space */
