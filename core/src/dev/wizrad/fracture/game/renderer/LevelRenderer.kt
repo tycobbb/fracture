@@ -10,7 +10,10 @@ fun Renderer.render(level: Level, delta: Float) {
   batch.pause {
     shaper.draw {
       it.color = Color(0x7F89AE)
-      it.rect(level.center.x, level.center.y, level.size.x, level.size.y)
+
+      val center = scale(level.center, Renderer.scratch1)
+      val size = scale(level.size, Renderer.scratch2)
+      it.rect(center.x, center.y, size.x, size.y)
     }
   }
 

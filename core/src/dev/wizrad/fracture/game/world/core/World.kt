@@ -46,6 +46,6 @@ class World {
   companion object {
     // MARK: Constants
     private val timestep = 1.0f / 60.0f
-    private val gravity = Vector2(0.0f, 98.1f)
+    private val gravity = Vector2(0.0f, 9.81f)
   }
 }

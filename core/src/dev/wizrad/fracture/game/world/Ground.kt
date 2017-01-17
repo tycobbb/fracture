@@ -16,7 +16,7 @@ class Ground(
   // MARK: BaseEntity
   override val name = "Ground"
   override val size by lazy {
-    Vector2(parent.size.x, 200.0f)
+    Vector2(parent.size.x, 4.0f)
   }
 
   // MARK: Lifecycle

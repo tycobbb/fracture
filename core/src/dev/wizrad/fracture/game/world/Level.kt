@@ -10,7 +10,7 @@ class Level(
 
   // MARK: BaseEntity
   override val name = "Level"
-  override val size = Vector2(320.0f, 568.0f)
+  override val size = Vector2(10.0f, 17.75f)
   override val center: Vector2 = size.cpy().scl(0.5f)
 
   // MARK: Children

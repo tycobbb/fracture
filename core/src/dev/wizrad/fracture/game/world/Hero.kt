@@ -15,7 +15,7 @@ class Hero(
 
   // MARK: BaseEntity
   override val name = "Hero"
-  override val size = Vector2(30.0f, 30.0f)
+  override val size = Vector2(1.0f, 1.0f)
 
   // MARK: Body
   override fun defineBody(): BodyDef {

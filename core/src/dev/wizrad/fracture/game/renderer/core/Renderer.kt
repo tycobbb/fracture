@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
+import com.badlogic.gdx.math.Vector2
 import dev.wizrad.fracture.game.core.Renderable
 import dev.wizrad.fracture.game.renderer.render
 import dev.wizrad.fracture.game.world.core.World
@@ -15,6 +16,9 @@ class Renderer constructor(
   // MARK: Renderers
   val batch = SpriteBatch()
   val shaper = ShapeRenderer()
+
+  // MARK: Properties
+  private val _scale = Vector2(32.0f, 32.0f)
 
   // MARK: Lifecycle
   init {
@@ -38,5 +42,15 @@ class Renderer constructor(
 
   override fun resize(width: Int, height: Int) {
     camera.resize(width, height)
+  }
+
+  // MARK: Scale
+  fun scale(vector: Vector2, scratch: Vector2): Vector2 {
+    return scratch.set(vector).scl(_scale)
+  }
+
+  companion object {
+    val scratch1 = Vector2(0.0f, 0.0f)
+    val scratch2 = Vector2(0.0f, 0.0f)
   }
 }
