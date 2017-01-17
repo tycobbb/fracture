@@ -17,8 +17,9 @@ abstract class Entity(
   override fun initialize() {
     super.initialize()
 
-    body = world.physics.createBody(defineBody())
-    createFixtures()
+    val body = world.physics.createBody(defineBody())
+    defineFixtures(body)
+    this.body = body
   }
 
   // MARK: Physics
@@ -26,6 +27,6 @@ abstract class Entity(
     return BodyDef()
   }
 
-  open protected fun createFixtures() {
+  open protected fun defineFixtures(body: Body) {
   }
 }
