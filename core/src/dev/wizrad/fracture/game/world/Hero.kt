@@ -10,6 +10,8 @@ import dev.wizrad.fracture.game.components.controls.Key
 import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.core.EntityBase
 import dev.wizrad.fracture.game.world.core.World
+import dev.wizrad.fracture.support.Tag
+import dev.wizrad.fracture.support.debug
 
 class Hero(
   parent: EntityBase, world: World): Entity(parent, world) {
@@ -33,10 +35,16 @@ class Hero(
 
     body.applyForceToCenter(force, true)
 
-    if(w.controls.pressed(Key.Jump)) {
+    if(w.controls.pressed(Key.Jump) && canJump()) {
       val center = body.worldCenter
+      debug(Tag.Physics, "jumping")
       body.applyLinearImpulse(0.0f, 30.0f, center.x, center.y, true)
     }
+  }
+
+  private fun canJump(): Boolean {
+    val fixture = body.fixtureList.firstOrNull() ?: return false
+    return w.contacts.count(fixture) != 0
   }
 
   // MARK: Body

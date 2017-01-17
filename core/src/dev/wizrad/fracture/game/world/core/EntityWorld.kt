@@ -12,6 +12,7 @@ class EntityWorld: World {
   // MARK: World
   override val physics = PhysicsWorld(gravity, true)
   override val controls = Controls()
+  override val contacts = Contacts()
 
   // MARK: Children
   val level = Level(world = this)
@@ -22,8 +23,8 @@ class EntityWorld: World {
 
   // MARK: Lifecycle
   init {
+    physics.setContactListener(contacts)
     level.initialize()
-    // setup the w projection
     Projections.world = Projection.scaling(level.size)
   }
 

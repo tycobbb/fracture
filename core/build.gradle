@@ -6,3 +6,7 @@ sourceCompatibility = 1.6
 sourceSets.main.java.srcDirs = ["src/"]
 sourceSets.test.java.srcDirs = ["test/src/"]
 sourceSets.test.resources.srcDirs = ["test/res/"]
+
+dependencies {
+  compile 'org.robovm:robovm-rt:1.12.0'
+}

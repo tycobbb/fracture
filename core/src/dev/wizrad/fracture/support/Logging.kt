@@ -15,7 +15,7 @@ class Logging {
 enum class Tag(val key: String) {
   General("STD"),
   World("WRL"),
-  Physics("PHS"),
+  Physics("PHY"),
   Interface("GUI"),
   Rendering("REN")
 }
