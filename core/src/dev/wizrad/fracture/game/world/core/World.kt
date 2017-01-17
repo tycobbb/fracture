@@ -4,7 +4,6 @@ import com.badlogic.gdx.math.Vector2
 import dev.wizrad.fracture.game.components.projection.Projection
 import dev.wizrad.fracture.game.components.projection.Projections
 import dev.wizrad.fracture.game.world.Level
-import dev.wizrad.fracture.support.extensions.Vector2
 import com.badlogic.gdx.physics.box2d.World as PhysicsWorld
 
 class World {
@@ -22,7 +21,7 @@ class World {
   init {
     level.initialize()
     // setup the world projection
-    Projections.world = Projection.scaling(Vector2(50, 50))
+    Projections.world = Projection.scaling(level.size)
   }
 
   fun update(delta: Float) {

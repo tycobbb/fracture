@@ -1,6 +1,7 @@
 package dev.wizrad.fracture.support.extensions
 
 import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.math.Vector3
 import dev.wizrad.fracture.support.atan2
 
 // MARK: Constructors
@@ -9,6 +10,10 @@ fun Vector2(width: Int, height: Int): Vector2 {
 }
 
 // MARK: Operations
+fun Vector3.set(x: Int, y: Int) {
+  set(x.toFloat(), y.toFloat(), 0.0f)
+}
+
 fun Vector2.update(x: Float = this.x, y: Float = this.y): Vector2 {
   this.x = x
   this.y = y

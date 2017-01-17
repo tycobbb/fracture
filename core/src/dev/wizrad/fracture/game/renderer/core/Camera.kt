@@ -4,10 +4,11 @@ import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.utils.viewport.ScreenViewport
 import com.badlogic.gdx.utils.viewport.Viewport
-import dev.wizrad.fracture.game.core.Renderable
 import dev.wizrad.fracture.game.components.projection.Projection
 import dev.wizrad.fracture.game.components.projection.Projections
 import dev.wizrad.fracture.game.components.projection.then
+import dev.wizrad.fracture.game.core.Renderable
+import dev.wizrad.fracture.support.extensions.set
 
 class Camera: OrthographicCamera(), Renderable {
   // MARK: Properties
@@ -23,6 +24,7 @@ class Camera: OrthographicCamera(), Renderable {
   }
 
   override fun resize(width: Int, height: Int) {
+    position.set(width / 2, height / 2)
     viewport.update(width, height)
     resizeProjections(width, height)
   }
