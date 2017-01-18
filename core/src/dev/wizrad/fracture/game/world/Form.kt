@@ -7,6 +7,7 @@ interface Form {
   val behavior: Behavior
 
   enum class Type {
-    SingleJump
+    SingleJump,
+    DoubleJump
   }
 }

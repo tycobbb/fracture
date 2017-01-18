@@ -47,7 +47,8 @@ class Hero(
   }
 
   private fun createRandomForm(): Form {
-    return SingleJumpForm(body, w)
+    return DoubleJumpForm(body, w)
+//    return SingleJumpForm(body, w)
   }
 
   // MARK: Body
