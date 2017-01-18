@@ -1,8 +1,7 @@
 package dev.wizrad.fracture.game.world.core
 
 import com.badlogic.gdx.math.Vector2
-import dev.wizrad.fracture.game.core.Updatable
-import dev.wizrad.fracture.game.world.support.EntitySequence
+import dev.wizrad.fracture.game.core.update
 import dev.wizrad.fracture.support.Tag
 import dev.wizrad.fracture.support.debug
 import dev.wizrad.fracture.support.debugPrefix
@@ -10,7 +9,7 @@ import dev.wizrad.fracture.support.fmt
 
 abstract class EntityBase(
   val parent: EntityBase?,
-  val w: World): Updatable {
+  val w: World): Behavior {
 
   // MARK: Properties
   /** A string name for this entity */
@@ -20,8 +19,26 @@ abstract class EntityBase(
   /** EntityBase size in w coords */
   abstract val size: Vector2
 
+  // MARK: Relationships
   /** Cached list for traversing children in prescribed order */
-  private val children: Array<EntityBase> by lazy { children(EntitySequence()).toArray() }
+  private val children: Array<EntityBase> by lazy {
+    children(EntitySequence()).toArray()
+  }
+
+  open fun children(sequence: EntitySequence): EntitySequence {
+    return sequence
+  }
+
+  @Suppress("ConvertLambdaToReference")
+  open fun initialize() {
+    debug(Tag.World, "initializing $debugPrefix")
+    children.forEach { it.initialize() }
+  }
+
+  // MARK: Behavior
+  override fun update(delta: Float) = children.update(delta)
+  override fun step(delta: Float) = children.step(delta)
+  override fun destroy() = children.destroy()
 
   // MARK: Geometry
   /** Transforms a vector from the local -> absolute coordinate space */
@@ -31,33 +48,6 @@ abstract class EntityBase(
 
   protected fun transform(vector: Vector2): Vector2 {
     return vector.add(parent?.center)
-  }
-
-  // MARK: Relationships
-  open fun children(sequence: EntitySequence): EntitySequence {
-    return sequence
-  }
-
-  // MARK: Lifecycle
-  @Suppress("ConvertLambdaToReference")
-  open fun initialize() {
-    debug(Tag.World, "initializing $debugPrefix")
-    children.forEach { it.initialize() }
-  }
-
-  override fun update(delta: Float) {
-    children.forEach { it.update(delta) }
-  }
-
-  open fun step(delta: Float) {
-    children.forEach { it.step(delta) }
-  }
-
-  open fun afterStep(delta: Float) {
-    children.forEach { it.afterStep(delta) }
-  }
-
-  open fun destroy() {
   }
 
   // MARK: Debugging

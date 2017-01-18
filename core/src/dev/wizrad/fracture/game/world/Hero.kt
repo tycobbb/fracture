@@ -6,12 +6,9 @@ import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType
 import com.badlogic.gdx.physics.box2d.FixtureDef
 import com.badlogic.gdx.physics.box2d.PolygonShape
-import dev.wizrad.fracture.game.components.controls.Key
 import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.core.EntityBase
 import dev.wizrad.fracture.game.world.core.World
-import dev.wizrad.fracture.support.Tag
-import dev.wizrad.fracture.support.debug
 
 class Hero(
   parent: EntityBase, world: World): Entity(parent, world) {
@@ -20,31 +17,36 @@ class Hero(
   override val name = "Hero"
   override val size = Vector2(1.0f, 1.0f)
 
-  // MARK: Lifecycle
-  override fun update(delta: Float) {
-    super.update(delta)
+  // MARK: Properties
+  var form: Form? = null
 
-    val force = Vector2()
-    if(w.controls.pressed(Key.Left)) {
-      force.x -= 20.0f
-    }
-
-    if(w.controls.pressed(Key.Right)) {
-      force.x += 20.0f
-    }
-
-    body.applyForceToCenter(force, true)
-
-    if(w.controls.pressed(Key.Jump) && canJump()) {
-      val center = body.worldCenter
-      debug(Tag.Physics, "jumping")
-      body.applyLinearImpulse(0.0f, 30.0f, center.x, center.y, true)
-    }
+  override fun initialize() {
+    super.initialize()
+    randomizeForm()
   }
 
-  private fun canJump(): Boolean {
-    val fixture = body.fixtureList.firstOrNull() ?: return false
-    return w.contacts.count(fixture) != 0
+  override fun update(delta: Float) {
+    super.update(delta)
+    form?.update(delta)
+  }
+
+  override fun step(delta: Float) {
+    super.step(delta)
+    form?.step(delta)
+  }
+
+  override fun destroy() {
+    super.destroy()
+    form?.destroy()
+  }
+
+  // MARK: Forms
+  private fun randomizeForm() {
+    form = createRandomForm()
+  }
+
+  private fun createRandomForm(): Form {
+    return SingleJumpForm(body = body, w = w)
   }
 
   // MARK: Body

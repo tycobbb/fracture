@@ -40,8 +40,6 @@ class EntityWorld: World {
     while(accumulator >= timestep) {
       level.step(timestep)
       physics.step(timestep, 6, 2)
-      level.afterStep(timestep)
-
       accumulator -= timestep
     }
   }

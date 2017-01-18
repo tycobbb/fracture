@@ -2,8 +2,8 @@ package dev.wizrad.fracture.game.world
 
 import com.badlogic.gdx.math.Vector2
 import dev.wizrad.fracture.game.world.core.EntityBase
+import dev.wizrad.fracture.game.world.core.EntitySequence
 import dev.wizrad.fracture.game.world.core.World
-import dev.wizrad.fracture.game.world.support.EntitySequence
 
 class Level(
   world: World): EntityBase(parent = null, w = world) {
