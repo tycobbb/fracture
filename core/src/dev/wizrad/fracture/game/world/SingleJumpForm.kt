@@ -3,26 +3,18 @@ package dev.wizrad.fracture.game.world
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
 import dev.wizrad.fracture.game.components.controls.Key
-import dev.wizrad.fracture.game.world.core.Behavior
 import dev.wizrad.fracture.game.world.core.State
 import dev.wizrad.fracture.game.world.core.StateMachine
 import dev.wizrad.fracture.game.world.core.World
 import dev.wizrad.fracture.support.Tag
 import dev.wizrad.fracture.support.debug
 
-class SingleJumpForm(body: Body, w: World): Form {
-  // MARK: Form
+class SingleJumpForm(val body: Body, val w: World): Form {
   override val type = Form.Type.SingleJump
-  override val behavior: Behavior get() = states
-
-  // MARK: Properties
-  private val states = StateMachine(initialState = Standing(body, w))
+  override val behavior = StateMachine(initialState = standing())
 
   // MARK: States
-  private class Standing(
-    val body: Body,
-    val w: World): State() {
-
+  private fun standing(): State = object: State() {
     override fun update(delta: Float) {
       super.update(delta)
 
@@ -48,48 +40,40 @@ class SingleJumpForm(body: Body, w: World): Form {
 
     override fun nextState(): State? {
       if (w.controls.pressed(Key.Jump) && canJump()) {
-        return Windup(body, w)
+        return windup()
       }
 
       return null
     }
   }
 
-  private class Windup(
-    val body: Body,
-    val w: World): State() {
-
+  private fun windup(): State = object: State() {
     override fun nextState(): State? {
       if (!w.controls.pressed(Key.Jump)) {
-        return JumpStart(body, w, isShort = frame <= 4)
+        val shortJumpFrameLength = 4
+        return jumpStart(isShort = frame <= shortJumpFrameLength)
       }
 
       return null
     }
   }
 
-  private class JumpStart(
-    val body: Body,
-    val w: World,
-    isShort: Boolean): State() {
+  private fun jumpStart(isShort: Boolean): State = object: State() {
+    private val magnitude = if (isShort) 15.0f else 30.0f
 
-    init {
-      debug(Tag.World, "$this applying impulse!")
+    override fun start() {
+      debug(Tag.World, "$this applying impulse: $magnitude")
       val center = body.worldCenter
-      val magnitude = if (isShort) 15.0f else 30.0f
       body.applyLinearImpulse(0.0f, -magnitude, center.x, center.y, true)
     }
 
     override fun nextState(): State? {
-      val jumpStartFrames = 3
-      return if (frame >= jumpStartFrames) Jumping(body, w) else null
+      val frameLength = 3
+      return if (frame >= frameLength) jumping() else null
     }
   }
 
-  class Jumping(
-    val body: Body,
-    val w: World): State() {
-
+  private fun jumping(): State = object: State() {
     override fun update(delta: Float) {
       super.update(delta)
 
@@ -114,17 +98,14 @@ class SingleJumpForm(body: Body, w: World): Form {
     }
 
     override fun nextState(): State? {
-      return if (didLand()) JumpEnd(body, w) else null
+      return if (didLand()) jumpEnd() else null
     }
   }
 
-  class JumpEnd(
-    val body: Body,
-    val w: World): State() {
-
+  fun jumpEnd(): State = object: State() {
     override fun nextState(): State? {
-      val jumpEndFrames = 3
-      return if (frame >= jumpEndFrames) Standing(body, w) else null
+      val frameLength = 3
+      return if (frame >= frameLength) standing() else null
     }
   }
 }

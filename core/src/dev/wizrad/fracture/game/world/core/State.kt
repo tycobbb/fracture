@@ -10,6 +10,9 @@ abstract class State: Behavior() {
   abstract fun nextState(): State?
 
   // MARK: Lifecycle
+  open fun start() {
+  }
+
   override fun update(delta: Float) {
     super.update(delta)
     frame++

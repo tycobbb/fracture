@@ -11,6 +11,10 @@ class StateMachine(
   var state: State = initialState
 
   // MARK: Lifecycle
+  init {
+    state.start()
+  }
+
   override fun update(delta: Float) {
     super.update(delta)
 
@@ -19,6 +23,7 @@ class StateMachine(
       debug(Tag.World, "$state ended -> ${it.className}")
       state.destroy()
       state = it
+      state.start()
     }
   }
 
