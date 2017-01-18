@@ -18,8 +18,9 @@ class Hero(
   override val size = Vector2(1.0f, 1.0f)
 
   // MARK: Properties
-  var form: Form? = null
+  lateinit var form: Form
 
+  // MARK: Lifecycle
   override fun initialize() {
     super.initialize()
     randomizeForm()
@@ -27,17 +28,17 @@ class Hero(
 
   override fun update(delta: Float) {
     super.update(delta)
-    form?.update(delta)
+    form.behavior.update(delta)
   }
 
   override fun step(delta: Float) {
     super.step(delta)
-    form?.step(delta)
+    form.behavior.step(delta)
   }
 
   override fun destroy() {
     super.destroy()
-    form?.destroy()
+    form.behavior.destroy()
   }
 
   // MARK: Forms
@@ -46,7 +47,7 @@ class Hero(
   }
 
   private fun createRandomForm(): Form {
-    return SingleJumpForm(body = body, w = w)
+    return SingleJumpForm(body, w)
   }
 
   // MARK: Body

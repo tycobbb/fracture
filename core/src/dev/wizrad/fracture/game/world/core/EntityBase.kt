@@ -1,7 +1,6 @@
 package dev.wizrad.fracture.game.world.core
 
 import com.badlogic.gdx.math.Vector2
-import dev.wizrad.fracture.game.core.update
 import dev.wizrad.fracture.support.Tag
 import dev.wizrad.fracture.support.debug
 import dev.wizrad.fracture.support.debugPrefix
@@ -9,7 +8,7 @@ import dev.wizrad.fracture.support.fmt
 
 abstract class EntityBase(
   val parent: EntityBase?,
-  val w: World): Behavior {
+  val w: World): Behavior() {
 
   // MARK: Properties
   /** A string name for this entity */
@@ -36,9 +35,17 @@ abstract class EntityBase(
   }
 
   // MARK: Behavior
-  override fun update(delta: Float) = children.update(delta)
-  override fun step(delta: Float) = children.step(delta)
-  override fun destroy() = children.destroy()
+  override fun update(delta: Float) {
+    children.forEach { it.update(delta) }
+  }
+
+  override fun step(delta: Float) {
+    children.forEach { it.step(delta) }
+  }
+
+  override fun destroy() {
+    children.forEach { it.destroy() }
+  }
 
   // MARK: Geometry
   /** Transforms a vector from the local -> absolute coordinate space */

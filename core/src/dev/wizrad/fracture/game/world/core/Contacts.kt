@@ -1,8 +1,6 @@
 package dev.wizrad.fracture.game.world.core
 
 import com.badlogic.gdx.physics.box2d.*
-import dev.wizrad.fracture.support.Tag
-import dev.wizrad.fracture.support.debug
 
 
 class Contacts: ContactListener {
@@ -23,16 +21,12 @@ class Contacts: ContactListener {
   override fun beginContact(contact: Contact?) {
     val contact = contact ?: return
 
-    debug(Tag.Physics, "begin contact ${contact.fixtureA} to ${contact.fixtureB}")
-
     contactSet(contact.fixtureA).add(contact.fixtureB)
     contactSet(contact.fixtureB).add(contact.fixtureA)
   }
 
   override fun endContact(contact: Contact?) {
     val contact = contact ?: return
-
-    debug(Tag.Physics, "end contact ${contact.fixtureA} to ${contact.fixtureB}")
 
     contactSet(contact.fixtureA).remove(contact.fixtureB)
     contactSet(contact.fixtureB).remove(contact.fixtureA)

@@ -2,10 +2,13 @@ package dev.wizrad.fracture.game.world.core
 
 import dev.wizrad.fracture.game.core.Updatable
 
-interface Behavior: Updatable {
-  fun step(delta: Float)
-  fun destroy()
-}
+abstract class Behavior: Updatable {
+  override fun update(delta: Float) {
+  }
 
-fun <E: Behavior> Array<E>.step(delta: Float) = forEach { it.step(delta) }
-fun <E: Behavior> Array<E>.destroy() = forEach { it.destroy() }
+  open fun step(delta: Float) {
+  }
+
+  open fun destroy() {
+  }
+}
