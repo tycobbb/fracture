@@ -49,9 +49,9 @@ class SingleJumpForm(val body: Body, val w: World): Form {
 
   private fun windup(): State = object: State() {
     override fun nextState(): State? {
-      if (!w.controls.pressed(Key.Jump)) {
-        val shortJumpFrameLength = 4
-        return jumpStart(isShort = frame <= shortJumpFrameLength)
+      val frameLength = 4
+      if (frame >= frameLength) {
+        return jumpStart(isShort = !w.controls.pressed(Key.Jump))
       }
 
       return null
