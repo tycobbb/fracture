@@ -5,36 +5,44 @@ import com.badlogic.gdx.physics.box2d.Body
 import dev.wizrad.fracture.game.components.controls.Key
 import dev.wizrad.fracture.game.world.core.Behavior
 import dev.wizrad.fracture.game.world.core.State
+import dev.wizrad.fracture.game.world.core.StateMachine
 import dev.wizrad.fracture.game.world.core.World
 import dev.wizrad.fracture.support.Tag
 import dev.wizrad.fracture.support.debug
 
-class SingleJumpForm(val body: Body, val w: World): Behavior(), Form {
+class SingleJumpForm(body: Body, w: World): Form {
   // MARK: Form
-  override val type: Form.Type get() = Form.Type.SingleJump
-  override val behavior: Behavior get() = this
+  override val type = Form.Type.SingleJump
+  override val behavior: Behavior get() = states
 
   // MARK: Properties
-  private var state: State = Standing(body, w)
-
-  // MARK: Lifecycle
-  override fun update(delta: Float) {
-    super.update(delta)
-
-    state.update(delta)
-    state.nextState()?.let {
-      state = it
-    }
-  }
+  private val states = StateMachine(initialState = Standing(body, w))
 
   // MARK: States
   private class Standing(
     val body: Body,
     val w: World): State() {
 
+    override fun update(delta: Float) {
+      super.update(delta)
+
+      // apply running movement
+      val force = Vector2()
+      if (w.controls.pressed(Key.Left)) {
+        force.x -= 30.0f
+      }
+
+      if (w.controls.pressed(Key.Right)) {
+        force.x += 30.0f
+      }
+
+      body.applyForceToCenter(force, true)
+    }
+
     private fun canJump(): Boolean {
       assert(body.fixtureList.size != 0) { "body must have at least one fixture" }
-      val contactCount = w.contacts.count(body.fixtureList.first())
+      val fixture = body.fixtureList.first()
+      val contactCount = w.contacts.count(fixture)
       return contactCount != 0
     }
 
@@ -53,28 +61,37 @@ class SingleJumpForm(val body: Body, val w: World): Behavior(), Form {
 
     override fun nextState(): State? {
       if (!w.controls.pressed(Key.Jump)) {
-        return Jumping(body, w, isShort = frames <= 4)
+        return JumpStart(body, w, isShort = frame <= 4)
       }
 
       return null
     }
   }
 
-  private class Jumping(
+  private class JumpStart(
     val body: Body,
     val w: World,
-    val isShort: Boolean): State() {
+    isShort: Boolean): State() {
+
+    init {
+      debug(Tag.World, "$this applying impulse!")
+      val center = body.worldCenter
+      val magnitude = if (isShort) 15.0f else 30.0f
+      body.applyLinearImpulse(0.0f, -magnitude, center.x, center.y, true)
+    }
+
+    override fun nextState(): State? {
+      val jumpStartFrames = 3
+      return if (frame >= jumpStartFrames) Jumping(body, w) else null
+    }
+  }
+
+  class Jumping(
+    val body: Body,
+    val w: World): State() {
 
     override fun update(delta: Float) {
       super.update(delta)
-
-      // jump on first frame
-      if (frames == 1) {
-        debug(Tag.Physics, "applying jump impulse")
-        val center = body.worldCenter
-        val magnitude = if (isShort) 30.0f else 60.0f
-        body.applyLinearImpulse(0.0f, magnitude, center.x, center.y, true)
-      }
 
       // apply directional influence
       val force = Vector2()
@@ -91,16 +108,23 @@ class SingleJumpForm(val body: Body, val w: World): Behavior(), Form {
 
     private fun didLand(): Boolean {
       assert(body.fixtureList.size != 0) { "body have at least one fixture" }
-      val contactCount = w.contacts.count(body.fixtureList.first())
+      val fixture = body.fixtureList.first()
+      val contactCount = w.contacts.count(fixture)
       return contactCount != 0
     }
 
     override fun nextState(): State? {
-      if (didLand()) {
-        return Standing(body, w)
-      }
+      return if (didLand()) JumpEnd(body, w) else null
+    }
+  }
 
-      return null
+  class JumpEnd(
+    val body: Body,
+    val w: World): State() {
+
+    override fun nextState(): State? {
+      val jumpEndFrames = 3
+      return if (frame >= jumpEndFrames) Standing(body, w) else null
     }
   }
 }

@@ -59,7 +59,7 @@ abstract class EntityBase(
 
   // MARK: Debugging
   override fun toString(): String {
-    return "[$debugPrefix cen=${center.fmt()}]"
+    return "[$debugPrefix c=${center.fmt()}]"
   }
 
   // MARK: Companion

@@ -33,8 +33,11 @@ fun debug(tag: Tag, message: String) {
 }
 
 // MARK: Formatting
+val Any.className: String
+  get() = javaClass.simpleName
+
 val Any.debugPrefix: String
-  get() = "${javaClass.simpleName}@${hashCode()}"
+  get() = "$className@${hashCode()}"
 
 fun Vector2.fmt(precision: Int = 3): String {
   return "(${x.fmt(precision)}, ${y.fmt(precision)})"

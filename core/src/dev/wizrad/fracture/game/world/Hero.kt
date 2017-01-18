@@ -72,7 +72,6 @@ class Hero(
     val fixture = FixtureDef()
     fixture.shape = square
     fixture.density = 1.0f
-    fixture.restitution = 0.5f
     fixture.friction = 0.2f
 
     body.createFixture(fixture)
