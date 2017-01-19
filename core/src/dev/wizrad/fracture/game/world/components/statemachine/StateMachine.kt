@@ -1,4 +1,4 @@
-package dev.wizrad.fracture.game.world.components
+package dev.wizrad.fracture.game.world.components.statemachine
 
 import dev.wizrad.fracture.game.world.core.Behavior
 import dev.wizrad.fracture.support.Tag

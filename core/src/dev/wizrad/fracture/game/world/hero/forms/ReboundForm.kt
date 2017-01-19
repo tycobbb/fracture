@@ -4,10 +4,9 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
 import com.badlogic.gdx.physics.box2d.FixtureDef
 import com.badlogic.gdx.physics.box2d.PolygonShape
-import dev.wizrad.fracture.game.components.controls.Key
-import dev.wizrad.fracture.game.world.components.ContactType
-import dev.wizrad.fracture.game.world.components.State
-import dev.wizrad.fracture.game.world.components.StateMachine
+import dev.wizrad.fracture.game.world.components.contact.ContactType
+import dev.wizrad.fracture.game.world.components.statemachine.State
+import dev.wizrad.fracture.game.world.components.statemachine.StateMachine
 import dev.wizrad.fracture.game.world.core.World
 import dev.wizrad.fracture.support.Tag
 import dev.wizrad.fracture.support.debug
@@ -45,11 +44,11 @@ class ReboundForm(
 
       // apply running movement
       val force = Vector2()
-      if (world.controls.pressed(Key.Left)) {
+      if (world.controls.left.isPressed) {
         force.x -= 30.0f
       }
 
-      if (world.controls.pressed(Key.Right)) {
+      if (world.controls.right.isPressed) {
         force.x += 30.0f
       }
 
@@ -57,7 +56,7 @@ class ReboundForm(
     }
 
     override fun nextState(): State? {
-      if (world.controls.pressed(Key.Jump) && canJump()) {
+      if (world.controls.jump.isPressedUnique && canJump()) {
         return windup()
       }
 
@@ -66,7 +65,7 @@ class ReboundForm(
 
     private fun canJump(): Boolean {
       assert(body.fixtureList.size != 0) { "body must have at least one fixture" }
-      return world.contacts.exists(body.fixtureList.first(), ContactType.Ground)
+      return world.contact.exists(body.fixtureList.first(), ContactType.Ground)
     }
   }
 
@@ -74,7 +73,7 @@ class ReboundForm(
     override fun nextState(): State? {
       val frameLength = 4
       if (frame >= frameLength) {
-        return jumpStart(isShort = !world.controls.pressed(Key.Jump))
+        return jumpStart(isShort = !world.controls.jump.isPressed)
       }
 
       return null
@@ -82,7 +81,7 @@ class ReboundForm(
   }
 
   private fun jumpStart(isShort: Boolean): State = object: State() {
-    private val magnitude = if (isShort) 5.0f else 10.0f
+    private val magnitude = if (isShort) 10.0f else 15.0f
 
     override fun start() {
       debug(Tag.World, "$this applying impulse: $magnitude")
@@ -105,11 +104,11 @@ class ReboundForm(
 
       // apply directional influence
       val force = Vector2()
-      if (world.controls.pressed(Key.Left)) {
+      if (world.controls.left.isPressed) {
         force.x -= 20.0f
       }
 
-      if (world.controls.pressed(Key.Right)) {
+      if (world.controls.right.isPressed) {
         force.x += 20.0f
       }
 
@@ -118,6 +117,7 @@ class ReboundForm(
       // allow fastfalling any time after reaching the first jump's peak
       if (!canFastfall && isFalling()) {
         canFastfall = true
+        world.controls.jump.requireUniquePress()
       }
 
       // if in contact with floor, increment resting frame count
@@ -133,7 +133,7 @@ class ReboundForm(
       val restingFrameLength = 2
       if (restingFrames >= restingFrameLength) {
         return landing()
-      } else if (world.controls.pressed(Key.Jump) && canFastfall) {
+      } else if (world.controls.jump.isPressedUnique && canFastfall) {
         return fastfalling()
       }
 
@@ -142,7 +142,7 @@ class ReboundForm(
 
     private fun isLanding(): Boolean {
       assert(body.fixtureList.size != 0) { "body must have at least one fixture" }
-      return world.contacts.exists(body.fixtureList.first(), ContactType.Ground)
+      return world.contact.exists(body.fixtureList.first(), ContactType.Ground)
     }
 
     private fun isFalling(): Boolean {
@@ -163,11 +163,11 @@ class ReboundForm(
 
       // apply directional influence
       val force = Vector2()
-      if (world.controls.pressed(Key.Left)) {
+      if (world.controls.left.isPressed) {
         force.x -= 20.0f
       }
 
-      if (world.controls.pressed(Key.Right)) {
+      if (world.controls.right.isPressed) {
         force.x += 20.0f
       }
 
@@ -181,11 +181,16 @@ class ReboundForm(
 
     private fun didLand(): Boolean {
       assert(body.fixtureList.size != 0) { "body must have at least one fixture" }
-      return world.contacts.exists(body.fixtureList.first(), ContactType.Ground)
+      return world.contact.exists(body.fixtureList.first(), ContactType.Ground)
     }
   }
 
   private fun landing(): State = object: State() {
+    override fun start() {
+      super.start()
+      world.controls.jump.requireUniquePress()
+    }
+
     override fun nextState(): State? {
       val frameLength = 3
       return if (frame >= frameLength) standing() else null

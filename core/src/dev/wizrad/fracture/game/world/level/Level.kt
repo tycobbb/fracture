@@ -5,7 +5,7 @@ import com.badlogic.gdx.physics.box2d.Body
 import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.physics.box2d.FixtureDef
 import com.badlogic.gdx.physics.box2d.PolygonShape
-import dev.wizrad.fracture.game.world.components.ContactType
+import dev.wizrad.fracture.game.world.components.contact.ContactType
 import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.core.EntitySequence
 import dev.wizrad.fracture.game.world.core.World

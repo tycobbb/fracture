@@ -1,20 +1,18 @@
 package dev.wizrad.fracture.game.components.controls
 
-import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.Input
+import dev.wizrad.fracture.game.core.Updatable
 
-class Controls {
+class Controls: Updatable {
   // MARK: Properties
-  private val keys = Key.map()
+  val jump = Key(code = Input.Keys.SPACE)
+  val left = Key(code = Input.Keys.A)
+  val right = Key(code = Input.Keys.D)
 
-  // MARK: Evaluation
-  fun pressed(key: Key): Boolean {
-    val code = checkNotNull(keys[key]) { "$this no code for $key" }
-    val result = Gdx.input.isKeyPressed(code)
-    return result
-  }
-
-  // MARK: Debugging
-  override fun toString(): String {
-    return "[Controls]"
+  // MARK: Updatable
+  override fun update(delta: Float) {
+    jump.update(delta)
+    left.update(delta)
+    right.update(delta)
   }
 }

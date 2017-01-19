@@ -1,4 +1,4 @@
-package dev.wizrad.fracture.game.world.components
+package dev.wizrad.fracture.game.world.components.contact
 
 enum class ContactType(val value: Int) {
   Hero(1 shl 0),
@@ -10,7 +10,3 @@ enum class ContactType(val value: Int) {
   val bits: Short get() = value.toShort()
 }
 
-// MARK: Operations
-infix fun Short.and(type: ContactType): Int {
-  return toInt().and(type.value)
-}

@@ -1,9 +1,10 @@
-package dev.wizrad.fracture.game.world.components
+package dev.wizrad.fracture.game.world.components.contact
 
 import com.badlogic.gdx.physics.box2d.*
+import com.badlogic.gdx.physics.box2d.Contact
 
 
-class Contacts: ContactListener {
+class Contact : ContactListener {
   // MARK: Properties
   private val map = mutableMapOf<Fixture, MutableSet<Fixture>>()
   private val defaultSet = { mutableSetOf<Fixture>() }

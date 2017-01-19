@@ -1,17 +1,32 @@
 package dev.wizrad.fracture.game.components.controls
 
-import com.badlogic.gdx.Input
+import com.badlogic.gdx.Gdx
+import dev.wizrad.fracture.game.core.Updatable
 
-enum class Key {
-  Left,
-  Right,
-  Jump;
+class Key(val code: Int): Updatable {
+  // MARK: Properties
+  private var count = 0
+  private var mark = 0
 
-  companion object  {
-    fun map() = mapOf(
-      Left to Input.Keys.A,
-      Right to Input.Keys.D,
-      Jump to Input.Keys.SPACE
-    )
+  /** Indicates that the key is currently pressed */
+  var isPressed: Boolean = false; private set
+  /** Indicates that the key is currently press, and it is a new press since the last requireUniquePress */
+  val isPressedUnique: Boolean get() = isPressed && count != mark
+
+  // MARK: Uniqueness
+  fun requireUniquePress() {
+    mark = count
+  }
+
+  // MARK: Updatable
+  override fun update(delta: Float) {
+    val isNowPressed = Gdx.input.isKeyPressed(code)
+
+    if (isNowPressed != isPressed) {
+      isPressed = isNowPressed
+      if (isNowPressed) {
+        count++
+      }
+    }
   }
 }

@@ -23,7 +23,7 @@ class Hero(
   // MARK: Behavior
   override fun start() {
     super.start()
-    selectForm(SpaceJumpForm(body, world))
+    selectForm(SingleJumpForm(body, world))
   }
 
   override fun update(delta: Float) {
@@ -62,6 +62,7 @@ class Hero(
   override fun defineBody(): BodyDef {
     val body = super.defineBody()
     body.type = BodyType.DynamicBody
+    body.fixedRotation = true
     body.position.set(transform(
       x = (parent!!.size.x - size.x) / 2,
       y = 0.0f
