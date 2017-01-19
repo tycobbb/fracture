@@ -5,6 +5,7 @@ import com.badlogic.gdx.physics.box2d.Body
 import com.badlogic.gdx.physics.box2d.FixtureDef
 import com.badlogic.gdx.physics.box2d.PolygonShape
 import dev.wizrad.fracture.game.components.controls.Key
+import dev.wizrad.fracture.game.world.components.ContactType
 import dev.wizrad.fracture.game.world.components.State
 import dev.wizrad.fracture.game.world.components.StateMachine
 import dev.wizrad.fracture.game.world.core.World
@@ -28,6 +29,7 @@ class SpaceJumpForm(
     fixture.shape = square
     fixture.density = 1.0f
     fixture.friction = 0.2f
+    fixture.filter.categoryBits = ContactType.Hero.bits
 
     body.createFixture(fixture)
 
@@ -66,9 +68,7 @@ class SpaceJumpForm(
 
     private fun canJump(): Boolean {
       assert(body.fixtureList.size != 0) { "body must have at least one fixture" }
-      val fixture = body.fixtureList.first()
-      val contactCount = world.contacts.count(fixture)
-      return contactCount != 0
+      return world.contacts.exists(body.fixtureList.first(), ContactType.Ground)
     }
   }
 
@@ -126,10 +126,8 @@ class SpaceJumpForm(
     }
 
     private fun didLand(): Boolean {
-      assert(body.fixtureList.size != 0) { "body have at least one fixture" }
-      val fixture = body.fixtureList.first()
-      val contactCount = world.contacts.count(fixture)
-      return contactCount != 0
+      assert(body.fixtureList.size != 0) { "body must have at least one fixture" }
+      return world.contacts.exists(body.fixtureList.first(), ContactType.Ground)
     }
 
     private fun isFalling(): Boolean {
@@ -218,10 +216,8 @@ class SpaceJumpForm(
     }
 
     private fun didLand(): Boolean {
-      assert(body.fixtureList.size != 0) { "body have at least one fixture" }
-      val fixture = body.fixtureList.first()
-      val contactCount = world.contacts.count(fixture)
-      return contactCount != 0
+      assert(body.fixtureList.size != 0) { "body must have at least one fixture" }
+      return world.contacts.exists(body.fixtureList.first(), ContactType.Ground)
     }
   }
 

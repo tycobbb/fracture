@@ -23,7 +23,7 @@ class Hero(
   // MARK: Behavior
   override fun start() {
     super.start()
-    selectForm(SingleJumpForm(body, world))
+    selectForm(SpaceJumpForm(body, world))
   }
 
   override fun update(delta: Float) {

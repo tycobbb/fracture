@@ -9,8 +9,13 @@ class Contacts: ContactListener {
   private val defaultSet = { mutableSetOf<Fixture>() }
 
   // MARK: Lookup
-  fun count(fixture: Fixture): Int {
-    return contactSet(fixture).size
+  fun exists(fixture: Fixture): Boolean {
+    return contactSet(fixture).size != 0
+  }
+
+  fun exists(fixture: Fixture, type: ContactType): Boolean {
+    return contactSet(fixture)
+      .find { (it.filterData.categoryBits and type) != 0 } != null
   }
 
   private fun contactSet(fixture: Fixture): MutableSet<Fixture> {

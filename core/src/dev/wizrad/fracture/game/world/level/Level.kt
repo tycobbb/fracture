@@ -5,6 +5,7 @@ import com.badlogic.gdx.physics.box2d.Body
 import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.physics.box2d.FixtureDef
 import com.badlogic.gdx.physics.box2d.PolygonShape
+import dev.wizrad.fracture.game.world.components.ContactType
 import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.core.EntitySequence
 import dev.wizrad.fracture.game.world.core.World
@@ -48,6 +49,7 @@ class Level(
     leftWall.shape = rect
     leftWall.density = 1.0f
     leftWall.friction = 0.2f
+    leftWall.filter.categoryBits = ContactType.Wall.bits
 
     body.createFixture(leftWall)
 
@@ -58,6 +60,7 @@ class Level(
     rightWall.shape = rect
     rightWall.density = 1.0f
     rightWall.friction = 0.2f
+    rightWall.filter.categoryBits = ContactType.Wall.bits
 
     body.createFixture(rightWall)
 
@@ -68,6 +71,7 @@ class Level(
     ceiling.shape = rect
     ceiling.density = 1.0f
     ceiling.friction = 0.2f
+    ceiling.filter.categoryBits = ContactType.Ceiling.bits
 
     body.createFixture(ceiling)
 

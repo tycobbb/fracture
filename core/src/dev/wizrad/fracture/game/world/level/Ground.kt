@@ -6,6 +6,7 @@ import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType
 import com.badlogic.gdx.physics.box2d.FixtureDef
 import com.badlogic.gdx.physics.box2d.PolygonShape
+import dev.wizrad.fracture.game.world.components.ContactType
 import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.core.World
 
@@ -43,6 +44,7 @@ class Ground(
     fixture.shape = rect
     fixture.density = 1.0f
     fixture.friction = 0.2f
+    fixture.filter.categoryBits = ContactType.Ground.bits
 
     body.createFixture(fixture)
 
