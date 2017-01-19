@@ -5,10 +5,7 @@ import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType
 import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.core.World
-import dev.wizrad.fracture.game.world.hero.forms.Form
-import dev.wizrad.fracture.game.world.hero.forms.ReboundForm
-import dev.wizrad.fracture.game.world.hero.forms.SingleJumpForm
-import dev.wizrad.fracture.game.world.hero.forms.SpaceJumpForm
+import dev.wizrad.fracture.game.world.hero.forms.*
 
 class Hero(
   parent: Entity, world: World): Entity(parent, world) {
@@ -23,7 +20,7 @@ class Hero(
   // MARK: Behavior
   override fun start() {
     super.start()
-    selectForm(SingleJumpForm(body, world))
+    selectForm(SpearForm(body, world))
   }
 
   override fun update(delta: Float) {

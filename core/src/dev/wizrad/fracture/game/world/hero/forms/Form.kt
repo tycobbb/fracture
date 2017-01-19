@@ -12,6 +12,7 @@ interface Form {
   enum class Type {
     SingleJump,
     SpaceJump,
-    Rebound
+    Rebound,
+    Spear
   }
 }

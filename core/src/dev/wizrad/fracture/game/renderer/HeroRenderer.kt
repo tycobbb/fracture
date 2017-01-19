@@ -24,5 +24,6 @@ private fun getColor(hero: Hero): Color {
     Form.Type.SingleJump -> Color.WHITE
     Form.Type.SpaceJump -> Color.FIREBRICK
     Form.Type.Rebound -> Color.CHARTREUSE
+    Form.Type.Spear -> Color.CORAL
   }
 }
