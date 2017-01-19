@@ -11,12 +11,12 @@ import dev.wizrad.fracture.game.world.core.World
 import dev.wizrad.fracture.support.Tag
 import dev.wizrad.fracture.support.debug
 
-class DoubleJumpForm(
+class SpaceJumpForm(
   private val body: Body,
   private val w: World): Form {
 
   // MARK: Form
-  override val type = Form.Type.DoubleJump
+  override val type = Form.Type.SpaceJump
   override val behavior = StateMachine(initialState = standing())
 
   override fun defineFixtures(size: Vector2) {
@@ -161,12 +161,19 @@ class DoubleJumpForm(
 
   private fun jumpStart2(isShort: Boolean, direction: Direction): State = object: State() {
     override fun start() {
+      // cancel vertical momentum
+      val velocity = body.linearVelocity
+      velocity.y = 0.0f
+
+      // cancel horizontal momentum if direction is changing
       if (direction != Direction.None && initialDirection() != direction) {
         debug(Tag.World, "$this canceling horizontal momentum")
-        val velocity = body.linearVelocity
-        body.setLinearVelocity(0.0f, velocity.y)
+        velocity.x = 0.0f
       }
 
+      body.linearVelocity = velocity
+
+      // apply the space jump impulse
       debug(Tag.World, "$this applying impulse")
       val center = body.worldCenter
       val magnitude = if (isShort) 20.0f else 30.0f
@@ -182,7 +189,7 @@ class DoubleJumpForm(
       val velocity = body.linearVelocity
 
       return when {
-        velocity.x < 0.0 -> Direction.Right
+        velocity.x < 0.0 -> Direction.Left
         velocity.x > 0.0 -> Direction.Right
         else -> Direction.None
       }

@@ -22,7 +22,7 @@ fun Renderer.render(hero: Hero, delta: Float) {
 private fun getColor(hero: Hero): Color {
   return when (hero.form.type) {
     Form.Type.SingleJump -> Color.WHITE
-    Form.Type.DoubleJump -> Color.FIREBRICK
+    Form.Type.SpaceJump -> Color.FIREBRICK
     Form.Type.Rebound -> Color.CHARTREUSE
   }
 }

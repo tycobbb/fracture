@@ -6,7 +6,7 @@ import com.badlogic.gdx.physics.box2d.BodyDef.BodyType
 import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.core.EntityBase
 import dev.wizrad.fracture.game.world.core.World
-import dev.wizrad.fracture.game.world.hero.forms.DoubleJumpForm
+import dev.wizrad.fracture.game.world.hero.forms.SpaceJumpForm
 import dev.wizrad.fracture.game.world.hero.forms.Form
 import dev.wizrad.fracture.game.world.hero.forms.ReboundForm
 import dev.wizrad.fracture.game.world.hero.forms.SingleJumpForm
@@ -52,8 +52,8 @@ class Hero(
 
   private fun createRandomForm(): Form {
     return when (form) {
-      is SingleJumpForm -> DoubleJumpForm(body, w)
-      is DoubleJumpForm -> ReboundForm(body, w)
+      is SingleJumpForm -> SpaceJumpForm(body, w)
+      is SpaceJumpForm -> ReboundForm(body, w)
       else -> SingleJumpForm(body, w)
     }
   }
