@@ -2,6 +2,8 @@ package dev.wizrad.fracture.game.world.hero.forms
 
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
+import com.badlogic.gdx.physics.box2d.FixtureDef
+import com.badlogic.gdx.physics.box2d.PolygonShape
 import dev.wizrad.fracture.game.components.controls.Key
 import dev.wizrad.fracture.game.world.core.State
 import dev.wizrad.fracture.game.world.core.StateMachine
@@ -16,6 +18,23 @@ class ReboundForm(
   // MARK: Form
   override val type = Form.Type.Rebound
   override val behavior = StateMachine(initialState = standing())
+
+  override fun defineFixtures(size: Vector2) {
+    // create fixtures
+    val square = PolygonShape()
+    square.setAsBox(size.x, size.y)
+
+    val fixture = FixtureDef()
+    fixture.shape = square
+    fixture.density = 1.0f
+    fixture.friction = 0.2f
+    fixture.restitution = 0.5f
+
+    body.createFixture(fixture)
+
+    // dispose shapes
+    square.dispose()
+  }
 
   // MARK: States
   private fun standing(): State = object: State() {
@@ -78,6 +97,69 @@ class ReboundForm(
   }
 
   private fun jumping(): State = object: State() {
+    private var canFastfall = false
+    private var restingFrames = 0
+
+    override fun update(delta: Float) {
+      super.update(delta)
+
+      // apply directional influence
+      val force = Vector2()
+      if (w.controls.pressed(Key.Left)) {
+        force.x -= 20.0f
+      }
+
+      if (w.controls.pressed(Key.Right)) {
+        force.x += 20.0f
+      }
+
+      body.applyForceToCenter(force, true)
+
+      // allow fastfalling any time after reaching the first jump's peak
+      if (!canFastfall && isFalling()) {
+        canFastfall = true
+      }
+
+      // if in contact with floor, increment resting frame count
+      if (isLanding()) {
+        restingFrames++
+      } else {
+        restingFrames = 0
+      }
+    }
+
+    override fun nextState(): State? {
+      // land once we've rested for enough frames (no longer bouncing)
+      val restingFrameLength = 2
+      if (restingFrames >= restingFrameLength) {
+        return landing()
+      } else if (w.controls.pressed(Key.Jump) && canFastfall) {
+        return fastfalling()
+      }
+
+      return null
+    }
+
+    private fun isLanding(): Boolean {
+      assert(body.fixtureList.size != 0) { "body have at least one fixture" }
+      val fixture = body.fixtureList.first()
+      val contactCount = w.contacts.count(fixture)
+      return contactCount != 0
+    }
+
+    private fun isFalling(): Boolean {
+      return body.linearVelocity.y >= 0.0
+    }
+  }
+
+  private fun fastfalling(): State = object: State() {
+    override fun start() {
+      debug(Tag.World, "$this applying fastfall impulse")
+      val center = body.worldCenter
+      val magnitude = 50.0f
+      body.applyLinearImpulse(0.0f, magnitude, center.x, center.y, true)
+    }
+
     override fun update(delta: Float) {
       super.update(delta)
 
@@ -95,13 +177,8 @@ class ReboundForm(
     }
 
     override fun nextState(): State? {
-      if (didLand()) {
-        return landing()
-      } else if (w.controls.pressed(Key.Jump) && isFalling()) {
-        return fastfalling()
-      }
-
-      return null
+      // return to jumping at first contact to allow for re-falling
+      return if (didLand()) jumping() else null
     }
 
     private fun didLand(): Boolean {
@@ -109,23 +186,6 @@ class ReboundForm(
       val fixture = body.fixtureList.first()
       val contactCount = w.contacts.count(fixture)
       return contactCount != 0
-    }
-
-    private fun isFalling(): Boolean {
-      return body.linearVelocity.y >= 0.0
-    }
-  }
-
-  private fun fastfalling(): State = object: State() {
-    override fun start() {
-      debug(Tag.World, "$this applying fastfall impulse")
-      val center = body.worldCenter
-      val magnitude = 30.0f
-      body.applyLinearImpulse(0.0f, magnitude, center.x, center.y, true)
-    }
-
-    override fun nextState(): State? {
-      return null
     }
   }
 

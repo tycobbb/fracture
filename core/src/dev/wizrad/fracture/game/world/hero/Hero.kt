@@ -1,11 +1,8 @@
 package dev.wizrad.fracture.game.world.hero
 
 import com.badlogic.gdx.math.Vector2
-import com.badlogic.gdx.physics.box2d.Body
 import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType
-import com.badlogic.gdx.physics.box2d.FixtureDef
-import com.badlogic.gdx.physics.box2d.PolygonShape
 import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.core.EntityBase
 import dev.wizrad.fracture.game.world.core.World
@@ -27,7 +24,7 @@ class Hero(
   // MARK: Lifecycle
   override fun initialize() {
     super.initialize()
-    form = ReboundForm(body, w)
+    selectForm(ReboundForm(body, w))
   }
 
   override fun update(delta: Float) {
@@ -46,8 +43,11 @@ class Hero(
   }
 
   // MARK: Forms
-  fun randomizeForm() {
-    form = createRandomForm()
+  fun selectForm(form: Form? = null) {
+    body.fixtureList.forEach { body.destroyFixture(it) }
+
+    this.form = form ?: createRandomForm()
+    this.form.defineFixtures(size)
   }
 
   private fun createRandomForm(): Form {
@@ -68,23 +68,5 @@ class Hero(
     ))
 
     return body
-  }
-
-  override fun defineFixtures(body: Body) {
-    super.defineFixtures(body)
-
-    // create fixtures
-    val square = PolygonShape()
-    square.setAsBox(size.x, size.y)
-
-    val fixture = FixtureDef()
-    fixture.shape = square
-    fixture.density = 1.0f
-    fixture.friction = 0.2f
-
-    body.createFixture(fixture)
-
-    // dispose shapes
-    square.dispose()
   }
 }

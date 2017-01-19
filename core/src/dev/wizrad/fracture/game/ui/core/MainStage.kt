@@ -40,7 +40,7 @@ class MainStage(
     updateFormButtonText(model)
 
     formButton.onChange { event, actor ->
-      model.randomizeForm()
+      model.selectForm()
       updateFormButtonText(model)
     }
   }

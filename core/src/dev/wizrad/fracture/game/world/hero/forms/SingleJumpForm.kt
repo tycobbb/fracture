@@ -2,6 +2,8 @@ package dev.wizrad.fracture.game.world.hero.forms
 
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
+import com.badlogic.gdx.physics.box2d.FixtureDef
+import com.badlogic.gdx.physics.box2d.PolygonShape
 import dev.wizrad.fracture.game.components.controls.Key
 import dev.wizrad.fracture.game.world.core.State
 import dev.wizrad.fracture.game.world.core.StateMachine
@@ -16,6 +18,22 @@ class SingleJumpForm(
   // MARK: Form
   override val type = Form.Type.SingleJump
   override val behavior = StateMachine(initialState = standing())
+
+  override fun defineFixtures(size: Vector2) {
+    // create fixtures
+    val square = PolygonShape()
+    square.setAsBox(size.x, size.y)
+
+    val fixture = FixtureDef()
+    fixture.shape = square
+    fixture.density = 1.0f
+    fixture.friction = 0.2f
+
+    body.createFixture(fixture)
+
+    // dispose shapes
+    square.dispose()
+  }
 
   // MARK: States
   private fun standing(): State = object: State() {
