@@ -1,4 +1,4 @@
-package dev.wizrad.fracture.game.world
+package dev.wizrad.fracture.game.world.hero.forms
 
 import dev.wizrad.fracture.game.world.core.Behavior
 

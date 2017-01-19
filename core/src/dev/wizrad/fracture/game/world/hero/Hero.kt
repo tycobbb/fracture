@@ -1,4 +1,4 @@
-package dev.wizrad.fracture.game.world
+package dev.wizrad.fracture.game.world.hero
 
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
@@ -9,6 +9,8 @@ import com.badlogic.gdx.physics.box2d.PolygonShape
 import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.core.EntityBase
 import dev.wizrad.fracture.game.world.core.World
+import dev.wizrad.fracture.game.world.hero.forms.DoubleJumpForm
+import dev.wizrad.fracture.game.world.hero.forms.Form
 
 class Hero(
   parent: EntityBase, world: World): Entity(parent, world) {
