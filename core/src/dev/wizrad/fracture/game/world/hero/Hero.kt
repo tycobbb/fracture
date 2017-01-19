@@ -11,6 +11,8 @@ import dev.wizrad.fracture.game.world.core.EntityBase
 import dev.wizrad.fracture.game.world.core.World
 import dev.wizrad.fracture.game.world.hero.forms.DoubleJumpForm
 import dev.wizrad.fracture.game.world.hero.forms.Form
+import dev.wizrad.fracture.game.world.hero.forms.ReboundForm
+import dev.wizrad.fracture.game.world.hero.forms.SingleJumpForm
 
 class Hero(
   parent: EntityBase, world: World): Entity(parent, world) {
@@ -25,7 +27,7 @@ class Hero(
   // MARK: Lifecycle
   override fun initialize() {
     super.initialize()
-    randomizeForm()
+    form = ReboundForm(body, w)
   }
 
   override fun update(delta: Float) {
@@ -44,14 +46,16 @@ class Hero(
   }
 
   // MARK: Forms
-  private fun randomizeForm() {
+  fun randomizeForm() {
     form = createRandomForm()
   }
 
   private fun createRandomForm(): Form {
-//    return ReboundForm(body, w)
-    return DoubleJumpForm(body, w)
-//    return SingleJumpForm(body, w)
+    return when (form) {
+      is SingleJumpForm -> DoubleJumpForm(body, w)
+      is DoubleJumpForm -> ReboundForm(body, w)
+      else -> SingleJumpForm(body, w)
+    }
   }
 
   // MARK: Body

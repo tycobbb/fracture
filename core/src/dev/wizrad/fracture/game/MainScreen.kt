@@ -11,13 +11,9 @@ import dev.wizrad.fracture.game.world.core.EntityWorld
 import dev.wizrad.fracture.support.extensions.Vector2
 
 class MainScreen: Screen {
-  private val world: EntityWorld = EntityWorld()
-  private val stage: MainStage = MainStage()
-  private val renderer: Renderer
-
-  init {
-    renderer = Renderer(world, camera = Camera())
-  }
+  private val world = EntityWorld()
+  private val renderer = Renderer(world, camera = Camera())
+  private val stage = MainStage(world)
 
   // MARK: Screen
   override fun render(delta: Float) {

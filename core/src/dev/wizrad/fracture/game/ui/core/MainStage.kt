@@ -1,18 +1,25 @@
 package dev.wizrad.fracture.game.ui.core
 
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.graphics.g2d.BitmapFont
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.ui.Skin
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton
 import com.badlogic.gdx.utils.viewport.ScreenViewport
+import dev.wizrad.fracture.game.ui.support.onChange
+import dev.wizrad.fracture.game.world.core.EntityWorld
+import dev.wizrad.fracture.game.world.hero.Hero
 
-class MainStage: Stage(ScreenViewport()) {
+class MainStage(
+  private val world: EntityWorld): Stage(ScreenViewport()) {
+
+  // MARK: Properties
+  private val skin = Skin(Gdx.files.internal("uiskin.json"))
+  private val formButton = TextButton("form", skin)
+
+  // MARK: Lifecycle
   init {
-    val font = BitmapFont()
-    val skin = Skin(Gdx.files.internal("uiskin.json"))
-    val button = TextButton("Foo", skin)
-    addActor(button)
+    Gdx.input.inputProcessor = this
+    attachFormButton()
   }
 
   fun update(delta: Float) {
@@ -22,5 +29,22 @@ class MainStage: Stage(ScreenViewport()) {
 
   fun resize(width: Int, height: Int) {
     viewport.update(width, height, true)
+  }
+
+  // MARK: Form Button
+  private fun attachFormButton() {
+    addActor(formButton)
+
+    val model = world.level.hero
+    updateFormButtonText(model)
+
+    formButton.onChange { event, actor ->
+      model.randomizeForm()
+      updateFormButtonText(model)
+    }
+  }
+
+  private fun updateFormButtonText(model: Hero) {
+    formButton.setText("${model.form.type}")
   }
 }
