@@ -8,6 +8,7 @@ interface Form {
 
   enum class Type {
     SingleJump,
-    DoubleJump
+    DoubleJump,
+    Rebound
   }
 }

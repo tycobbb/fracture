@@ -9,12 +9,12 @@ import dev.wizrad.fracture.game.world.core.World
 import dev.wizrad.fracture.support.Tag
 import dev.wizrad.fracture.support.debug
 
-class SingleJumpForm(
+class ReboundForm(
   private val body: Body,
   private val w: World): Form {
 
   // MARK: Form
-  override val type = Form.Type.SingleJump
+  override val type = Form.Type.Rebound
   override val behavior = StateMachine(initialState = standing())
 
   // MARK: States
@@ -63,7 +63,7 @@ class SingleJumpForm(
   }
 
   private fun jumpStart(isShort: Boolean): State = object: State() {
-    private val magnitude = if (isShort) 15.0f else 30.0f
+    private val magnitude = if (isShort) 5.0f else 10.0f
 
     override fun start() {
       debug(Tag.World, "$this applying impulse: $magnitude")
@@ -95,7 +95,13 @@ class SingleJumpForm(
     }
 
     override fun nextState(): State? {
-      return if (didLand()) landing() else null
+      if (didLand()) {
+        return landing()
+      } else if (w.controls.pressed(Key.Jump) && isFalling()) {
+        return fastfalling()
+      }
+
+      return null
     }
 
     private fun didLand(): Boolean {
@@ -103,6 +109,23 @@ class SingleJumpForm(
       val fixture = body.fixtureList.first()
       val contactCount = w.contacts.count(fixture)
       return contactCount != 0
+    }
+
+    private fun isFalling(): Boolean {
+      return body.linearVelocity.y >= 0.0
+    }
+  }
+
+  private fun fastfalling(): State = object: State() {
+    override fun start() {
+      debug(Tag.World, "$this applying fastfall impulse")
+      val center = body.worldCenter
+      val magnitude = 30.0f
+      body.applyLinearImpulse(0.0f, magnitude, center.x, center.y, true)
+    }
+
+    override fun nextState(): State? {
+      return null
     }
   }
 

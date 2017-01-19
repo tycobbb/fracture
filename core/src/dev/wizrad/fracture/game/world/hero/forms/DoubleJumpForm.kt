@@ -10,8 +10,8 @@ import dev.wizrad.fracture.support.Tag
 import dev.wizrad.fracture.support.debug
 
 class DoubleJumpForm(
-  val body: Body,
-  val w: World): Form {
+  private val body: Body,
+  private val w: World): Form {
 
   // MARK: Form
   override val type = Form.Type.DoubleJump
