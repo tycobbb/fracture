@@ -1,5 +1,6 @@
-package dev.wizrad.fracture.game.world.core
+package dev.wizrad.fracture.game.world.components
 
+import dev.wizrad.fracture.game.world.core.Behavior
 import dev.wizrad.fracture.support.debugPrefix
 
 abstract class State: Behavior() {
@@ -9,10 +10,7 @@ abstract class State: Behavior() {
   // MARK: Sequence
   abstract fun nextState(): State?
 
-  // MARK: Lifecycle
-  open fun start() {
-  }
-
+  // MARK: Behavior
   override fun update(delta: Float) {
     super.update(delta)
     frame++

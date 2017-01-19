@@ -5,15 +5,15 @@ import com.badlogic.gdx.physics.box2d.Body
 import com.badlogic.gdx.physics.box2d.FixtureDef
 import com.badlogic.gdx.physics.box2d.PolygonShape
 import dev.wizrad.fracture.game.components.controls.Key
-import dev.wizrad.fracture.game.world.core.State
-import dev.wizrad.fracture.game.world.core.StateMachine
+import dev.wizrad.fracture.game.world.components.State
+import dev.wizrad.fracture.game.world.components.StateMachine
 import dev.wizrad.fracture.game.world.core.World
 import dev.wizrad.fracture.support.Tag
 import dev.wizrad.fracture.support.debug
 
 class SingleJumpForm(
   private val body: Body,
-  private val w: World): Form {
+  private val world: World): Form {
 
   // MARK: Form
   override val type = Form.Type.SingleJump
@@ -42,11 +42,11 @@ class SingleJumpForm(
 
       // apply running movement
       val force = Vector2()
-      if (w.controls.pressed(Key.Left)) {
+      if (world.controls.pressed(Key.Left)) {
         force.x -= 30.0f
       }
 
-      if (w.controls.pressed(Key.Right)) {
+      if (world.controls.pressed(Key.Right)) {
         force.x += 30.0f
       }
 
@@ -54,7 +54,7 @@ class SingleJumpForm(
     }
 
     override fun nextState(): State? {
-      if (w.controls.pressed(Key.Jump) && canJump()) {
+      if (world.controls.pressed(Key.Jump) && canJump()) {
         return windup()
       }
 
@@ -64,7 +64,7 @@ class SingleJumpForm(
     private fun canJump(): Boolean {
       assert(body.fixtureList.size != 0) { "body must have at least one fixture" }
       val fixture = body.fixtureList.first()
-      val contactCount = w.contacts.count(fixture)
+      val contactCount = world.contacts.count(fixture)
       return contactCount != 0
     }
   }
@@ -73,7 +73,7 @@ class SingleJumpForm(
     override fun nextState(): State? {
       val frameLength = 4
       if (frame >= frameLength) {
-        return jumpStart(isShort = !w.controls.pressed(Key.Jump))
+        return jumpStart(isShort = !world.controls.pressed(Key.Jump))
       }
 
       return null
@@ -101,11 +101,11 @@ class SingleJumpForm(
 
       // apply directional influence
       val force = Vector2()
-      if (w.controls.pressed(Key.Left)) {
+      if (world.controls.pressed(Key.Left)) {
         force.x -= 20.0f
       }
 
-      if (w.controls.pressed(Key.Right)) {
+      if (world.controls.pressed(Key.Right)) {
         force.x += 20.0f
       }
 
@@ -119,7 +119,7 @@ class SingleJumpForm(
     private fun didLand(): Boolean {
       assert(body.fixtureList.size != 0) { "body have at least one fixture" }
       val fixture = body.fixtureList.first()
-      val contactCount = w.contacts.count(fixture)
+      val contactCount = world.contacts.count(fixture)
       return contactCount != 0
     }
   }

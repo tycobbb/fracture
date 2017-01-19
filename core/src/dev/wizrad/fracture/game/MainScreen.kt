@@ -7,7 +7,7 @@ import dev.wizrad.fracture.game.components.projection.then
 import dev.wizrad.fracture.game.renderer.core.Camera
 import dev.wizrad.fracture.game.renderer.core.Renderer
 import dev.wizrad.fracture.game.ui.core.MainStage
-import dev.wizrad.fracture.game.world.core.EntityWorld
+import dev.wizrad.fracture.game.world.EntityWorld
 import dev.wizrad.fracture.support.extensions.Vector2
 
 class MainScreen: Screen {

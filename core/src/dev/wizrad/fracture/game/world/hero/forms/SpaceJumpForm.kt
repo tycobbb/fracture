@@ -5,15 +5,15 @@ import com.badlogic.gdx.physics.box2d.Body
 import com.badlogic.gdx.physics.box2d.FixtureDef
 import com.badlogic.gdx.physics.box2d.PolygonShape
 import dev.wizrad.fracture.game.components.controls.Key
-import dev.wizrad.fracture.game.world.core.State
-import dev.wizrad.fracture.game.world.core.StateMachine
+import dev.wizrad.fracture.game.world.components.State
+import dev.wizrad.fracture.game.world.components.StateMachine
 import dev.wizrad.fracture.game.world.core.World
 import dev.wizrad.fracture.support.Tag
 import dev.wizrad.fracture.support.debug
 
 class SpaceJumpForm(
   private val body: Body,
-  private val w: World): Form {
+  private val world: World): Form {
 
   // MARK: Form
   override val type = Form.Type.SpaceJump
@@ -45,11 +45,11 @@ class SpaceJumpForm(
 
       // apply running movement
       val force = Vector2()
-      if (w.controls.pressed(Key.Left)) {
+      if (world.controls.pressed(Key.Left)) {
         force.x -= 30.0f
       }
 
-      if (w.controls.pressed(Key.Right)) {
+      if (world.controls.pressed(Key.Right)) {
         force.x += 30.0f
       }
 
@@ -57,7 +57,7 @@ class SpaceJumpForm(
     }
 
     override fun nextState(): State? {
-      if (w.controls.pressed(Key.Jump) && canJump()) {
+      if (world.controls.pressed(Key.Jump) && canJump()) {
         return windup()
       }
 
@@ -67,7 +67,7 @@ class SpaceJumpForm(
     private fun canJump(): Boolean {
       assert(body.fixtureList.size != 0) { "body must have at least one fixture" }
       val fixture = body.fixtureList.first()
-      val contactCount = w.contacts.count(fixture)
+      val contactCount = world.contacts.count(fixture)
       return contactCount != 0
     }
   }
@@ -76,7 +76,7 @@ class SpaceJumpForm(
     override fun nextState(): State? {
       val frameLength = 4
       if (frame >= frameLength) {
-        return jumpStart(isShort = !w.controls.pressed(Key.Jump))
+        return jumpStart(isShort = !world.controls.pressed(Key.Jump))
       }
 
       return null
@@ -104,11 +104,11 @@ class SpaceJumpForm(
 
       // apply directional influence
       val force = Vector2()
-      if (w.controls.pressed(Key.Left)) {
+      if (world.controls.pressed(Key.Left)) {
         force.x -= 20.0f
       }
 
-      if (w.controls.pressed(Key.Right)) {
+      if (world.controls.pressed(Key.Right)) {
         force.x += 20.0f
       }
 
@@ -118,7 +118,7 @@ class SpaceJumpForm(
     override fun nextState(): State? {
       if (didLand()) {
         return landing()
-      } else if (w.controls.pressed(Key.Jump) && isFalling()) {
+      } else if (world.controls.pressed(Key.Jump) && isFalling()) {
         return windup2()
       }
 
@@ -128,7 +128,7 @@ class SpaceJumpForm(
     private fun didLand(): Boolean {
       assert(body.fixtureList.size != 0) { "body have at least one fixture" }
       val fixture = body.fixtureList.first()
-      val contactCount = w.contacts.count(fixture)
+      val contactCount = world.contacts.count(fixture)
       return contactCount != 0
     }
 
@@ -141,15 +141,15 @@ class SpaceJumpForm(
     override fun nextState(): State? {
       val frameLength = 4
       if (frame >= frameLength) {
-        return jumpStart2(isShort = !w.controls.pressed(Key.Jump), direction = inputDirection())
+        return jumpStart2(isShort = !world.controls.pressed(Key.Jump), direction = inputDirection())
       }
 
       return null
     }
 
     private fun inputDirection(): Direction {
-      val leftPressed = w.controls.pressed(Key.Left)
-      val rightPressed = w.controls.pressed(Key.Right)
+      val leftPressed = world.controls.pressed(Key.Left)
+      val rightPressed = world.controls.pressed(Key.Right)
 
       return when {
         leftPressed && !rightPressed -> Direction.Left
@@ -202,11 +202,11 @@ class SpaceJumpForm(
 
       // apply directional influence
       val force = Vector2()
-      if (w.controls.pressed(Key.Left)) {
+      if (world.controls.pressed(Key.Left)) {
         force.x -= 20.0f
       }
 
-      if (w.controls.pressed(Key.Right)) {
+      if (world.controls.pressed(Key.Right)) {
         force.x += 20.0f
       }
 
@@ -220,7 +220,7 @@ class SpaceJumpForm(
     private fun didLand(): Boolean {
       assert(body.fixtureList.size != 0) { "body have at least one fixture" }
       val fixture = body.fixtureList.first()
-      val contactCount = w.contacts.count(fixture)
+      val contactCount = world.contacts.count(fixture)
       return contactCount != 0
     }
   }

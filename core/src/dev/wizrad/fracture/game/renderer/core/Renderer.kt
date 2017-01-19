@@ -7,7 +7,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Vector2
 import dev.wizrad.fracture.game.core.Renderable
 import dev.wizrad.fracture.game.renderer.render
-import dev.wizrad.fracture.game.world.core.EntityWorld
+import dev.wizrad.fracture.game.world.EntityWorld
 
 class Renderer constructor(
   val world: EntityWorld,

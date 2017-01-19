@@ -6,7 +6,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton
 import com.badlogic.gdx.utils.viewport.ScreenViewport
 import dev.wizrad.fracture.game.ui.support.onChange
-import dev.wizrad.fracture.game.world.core.EntityWorld
+import dev.wizrad.fracture.game.world.EntityWorld
 import dev.wizrad.fracture.game.world.hero.Hero
 
 class MainStage(

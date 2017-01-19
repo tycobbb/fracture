@@ -4,15 +4,14 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType
 import dev.wizrad.fracture.game.world.core.Entity
-import dev.wizrad.fracture.game.world.core.EntityBase
 import dev.wizrad.fracture.game.world.core.World
-import dev.wizrad.fracture.game.world.hero.forms.SpaceJumpForm
 import dev.wizrad.fracture.game.world.hero.forms.Form
 import dev.wizrad.fracture.game.world.hero.forms.ReboundForm
 import dev.wizrad.fracture.game.world.hero.forms.SingleJumpForm
+import dev.wizrad.fracture.game.world.hero.forms.SpaceJumpForm
 
 class Hero(
-  parent: EntityBase, world: World): Entity(parent, world) {
+  parent: Entity, world: World): Entity(parent, world) {
 
   // MARK: EntityBase
   override val name = "Hero"
@@ -21,10 +20,10 @@ class Hero(
   // MARK: Properties
   lateinit var form: Form
 
-  // MARK: Lifecycle
-  override fun initialize() {
-    super.initialize()
-    selectForm(ReboundForm(body, w))
+  // MARK: Behavior
+  override fun start() {
+    super.start()
+    selectForm(ReboundForm(body, world))
   }
 
   override fun update(delta: Float) {
@@ -52,9 +51,9 @@ class Hero(
 
   private fun createRandomForm(): Form {
     return when (form) {
-      is SingleJumpForm -> SpaceJumpForm(body, w)
-      is SpaceJumpForm -> ReboundForm(body, w)
-      else -> SingleJumpForm(body, w)
+      is SingleJumpForm -> SpaceJumpForm(body, world)
+      is SpaceJumpForm -> ReboundForm(body, world)
+      else -> SingleJumpForm(body, world)
     }
   }
 

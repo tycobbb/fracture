@@ -4,7 +4,7 @@ import com.badlogic.gdx.graphics.Color
 import dev.wizrad.fracture.game.renderer.core.Renderer
 import dev.wizrad.fracture.game.renderer.support.draw
 import dev.wizrad.fracture.game.renderer.support.pause
-import dev.wizrad.fracture.game.world.Ground
+import dev.wizrad.fracture.game.world.level.Ground
 
 fun Renderer.render(ground: Ground, delta: Float) {
   batch.pause {

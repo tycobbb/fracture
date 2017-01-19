@@ -1,5 +1,6 @@
-package dev.wizrad.fracture.game.world.core
+package dev.wizrad.fracture.game.world.components
 
+import dev.wizrad.fracture.game.world.core.Behavior
 import dev.wizrad.fracture.support.Tag
 import dev.wizrad.fracture.support.className
 import dev.wizrad.fracture.support.debug

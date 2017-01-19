@@ -1,4 +1,4 @@
-package dev.wizrad.fracture.game.world.core
+package dev.wizrad.fracture.game.world.components
 
 import com.badlogic.gdx.physics.box2d.*
 
