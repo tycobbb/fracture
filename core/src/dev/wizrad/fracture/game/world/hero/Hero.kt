@@ -23,7 +23,7 @@ class Hero(
   // MARK: Behavior
   override fun start() {
     super.start()
-    selectForm(ReboundForm(body, world))
+    selectForm(SingleJumpForm(body, world))
   }
 
   override fun update(delta: Float) {
@@ -47,6 +47,7 @@ class Hero(
 
     this.form = form ?: createRandomForm()
     this.form.defineFixtures(size)
+    this.form.behavior.start()
   }
 
   private fun createRandomForm(): Form {

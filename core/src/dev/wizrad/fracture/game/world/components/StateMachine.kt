@@ -12,7 +12,8 @@ class StateMachine(
   var state: State = initialState
 
   // MARK: Lifecycle
-  init {
+  override fun start() {
+    super.start()
     state.start()
   }
 

@@ -1,7 +1,10 @@
 package dev.wizrad.fracture.game.world.level
 
 import com.badlogic.gdx.math.Vector2
-import com.badlogic.gdx.physics.box2d.*
+import com.badlogic.gdx.physics.box2d.Body
+import com.badlogic.gdx.physics.box2d.BodyDef
+import com.badlogic.gdx.physics.box2d.FixtureDef
+import com.badlogic.gdx.physics.box2d.PolygonShape
 import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.core.EntitySequence
 import dev.wizrad.fracture.game.world.core.World
@@ -59,7 +62,7 @@ class Level(
     body.createFixture(rightWall)
 
     // create ceiling
-    rect.setAsBox(width, 0.0f, scratch.set(-1.0f, -1.0f), 0.0f)
+    rect.setAsBox(width, 0.0f, scratch.set(width, -1.0f), 0.0f)
 
     val ceiling = FixtureDef()
     ceiling.shape = rect
