@@ -33,6 +33,7 @@ class MainStage(
 
   // MARK: Form Button
   private fun attachFormButton() {
+    formButton.setPosition((width - formButton.width) / 2, formButton.y)
     addActor(formButton)
 
     val model = world.level.hero
