@@ -1,5 +1,7 @@
-## Java
+## assets
+android/assets
 
+## Java
 *.class
 *.war
 *.ear

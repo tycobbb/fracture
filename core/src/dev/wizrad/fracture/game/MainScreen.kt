@@ -11,14 +11,12 @@ import dev.wizrad.fracture.game.world.core.EntityWorld
 import dev.wizrad.fracture.support.extensions.Vector2
 
 class MainScreen: Screen {
-  private val world: EntityWorld
+  private val world: EntityWorld = EntityWorld()
+  private val stage: MainStage = MainStage()
   private val renderer: Renderer
-  private val stage: MainStage
 
   init {
-    world = EntityWorld()
     renderer = Renderer(world, camera = Camera())
-    stage = MainStage()
   }
 
   // MARK: Screen
