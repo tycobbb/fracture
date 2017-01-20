@@ -5,7 +5,7 @@ import com.badlogic.gdx.physics.box2d.Body
 import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.physics.box2d.FixtureDef
 import com.badlogic.gdx.physics.box2d.PolygonShape
-import dev.wizrad.fracture.game.world.components.contact.ContactInfo
+import dev.wizrad.fracture.game.world.components.contact.ContactInfo.Orientation
 import dev.wizrad.fracture.game.world.components.contact.ContactType
 import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.core.EntitySequence
@@ -39,7 +39,7 @@ class Level(
   override fun defineFixtures(body: Body) {
     super.defineFixtures(body)
 
-    fun buildWall(rect: PolygonShape, orientation: ContactInfo) {
+    fun buildWall(rect: PolygonShape, orientation: Orientation) {
       val wallDef = FixtureDef()
       wallDef.shape = rect
       wallDef.density = 1.0f
@@ -56,15 +56,15 @@ class Level(
 
     // create left wall
     rect.setAsBox(0.0f, height, scratch.set(-1.0f, height), 0.0f)
-    buildWall(rect, orientation = ContactInfo.Left)
+    buildWall(rect, Orientation.Left)
 
     // create left wall
     rect.setAsBox(0.0f, height, scratch.set(size.x, height), 0.0f)
-    buildWall(rect, orientation = ContactInfo.Right)
+    buildWall(rect, Orientation.Right)
 
     // create ceiling
     rect.setAsBox(width, 0.0f, scratch.set(width, -1.0f), 0.0f)
-    buildWall(rect, orientation = ContactInfo.Top)
+    buildWall(rect, Orientation.Top)
 
     // dispose shapes
     rect.dispose()

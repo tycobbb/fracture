@@ -1,8 +1,9 @@
 package dev.wizrad.fracture.game.world.components.contact
 
-enum class ContactInfo {
-  Bottom,
-  Left,
-  Top,
-  Right
+data class ContactInfo(
+  val orientation: Orientation) {
+
+  enum class Orientation {
+    Bottom, Left, Top, Right
+  }
 }

@@ -7,4 +7,3 @@ enum class ContactType(val value: Int) {
   // MARK: Representations
   val bits: Short get() = value.toShort()
 }
-
