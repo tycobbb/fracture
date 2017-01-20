@@ -1,27 +1,26 @@
 package dev.wizrad.fracture.game.world.hero
 
 import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.physics.box2d.Body
 import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType
-import dev.wizrad.fracture.game.world.components.statemachine.State
+import dev.wizrad.fracture.game.world.core.Context
 import dev.wizrad.fracture.game.world.core.Entity
-import dev.wizrad.fracture.game.world.core.World
 import dev.wizrad.fracture.game.world.hero.forms.*
 
 class Hero(
-  parent: Entity, world: World): Entity(parent, world) {
+  context: Context, body: Body, size: Vector2): Entity(context, body, size) {
 
-  // MARK: EntityBase
+  // MARK: Entity
   override val name = "Hero"
-  override val size = Vector2(1.0f, 1.0f)
 
   // MARK: Properties
-  lateinit var form: Form
+  var form: Form = SingleJumpForm(context()); private set
 
   // MARK: Behavior
   override fun start() {
     super.start()
-    transitionToForm(SpearForm(context()))
+    didUpdateForm()
   }
 
   override fun update(delta: Float) {
@@ -41,13 +40,17 @@ class Hero(
 
   // MARK: Forms
   fun selectForm() {
-    body.fixtureList.forEach { body.destroyFixture(it) }
-    form.destroy()
-    transitionToForm(createRandomForm())
+    willUpdateForm()
+    form = createRandomForm()
+    didUpdateForm()
   }
 
-  private fun transitionToForm(newForm: Form) {
-    form = newForm
+  private fun willUpdateForm() {
+    body.fixtureList.forEach { body.destroyFixture(it) }
+    form.destroy()
+  }
+
+  private fun didUpdateForm() {
     form.defineFixtures(size)
     form.start()
   }
@@ -61,20 +64,24 @@ class Hero(
     }
   }
 
-  private fun context(): State.Context {
-    return State.Context(body, world)
+  class Factory(context: Context): Entity.Factory(context) {
+    private val size = Vector2(1.0f, 1.0f)
+
+    // MARK: Output
+    fun entity() = Hero(context, body(), size)
+
+    // MARK: Body
+    override fun defineBody(): BodyDef {
+      val body = super.defineBody()
+      body.type = BodyType.DynamicBody
+      body.fixedRotation = true
+      body.position.set(transform(
+        x = (parent!!.size.x - size.x) / 2,
+        y = 5.0f
+      ))
+
+      return body
+    }
   }
 
-  // MARK: Body
-  override fun defineBody(): BodyDef {
-    val body = super.defineBody()
-    body.type = BodyType.DynamicBody
-    body.fixedRotation = true
-    body.position.set(transform(
-      x = (parent!!.size.x - size.x) / 2,
-      y = 5.0f
-    ))
-
-    return body
-  }
 }

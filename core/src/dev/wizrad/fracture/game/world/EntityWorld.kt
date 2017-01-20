@@ -4,6 +4,8 @@ import dev.wizrad.fracture.game.components.controls.Controls
 import dev.wizrad.fracture.game.components.projection.Projection
 import dev.wizrad.fracture.game.components.projection.Projections
 import dev.wizrad.fracture.game.world.components.contact.ContactGraph
+import dev.wizrad.fracture.game.world.core.Context
+import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.core.World
 import dev.wizrad.fracture.game.world.level.Level
 import dev.wizrad.fracture.game.world.support.Physics
@@ -17,7 +19,7 @@ class EntityWorld: World {
   override val contact = ContactGraph()
 
   // MARK: Children
-  val level = Level(world = this)
+  val level = Level.Factory(Context(this, null)).entity()
 
   // MARK: Properties
   /** accumulates frame time to determine when to run fixed-step physics simulation */

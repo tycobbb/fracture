@@ -6,12 +6,12 @@ import dev.wizrad.fracture.support.className
 import dev.wizrad.fracture.support.debug
 
 open class StateMachine(
-  initialState: State): Behavior() {
+  initialState: State = State.Stopped()): Behavior() {
 
   // MARK: Properties
-  var state: State = initialState
+  var state: State = initialState; protected set
 
-  // MARK: Lifecycle
+  // MARK: Behavior
   override fun start() {
     super.start()
     state.start()

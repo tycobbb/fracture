@@ -3,20 +3,20 @@ package dev.wizrad.fracture.game.world.hero.forms
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.FixtureDef
 import com.badlogic.gdx.physics.box2d.PolygonShape
-import dev.wizrad.fracture.game.world.components.contact.ContactInfo
 import dev.wizrad.fracture.game.world.components.contact.ContactInfo.Orientation
 import dev.wizrad.fracture.game.world.components.contact.ContactType
 import dev.wizrad.fracture.game.world.components.statemachine.State
+import dev.wizrad.fracture.game.world.core.Context
+import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.support.Tag
 import dev.wizrad.fracture.support.debug
 
-class SingleJumpForm(
-  context: State.Context): Form(initialState = Standing(context)) {
-
-  // MARK: Properties
-  private val body = context.body
-
+class SingleJumpForm(context: Context): Form(context) {
   // MARK: Form
+  override fun initialState(): State {
+    return Standing(context)
+  }
+
   override fun defineFixtures(size: Vector2) {
     // create fixtures
     val square = PolygonShape()
@@ -35,19 +35,19 @@ class SingleJumpForm(
   }
 
   // MARK: States
-  class Standing(context: Context): State(context) {
+  class Standing(context: Context): FormState(context) {
     private val runMagnitude = 30.0f
 
     override fun update(delta: Float) {
       super.update(delta)
 
       // apply running movement
-      val force = Vector2()
-      if (world.controls.left.isPressed) {
+      val force = scratch1.setZero()
+      if (controls.left.isPressed) {
         force.x -= runMagnitude
       }
 
-      if (world.controls.right.isPressed) {
+      if (controls.right.isPressed) {
         force.x += runMagnitude
       }
 
@@ -55,7 +55,7 @@ class SingleJumpForm(
     }
 
     override fun nextState(): State? {
-      if (world.controls.jump.isPressedUnique && canJump()) {
+      if (controls.jump.isPressedUnique && canJump()) {
         return Windup(context)
       }
 
@@ -64,23 +64,23 @@ class SingleJumpForm(
 
     private fun canJump(): Boolean {
       assert(body.fixtureList.size != 0) { "body must have at least one fixture" }
-      return world.contact.oriented(body.fixtureList.first(), Orientation.Bottom)
+      return contact.oriented(body.fixtureList.first(), Orientation.Bottom)
     }
   }
 
-  class Windup(context: Context): State(context) {
+  class Windup(context: Context): FormState(context) {
     private val frameLength = 4
 
     override fun nextState(): State? {
       if (frame >= frameLength) {
-        return JumpStart(context, isShort = !world.controls.jump.isPressed)
+        return JumpStart(context, isShort = !controls.jump.isPressed)
       }
 
       return null
     }
   }
 
-  class JumpStart(context: Context, isShort: Boolean): State(context) {
+  class JumpStart(context: Context, isShort: Boolean): FormState(context) {
     private val frameLength = 3
     private val magnitude = if (isShort) 15.0f else 30.0f
 
@@ -95,19 +95,19 @@ class SingleJumpForm(
     }
   }
 
-  class Jumping(context: Context): State(context) {
+  class Jumping(context: Context): FormState(context) {
     private val driftMagnitude = 20.0f
 
     override fun update(delta: Float) {
       super.update(delta)
 
       // apply directional influence
-      val force = Vector2()
-      if (world.controls.left.isPressed) {
+      val force = scratch1.setZero()
+      if (controls.left.isPressed) {
         force.x -= driftMagnitude
       }
 
-      if (world.controls.right.isPressed) {
+      if (controls.right.isPressed) {
         force.x += driftMagnitude
       }
 
@@ -120,16 +120,16 @@ class SingleJumpForm(
 
     private fun didLand(): Boolean {
       assert(body.fixtureList.size != 0) { "body must have at least one fixture" }
-      return world.contact.oriented(body.fixtureList.first(), Orientation.Bottom)
+      return contact.oriented(body.fixtureList.first(), Orientation.Bottom)
     }
   }
 
-  class Landing(context: Context): State(context) {
+  class Landing(context: Context): FormState(context) {
     private val frameLength = 3
 
     override fun start() {
       super.start()
-      world.controls.jump.requireUniquePress()
+      controls.jump.requireUniquePress()
     }
 
     override fun nextState(): State? {

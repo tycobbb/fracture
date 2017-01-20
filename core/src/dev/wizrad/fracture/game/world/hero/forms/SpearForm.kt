@@ -6,17 +6,14 @@ import com.badlogic.gdx.physics.box2d.PolygonShape
 import dev.wizrad.fracture.game.world.components.contact.ContactInfo.Orientation
 import dev.wizrad.fracture.game.world.components.contact.ContactType
 import dev.wizrad.fracture.game.world.components.statemachine.State
+import dev.wizrad.fracture.game.world.core.Context
+import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.support.applyImpulseToCenter
 import dev.wizrad.fracture.game.world.support.cancelMomentum
 import dev.wizrad.fracture.support.Tag
 import dev.wizrad.fracture.support.debug
 
-class SpearForm(
-  context: State.Context): Form(initialState = Standing(context, Orientation.Bottom)) {
-
-  // MARK: Properties
-  private val body = context.body
-
+class SpearForm(context: Context): Form(context) {
   // MARK: Behavior
   override fun start() {
     super.start()
@@ -29,6 +26,10 @@ class SpearForm(
   }
 
   // MARK: Form
+  override fun initialState(): State {
+    return Standing(context, Orientation.Bottom)
+  }
+
   override fun defineFixtures(size: Vector2) {
     // create fixtures
     val square = PolygonShape()
@@ -52,13 +53,13 @@ class SpearForm(
   // MARK: States
   class Standing(
     context: Context,
-    private val orientation: Orientation): State(context) {
+    private val orientation: Orientation): FormState(context) {
 
     override fun start() {
       super.start()
 
-      world.controls.left.requireUniquePress()
-      world.controls.right.requireUniquePress()
+      controls.left.requireUniquePress()
+      controls.right.requireUniquePress()
     }
 
     override fun nextState(): State? {
@@ -71,8 +72,8 @@ class SpearForm(
     }
 
     private fun inputDirection(): Direction {
-      val leftPressed = world.controls.left.isPressedUnique
-      val rightPressed = world.controls.right.isPressedUnique
+      val leftPressed = controls.left.isPressedUnique
+      val rightPressed = controls.right.isPressedUnique
 
       return when {
         leftPressed && !rightPressed -> Direction.Left
@@ -85,7 +86,7 @@ class SpearForm(
   class Prepare(
     context: Context,
     private val orientation: Orientation,
-    private val direction: Direction): State(context) {
+    private val direction: Direction): FormState(context) {
 
     private val frameLength = 20
     private val velocityMagnitude = if (direction == Direction.Left) -2.0f else 2.0f
@@ -127,8 +128,8 @@ class SpearForm(
     }
 
     private fun inputDirection(): Direction {
-      val leftPressed = world.controls.left.isPressed
-      val rightPressed = world.controls.right.isPressed
+      val leftPressed = controls.left.isPressed
+      val rightPressed = controls.right.isPressed
 
       return when {
         leftPressed && !rightPressed -> Direction.Left
@@ -141,20 +142,20 @@ class SpearForm(
   class Ready(
     context: Context,
     val orientation: Orientation,
-    val direction: Direction): State(context) {
+    val direction: Direction): FormState(context) {
 
     override fun start() {
       super.start()
 
-      world.controls.left.requireUniquePress()
-      world.controls.right.requireUniquePress()
+      controls.left.requireUniquePress()
+      controls.right.requireUniquePress()
 
       // cancel all momentum
       body.cancelMomentum()
     }
 
     override fun nextState(): State? {
-      if (world.controls.jump.isPressedUnique) {
+      if (controls.jump.isPressedUnique) {
         return Windup(context, orientation, direction)
       }
 
@@ -168,8 +169,8 @@ class SpearForm(
     }
 
     private fun inputDirection(): Direction {
-      val leftPressed = world.controls.left.isPressedUnique
-      val rightPressed = world.controls.right.isPressedUnique
+      val leftPressed = controls.left.isPressedUnique
+      val rightPressed = controls.right.isPressedUnique
 
       return when {
         leftPressed && !rightPressed -> Direction.Left
@@ -182,13 +183,13 @@ class SpearForm(
   class Windup(
     context: Context,
     val orientation: Orientation,
-    val direction: Direction): State(context) {
+    val direction: Direction): FormState(context) {
 
     private val frameLength = 4
 
     override fun nextState(): State? {
       if (frame >= frameLength) {
-        val isShort = !world.controls.jump.isPressed
+        val isShort = !controls.jump.isPressed
         return JumpStart(context, orientation, direction, isShort)
       }
 
@@ -200,7 +201,7 @@ class SpearForm(
     context: Context,
     val orientation: Orientation,
     direction: Direction,
-    isShort: Boolean): State(context) {
+    isShort: Boolean): FormState(context) {
 
     private val frameLength = 3
     private val magnitude = if (isShort) 15.0f else 20.0f
@@ -225,7 +226,7 @@ class SpearForm(
     }
   }
 
-  class Jumping(context: Context): State(context) {
+  class Jumping(context: Context): FormState(context) {
     override fun nextState(): State? {
       val orientation = landingOrientation()
       return if (orientation != null) Landing(context, orientation) else null
@@ -233,11 +234,11 @@ class SpearForm(
 
     private fun landingOrientation(): Orientation? {
       assert(body.fixtureList.size != 0) { "body must have at least one fixture" }
-      return world.contact.first(body.fixtureList.first())?.orientation
+      return contact.first(body.fixtureList.first())?.orientation
     }
   }
 
-  class Landing(context: Context, val orientation: Orientation): State(context) {
+  class Landing(context: Context, val orientation: Orientation): FormState(context) {
     private val frameLength = 3
 
     override fun start() {
@@ -246,7 +247,7 @@ class SpearForm(
       body.gravityScale = 0.0f
       body.cancelMomentum()
 
-      world.controls.jump.requireUniquePress()
+      controls.jump.requireUniquePress()
     }
 
     override fun nextState(): State? {

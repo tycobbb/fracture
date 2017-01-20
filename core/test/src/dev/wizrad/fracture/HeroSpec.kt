@@ -9,10 +9,6 @@ import org.jetbrains.spek.api.Spek
 class HeroSpec: Spek({
   var hero: Hero? = null
 
-  beforeEach {
-    hero = Hero()
-  }
-
   describe("a hero") {
     it("exists") {
       assertThat(hero, `is`(notNullValue()))
