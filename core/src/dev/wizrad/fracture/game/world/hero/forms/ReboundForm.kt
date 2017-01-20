@@ -1,24 +1,20 @@
 package dev.wizrad.fracture.game.world.hero.forms
 
 import com.badlogic.gdx.math.Vector2
-import com.badlogic.gdx.physics.box2d.Body
 import com.badlogic.gdx.physics.box2d.FixtureDef
 import com.badlogic.gdx.physics.box2d.PolygonShape
 import dev.wizrad.fracture.game.world.components.contact.ContactType
 import dev.wizrad.fracture.game.world.components.statemachine.State
-import dev.wizrad.fracture.game.world.components.statemachine.StateMachine
-import dev.wizrad.fracture.game.world.core.World
 import dev.wizrad.fracture.support.Tag
 import dev.wizrad.fracture.support.debug
 
 class ReboundForm(
-  private val body: Body,
-  private val world: World): Form {
+  context: State.Context): Form(initialState = Standing(context)) {
+
+  // MARK: Properties
+  private val body = context.body
 
   // MARK: Form
-  override val type = Form.Type.Rebound
-  override val behavior = StateMachine(initialState = standing())
-
   override fun defineFixtures(size: Vector2) {
     // create fixtures
     val square = PolygonShape()
@@ -38,18 +34,20 @@ class ReboundForm(
   }
 
   // MARK: States
-  private fun standing(): State = object: State() {
+  class Standing(context: Context): State(context) {
+    private val runMagnitude = 30.0f
+
     override fun update(delta: Float) {
       super.update(delta)
 
       // apply running movement
       val force = Vector2()
       if (world.controls.left.isPressed) {
-        force.x -= 30.0f
+        force.x -= runMagnitude
       }
 
       if (world.controls.right.isPressed) {
-        force.x += 30.0f
+        force.x += runMagnitude
       }
 
       body.applyForceToCenter(force, true)
@@ -57,7 +55,7 @@ class ReboundForm(
 
     override fun nextState(): State? {
       if (world.controls.jump.isPressedUnique && canJump()) {
-        return windup()
+        return Windup(context)
       }
 
       return null
@@ -69,19 +67,21 @@ class ReboundForm(
     }
   }
 
-  private fun windup(): State = object: State() {
+  class Windup(context: Context): State(context) {
+    private val frameLength = 4
+
     override fun nextState(): State? {
-      val frameLength = 4
       if (frame >= frameLength) {
-        return jumpStart(isShort = !world.controls.jump.isPressed)
+        return JumpStart(context, isShort = !world.controls.jump.isPressed)
       }
 
       return null
     }
   }
 
-  private fun jumpStart(isShort: Boolean): State = object: State() {
+  class JumpStart(context: Context, val isShort: Boolean): State(context) {
     private val magnitude = if (isShort) 10.0f else 15.0f
+    private val frameLength = 3
 
     override fun start() {
       debug(Tag.World, "$this applying impulse: $magnitude")
@@ -90,14 +90,16 @@ class ReboundForm(
     }
 
     override fun nextState(): State? {
-      val frameLength = 3
-      return if (frame >= frameLength) jumping() else null
+      return if (frame >= frameLength) Jumping(context) else null
     }
   }
 
-  private fun jumping(): State = object: State() {
-    private var canFastfall = false
+  class Jumping(context: Context): State(context) {
+    private val driftMagnitude = 20.0f
+    private val restingFrameLength = 2
+
     private var restingFrames = 0
+    private var canFastfall = false
 
     override fun update(delta: Float) {
       super.update(delta)
@@ -105,11 +107,11 @@ class ReboundForm(
       // apply directional influence
       val force = Vector2()
       if (world.controls.left.isPressed) {
-        force.x -= 20.0f
+        force.x -= driftMagnitude
       }
 
       if (world.controls.right.isPressed) {
-        force.x += 20.0f
+        force.x += driftMagnitude
       }
 
       body.applyForceToCenter(force, true)
@@ -130,11 +132,10 @@ class ReboundForm(
 
     override fun nextState(): State? {
       // land once we've rested for enough frames (no longer bouncing)
-      val restingFrameLength = 2
       if (restingFrames >= restingFrameLength) {
-        return landing()
+        return Landing(context)
       } else if (world.controls.jump.isPressedUnique && canFastfall) {
-        return fastfalling()
+        return FastFalling(context)
       }
 
       return null
@@ -150,11 +151,13 @@ class ReboundForm(
     }
   }
 
-  private fun fastfalling(): State = object: State() {
+  class FastFalling(context: Context): State(context) {
+    private val magnitude = 50.0f
+    private val driftMagnitude = 20.0f
+
     override fun start() {
       debug(Tag.World, "$this applying fastfall impulse")
       val center = body.worldCenter
-      val magnitude = 50.0f
       body.applyLinearImpulse(0.0f, magnitude, center.x, center.y, true)
     }
 
@@ -164,11 +167,11 @@ class ReboundForm(
       // apply directional influence
       val force = Vector2()
       if (world.controls.left.isPressed) {
-        force.x -= 20.0f
+        force.x -= driftMagnitude
       }
 
       if (world.controls.right.isPressed) {
-        force.x += 20.0f
+        force.x += driftMagnitude
       }
 
       body.applyForceToCenter(force, true)
@@ -176,7 +179,7 @@ class ReboundForm(
 
     override fun nextState(): State? {
       // return to jumping at first contact to allow for re-falling
-      return if (didLand()) jumping() else null
+      return if (didLand()) Jumping(context) else null
     }
 
     private fun didLand(): Boolean {
@@ -185,15 +188,16 @@ class ReboundForm(
     }
   }
 
-  private fun landing(): State = object: State() {
+  class Landing(context: Context): State(context) {
+    private val frameLength = 3
+
     override fun start() {
       super.start()
       world.controls.jump.requireUniquePress()
     }
 
     override fun nextState(): State? {
-      val frameLength = 3
-      return if (frame >= frameLength) standing() else null
+      return if (frame >= frameLength) Standing(context) else null
     }
   }
 }

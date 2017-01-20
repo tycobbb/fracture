@@ -5,7 +5,7 @@ import dev.wizrad.fracture.support.Tag
 import dev.wizrad.fracture.support.className
 import dev.wizrad.fracture.support.debug
 
-class StateMachine(
+open class StateMachine(
   initialState: State): Behavior() {
 
   // MARK: Properties

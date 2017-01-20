@@ -5,7 +5,10 @@ import dev.wizrad.fracture.game.renderer.core.Renderer
 import dev.wizrad.fracture.game.renderer.support.draw
 import dev.wizrad.fracture.game.renderer.support.pause
 import dev.wizrad.fracture.game.world.hero.Hero
-import dev.wizrad.fracture.game.world.hero.forms.Form
+import dev.wizrad.fracture.game.world.hero.forms.ReboundForm
+import dev.wizrad.fracture.game.world.hero.forms.SingleJumpForm
+import dev.wizrad.fracture.game.world.hero.forms.SpaceJumpForm
+import dev.wizrad.fracture.game.world.hero.forms.SpearForm
 
 fun Renderer.render(hero: Hero, delta: Float) {
   batch.pause {
@@ -20,10 +23,12 @@ fun Renderer.render(hero: Hero, delta: Float) {
 }
 
 private fun getColor(hero: Hero): Color {
-  return when (hero.form.type) {
-    Form.Type.SingleJump -> Color.WHITE
-    Form.Type.SpaceJump -> Color.FIREBRICK
-    Form.Type.Rebound -> Color.CHARTREUSE
-    Form.Type.Spear -> Color.CORAL
+  val form = hero.form
+  return when (form) {
+    is SingleJumpForm -> Color.WHITE
+    is SpaceJumpForm -> Color.FIREBRICK
+    is ReboundForm -> Color.CHARTREUSE
+    is SpearForm -> Color.CORAL
+    else -> error("attempted to render unknown form: $form")
   }
 }

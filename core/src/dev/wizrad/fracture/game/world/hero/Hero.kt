@@ -3,6 +3,7 @@ package dev.wizrad.fracture.game.world.hero
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType
+import dev.wizrad.fracture.game.world.components.statemachine.State
 import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.core.World
 import dev.wizrad.fracture.game.world.hero.forms.*
@@ -20,22 +21,22 @@ class Hero(
   // MARK: Behavior
   override fun start() {
     super.start()
-    selectForm(SpearForm(body, world))
+    selectForm(SpearForm(context()))
   }
 
   override fun update(delta: Float) {
     super.update(delta)
-    form.behavior.update(delta)
+    form.update(delta)
   }
 
   override fun step(delta: Float) {
     super.step(delta)
-    form.behavior.step(delta)
+    form.step(delta)
   }
 
   override fun destroy() {
     super.destroy()
-    form.behavior.destroy()
+    form.destroy()
   }
 
   // MARK: Forms
@@ -44,15 +45,19 @@ class Hero(
 
     this.form = form ?: createRandomForm()
     this.form.defineFixtures(size)
-    this.form.behavior.start()
+    this.form.start()
   }
 
   private fun createRandomForm(): Form {
     return when (form) {
-      is SingleJumpForm -> SpaceJumpForm(body, world)
-      is SpaceJumpForm -> ReboundForm(body, world)
-      else -> SingleJumpForm(body, world)
+      is SingleJumpForm -> SpaceJumpForm(context())
+      is SpaceJumpForm -> ReboundForm(context())
+      else -> SingleJumpForm(context())
     }
+  }
+
+  private fun context(): State.Context {
+    return State.Context(body, world)
   }
 
   // MARK: Body

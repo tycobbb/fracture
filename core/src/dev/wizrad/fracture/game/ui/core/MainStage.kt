@@ -46,6 +46,6 @@ class MainStage(
   }
 
   private fun updateFormButtonText(model: Hero) {
-    formButton.setText("${model.form.type}")
+    formButton.setText(model.form.javaClass.simpleName)
   }
 }
