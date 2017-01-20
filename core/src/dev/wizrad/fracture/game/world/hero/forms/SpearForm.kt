@@ -3,6 +3,7 @@ package dev.wizrad.fracture.game.world.hero.forms
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.FixtureDef
 import com.badlogic.gdx.physics.box2d.PolygonShape
+import dev.wizrad.fracture.game.world.components.contact.ContactInfo
 import dev.wizrad.fracture.game.world.components.contact.ContactType
 import dev.wizrad.fracture.game.world.components.statemachine.State
 import dev.wizrad.fracture.support.Tag
@@ -32,8 +33,9 @@ class SpearForm(
     square.dispose()
   }
 
-  // MARK: Direction
+  // MARK: Direction / Orientation
   enum class Direction { None, Left, Right }
+  enum class Orientation { Bottom, Left, Top, Right }
 
   // MARK: States
   class Standing(context: Context): State(context) {
@@ -181,12 +183,13 @@ class SpearForm(
 
   class Jumping(context: Context): State(context) {
     override fun nextState(): State? {
-      return if (didLand()) Landing(context) else null
+      return if (landingOrientation() != null) Landing(context) else null
     }
 
-    private fun didLand(): Boolean {
+    private fun landingOrientation(): Orientation? {
       assert(body.fixtureList.size != 0) { "body must have at least one fixture" }
-      return world.contact.exists(body.fixtureList.first(), ContactType.Ground)
+      val hasContact = world.contact.exists(body.fixtureList.first(), ContactInfo.Bottom)
+      return if (hasContact) Orientation.Bottom else null
     }
   }
 
@@ -195,7 +198,13 @@ class SpearForm(
 
     override fun start() {
       super.start()
+
       world.controls.jump.requireUniquePress()
+
+      // cancel horizontal momentum on land
+      val velocity = body.linearVelocity
+      velocity.x = 0.0f
+      body.linearVelocity = velocity
     }
 
     override fun nextState(): State? {

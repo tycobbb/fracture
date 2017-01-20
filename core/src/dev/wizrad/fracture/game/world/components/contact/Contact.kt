@@ -2,21 +2,22 @@ package dev.wizrad.fracture.game.world.components.contact
 
 import com.badlogic.gdx.physics.box2d.*
 import com.badlogic.gdx.physics.box2d.Contact
+import dev.wizrad.fracture.support.extensions.findMapped
 
 
-class Contact : ContactListener {
+class Contact: ContactListener {
   // MARK: Properties
   private val map = mutableMapOf<Fixture, MutableSet<Fixture>>()
   private val defaultSet = { mutableSetOf<Fixture>() }
 
   // MARK: Lookup
-  fun exists(fixture: Fixture): Boolean {
-    return contactSet(fixture).size != 0
+  fun orientation(fixture: Fixture): ContactInfo? {
+    return contactSet(fixture).findMapped { it.userData as? ContactInfo }
   }
 
-  fun exists(fixture: Fixture, type: ContactType): Boolean {
+  fun exists(fixture: Fixture, orientation: ContactInfo): Boolean {
     return contactSet(fixture)
-      .find { (it.filterData.categoryBits and type) != 0 } != null
+      .find { (it.userData as? ContactInfo) == orientation } != null
   }
 
   private fun contactSet(fixture: Fixture): MutableSet<Fixture> {

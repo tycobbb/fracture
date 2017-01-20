@@ -3,6 +3,7 @@ package dev.wizrad.fracture.game.world.hero.forms
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.FixtureDef
 import com.badlogic.gdx.physics.box2d.PolygonShape
+import dev.wizrad.fracture.game.world.components.contact.ContactInfo
 import dev.wizrad.fracture.game.world.components.contact.ContactType
 import dev.wizrad.fracture.game.world.components.statemachine.State
 import dev.wizrad.fracture.support.Tag
@@ -62,7 +63,7 @@ class SingleJumpForm(
 
     private fun canJump(): Boolean {
       assert(body.fixtureList.size != 0) { "body must have at least one fixture" }
-      return world.contact.exists(body.fixtureList.first(), ContactType.Ground)
+      return world.contact.exists(body.fixtureList.first(), ContactInfo.Bottom)
     }
   }
 
@@ -118,7 +119,7 @@ class SingleJumpForm(
 
     private fun didLand(): Boolean {
       assert(body.fixtureList.size != 0) { "body must have at least one fixture" }
-      return world.contact.exists(body.fixtureList.first(), ContactType.Ground)
+      return world.contact.exists(body.fixtureList.first(), ContactInfo.Bottom)
     }
   }
 

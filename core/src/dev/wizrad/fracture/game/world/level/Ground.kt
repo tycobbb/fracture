@@ -6,6 +6,7 @@ import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType
 import com.badlogic.gdx.physics.box2d.FixtureDef
 import com.badlogic.gdx.physics.box2d.PolygonShape
+import dev.wizrad.fracture.game.world.components.contact.ContactInfo
 import dev.wizrad.fracture.game.world.components.contact.ContactType
 import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.core.World
@@ -40,13 +41,14 @@ class Ground(
     val height = size.y / 2
     rect.setAsBox(width, height, scratch.set(width, height), 0.0f)
 
-    val fixture = FixtureDef()
-    fixture.shape = rect
-    fixture.density = 1.0f
-    fixture.friction = 0.2f
-    fixture.filter.categoryBits = ContactType.Ground.bits
+    val fixtureDef = FixtureDef()
+    fixtureDef.shape = rect
+    fixtureDef.density = 1.0f
+    fixtureDef.friction = 0.2f
+    fixtureDef.filter.categoryBits = ContactType.Wall.bits
 
-    body.createFixture(fixture)
+    val fixture = body.createFixture(fixtureDef)
+    fixture.userData = ContactInfo.Bottom
 
     // dispose shapes
     rect.dispose()

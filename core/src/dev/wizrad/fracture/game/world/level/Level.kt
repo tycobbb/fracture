@@ -5,6 +5,7 @@ import com.badlogic.gdx.physics.box2d.Body
 import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.physics.box2d.FixtureDef
 import com.badlogic.gdx.physics.box2d.PolygonShape
+import dev.wizrad.fracture.game.world.components.contact.ContactInfo
 import dev.wizrad.fracture.game.world.components.contact.ContactType
 import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.core.EntitySequence
@@ -38,42 +39,32 @@ class Level(
   override fun defineFixtures(body: Body) {
     super.defineFixtures(body)
 
+    fun buildWall(rect: PolygonShape, orientation: ContactInfo) {
+      val wallDef = FixtureDef()
+      wallDef.shape = rect
+      wallDef.density = 1.0f
+      wallDef.friction = 0.2f
+      wallDef.filter.categoryBits = ContactType.Wall.bits
+
+      val wall = body.createFixture(wallDef)
+      wall.userData = orientation
+    }
+
     val width = size.x / 2
     val height = size.y / 2
     val rect = PolygonShape()
 
     // create left wall
     rect.setAsBox(0.0f, height, scratch.set(-1.0f, height), 0.0f)
-
-    val leftWall = FixtureDef()
-    leftWall.shape = rect
-    leftWall.density = 1.0f
-    leftWall.friction = 0.2f
-    leftWall.filter.categoryBits = ContactType.Wall.bits
-
-    body.createFixture(leftWall)
+    buildWall(rect, orientation = ContactInfo.Left)
 
     // create left wall
     rect.setAsBox(0.0f, height, scratch.set(size.x, height), 0.0f)
-
-    val rightWall = FixtureDef()
-    rightWall.shape = rect
-    rightWall.density = 1.0f
-    rightWall.friction = 0.2f
-    rightWall.filter.categoryBits = ContactType.Wall.bits
-
-    body.createFixture(rightWall)
+    buildWall(rect, orientation = ContactInfo.Right)
 
     // create ceiling
     rect.setAsBox(width, 0.0f, scratch.set(width, -1.0f), 0.0f)
-
-    val ceiling = FixtureDef()
-    ceiling.shape = rect
-    ceiling.density = 1.0f
-    ceiling.friction = 0.2f
-    ceiling.filter.categoryBits = ContactType.Ceiling.bits
-
-    body.createFixture(ceiling)
+    buildWall(rect, orientation = ContactInfo.Top)
 
     // dispose shapes
     rect.dispose()
