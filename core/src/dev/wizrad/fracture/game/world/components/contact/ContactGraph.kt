@@ -2,6 +2,8 @@ package dev.wizrad.fracture.game.world.components.contact
 
 import com.badlogic.gdx.physics.box2d.*
 import dev.wizrad.fracture.game.world.support.contactInfo
+import dev.wizrad.fracture.support.Tag
+import dev.wizrad.fracture.support.debug
 import dev.wizrad.fracture.support.extensions.findMapped
 
 class ContactGraph: ContactListener {
@@ -11,6 +13,7 @@ class ContactGraph: ContactListener {
 
   // MARK: Lookup
   fun first(fixture: Fixture): ContactInfo? {
+    debug(Tag.World, "contacts: ${contactSet(fixture).map { it.contactInfo?.orientation }}")
     return contactSet(fixture).findMapped { it.contactInfo }
   }
 

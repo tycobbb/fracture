@@ -5,6 +5,7 @@ import com.badlogic.gdx.graphics.GL20
 import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer
 import com.badlogic.gdx.math.Vector2
+import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
 import dev.wizrad.fracture.game.core.Renderable
 import dev.wizrad.fracture.game.renderer.render
 import dev.wizrad.fracture.game.world.EntityWorld
@@ -16,9 +17,11 @@ class Renderer constructor(
   // MARK: Renderers
   val batch = SpriteBatch()
   val shaper = ShapeRenderer()
+  val debugr = Box2DDebugRenderer()
 
   // MARK: Properties
   private val _scale = Vector2(32.0f, 32.0f)
+  private val debugEnabled = true
 
   // MARK: Lifecycle
   override fun update(delta: Float) {
@@ -26,19 +29,28 @@ class Renderer constructor(
     Gdx.gl.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-    // reposition the camera
-    camera.update(delta)
     batch.projectionMatrix = camera.combined
     shaper.projectionMatrix = camera.combined
 
     // render the world
     batch.begin()
     render(world, delta)
+    render(debugr)
     batch.end()
   }
 
   override fun resize(width: Int, height: Int) {
     camera.resize(width, height)
+  }
+
+  private fun render(debugRenderer: Box2DDebugRenderer) {
+    if (!debugEnabled) {
+      return
+    }
+
+    val debugMatrix = camera.combined.cpy()
+    debugMatrix.scale(_scale.x, _scale.y, 1.0f)
+    debugRenderer.render(world.physics, debugMatrix)
   }
 
   // MARK: Scale

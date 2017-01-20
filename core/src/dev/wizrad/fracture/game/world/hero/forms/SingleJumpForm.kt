@@ -7,7 +7,6 @@ import dev.wizrad.fracture.game.world.components.contact.ContactInfo.Orientation
 import dev.wizrad.fracture.game.world.components.contact.ContactType
 import dev.wizrad.fracture.game.world.components.statemachine.State
 import dev.wizrad.fracture.game.world.core.Context
-import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.support.Tag
 import dev.wizrad.fracture.support.debug
 
@@ -19,8 +18,10 @@ class SingleJumpForm(context: Context): Form(context) {
 
   override fun defineFixtures(size: Vector2) {
     // create fixtures
+    val width = size.x / 2
+    val height = size.y / 2
     val square = PolygonShape()
-    square.setAsBox(size.x, size.y)
+    square.setAsBox(width, height, Vector2(width, height), 0.0f)
 
     val fixture = FixtureDef()
     fixture.shape = square
@@ -36,7 +37,7 @@ class SingleJumpForm(context: Context): Form(context) {
 
   // MARK: States
   class Standing(context: Context): FormState(context) {
-    private val runMagnitude = 30.0f
+    private val runMagnitude = 7.5f
 
     override fun update(delta: Float) {
       super.update(delta)
@@ -82,7 +83,7 @@ class SingleJumpForm(context: Context): Form(context) {
 
   class JumpStart(context: Context, isShort: Boolean): FormState(context) {
     private val frameLength = 3
-    private val magnitude = if (isShort) 15.0f else 30.0f
+    private val magnitude = if (isShort) 3.75f else 12.5f
 
     override fun start() {
       debug(Tag.World, "$this applying impulse: $magnitude")
@@ -96,7 +97,7 @@ class SingleJumpForm(context: Context): Form(context) {
   }
 
   class Jumping(context: Context): FormState(context) {
-    private val driftMagnitude = 20.0f
+    private val driftMagnitude = 5.0f
 
     override fun update(delta: Float) {
       super.update(delta)

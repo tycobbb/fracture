@@ -77,28 +77,41 @@ abstract class Entity(
   }
 
   // MARK: Factory
-  abstract class Factory(val context: Context) {
+  abstract class Factory<in T>(val context: Context) {
     // MARK: Properties
     val parent: Entity? get() = context.parent
 
     // MARK: Body
-    protected fun body(): Body {
-      val body = context.world.physics.createBody(defineBody())
-      defineFixtures(body)
+    protected fun body(options: T): Body {
+      val definition = defineBody(options)
+      val body = context.world.physics.createBody(definition)
+      defineFixtures(body, options)
       return body
     }
 
-    protected open fun defineBody(): BodyDef {
+    protected open fun defineBody(options: T): BodyDef {
       return BodyDef()
     }
 
-    protected open fun defineFixtures(body: Body) {
+    protected open fun defineFixtures(body: Body, options: T) {
     }
 
     // MARK: Geometry
     /** Transforms a vector from the local -> absolute coordinate space */
+    protected fun transform(point: Vector2): Vector2 {
+      return scratch.set(point).add(parent?.center)
+    }
+
+    /** Transforms a vector from the local -> absolute coordinate space */
     protected fun transform(x: Float, y: Float): Vector2 {
       return scratch.set(x, y).add(parent?.center)
+    }
+  }
+
+  abstract class UnitFactory(context: Context): Factory<Unit>(context) {
+    // MARK: Body
+    protected fun body(): Body {
+      return body(options = Unit)
     }
   }
 }

@@ -20,56 +20,70 @@ class Level(
   override val name = "Level"
 
   // MARK: Children
-  val hero = Hero.Factory(context()).entity()
   val ground = Ground.Factory(context()).entity()
+
+  val wall = Wall.Factory(context()).entity(
+    center = Vector2(
+      (size.x - Wall.size.x) / 2 + 1.0f,
+      (size.y - ground.size.y - Wall.size.y)
+    )
+  )
+
+  val hero = Hero.Factory(context()).entity(
+    center = Vector2(
+      (size.x - Hero.size.x) / 2,
+      (size.y - ground.size.y - Hero.size.y)
+    )
+  )
 
   // MARK: Lifecycle
   override fun children(sequence: EntitySequence) =
     super.children(sequence)
       .then(ground)
+      .then(wall)
       .then(hero)
 
-  class Factory(context: Context): Entity.Factory(context) {
+  class Factory(context: Context): Entity.UnitFactory(context) {
     private val size: Vector2 = Vector2(10.0f, 17.75f)
 
     // MARK: Output
     fun entity() = Level(context, body(), size)
 
     // MARK: Body
-    override fun defineBody(): BodyDef {
-      val body = super.defineBody()
+    override fun defineBody(options: Unit): BodyDef {
+      val body = super.defineBody(options)
       body.type = BodyDef.BodyType.StaticBody
       body.position.set(size.cpy().scl(0.5f))
       return body
     }
 
-    override fun defineFixtures(body: Body) {
-      super.defineFixtures(body)
+    override fun defineFixtures(body: Body, options: Unit) {
+      super.defineFixtures(body, options)
 
       val width = size.x / 2
       val height = size.y / 2
       val rect = PolygonShape()
 
       // create left wall
-      rect.setAsBox(0.0f, height, scratch.set(-1.0f, height), 0.0f)
+      rect.setAsBox(0.0f, height, scratch.set(0.0f, height), 0.0f)
       val leftWall = body.createFixture(defineWall(rect))
-      leftWall.orientation = Orientation.Left
+      leftWall.orientation = Orientation.Right
 
       // create right wall
       rect.setAsBox(0.0f, height, scratch.set(size.x, height), 0.0f)
       val rightWall = body.createFixture(defineWall(rect))
-      rightWall.orientation = Orientation.Right
+      rightWall.orientation = Orientation.Left
 
       // create ceiling
-      rect.setAsBox(width, 0.0f, scratch.set(width, -1.0f), 0.0f)
+      rect.setAsBox(width, 0.0f, scratch.set(width, 0.0f), 0.0f)
       val ceiling = body.createFixture(defineWall(rect))
-      ceiling.orientation = Orientation.Top
+      ceiling.orientation = Orientation.Bottom
 
       // dispose shapes
       rect.dispose()
     }
 
-    fun defineWall(rect: PolygonShape): FixtureDef {
+    private fun defineWall(rect: PolygonShape): FixtureDef {
       val wallDef = FixtureDef()
       wallDef.shape = rect
       wallDef.density = 1.0f

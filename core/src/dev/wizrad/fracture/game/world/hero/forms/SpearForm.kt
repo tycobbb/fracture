@@ -7,7 +7,6 @@ import dev.wizrad.fracture.game.world.components.contact.ContactInfo.Orientation
 import dev.wizrad.fracture.game.world.components.contact.ContactType
 import dev.wizrad.fracture.game.world.components.statemachine.State
 import dev.wizrad.fracture.game.world.core.Context
-import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.support.applyImpulseToCenter
 import dev.wizrad.fracture.game.world.support.cancelMomentum
 import dev.wizrad.fracture.support.Tag
@@ -27,13 +26,15 @@ class SpearForm(context: Context): Form(context) {
 
   // MARK: Form
   override fun initialState(): State {
-    return Standing(context, Orientation.Bottom)
+    return Standing(context, Orientation.Top)
   }
 
   override fun defineFixtures(size: Vector2) {
     // create fixtures
+    val width = size.x / 2
+    val height = size.y / 2
     val square = PolygonShape()
-    square.setAsBox(size.x, size.y)
+    square.setAsBox(width, height, Vector2(width, height), 0.0f)
 
     val fixture = FixtureDef()
     fixture.shape = square
@@ -112,8 +113,8 @@ class SpearForm(context: Context): Form(context) {
       // update correct velocity component according to orientation
       when (orientation) {
         Orientation.Bottom, Orientation.Top -> body.setLinearVelocity(velocity, 0.0f)
-        Orientation.Left -> body.setLinearVelocity(0.0f, velocity)
-        Orientation.Right -> body.setLinearVelocity(0.0f, -velocity)
+        Orientation.Left -> body.setLinearVelocity(0.0f, -velocity)
+        Orientation.Right -> body.setLinearVelocity(0.0f, velocity)
       }
     }
 
@@ -204,7 +205,7 @@ class SpearForm(context: Context): Form(context) {
     isShort: Boolean): FormState(context) {
 
     private val frameLength = 3
-    private val magnitude = if (isShort) 15.0f else 20.0f
+    private val magnitude = if (isShort) 3.75f else 5.0f
     private val cartesianDirection = if (direction == Direction.Left) -1.0f else 1.0f
 
     override fun start() {
@@ -214,10 +215,10 @@ class SpearForm(context: Context): Form(context) {
       debug(Tag.World, "$this applying impulse: $magnitude")
       val directedImpulse = cartesianDirection * magnitude
       when (orientation) {
-        Orientation.Top -> body.applyImpulseToCenter(directedImpulse, magnitude)
-        Orientation.Bottom -> body.applyImpulseToCenter(directedImpulse, -magnitude)
-        Orientation.Left -> body.applyImpulseToCenter(magnitude, directedImpulse)
-        Orientation.Right -> body.applyImpulseToCenter(-magnitude, -directedImpulse)
+        Orientation.Top -> body.applyImpulseToCenter(directedImpulse, -magnitude)
+        Orientation.Bottom -> body.applyImpulseToCenter(directedImpulse, magnitude)
+        Orientation.Left -> body.applyImpulseToCenter(-magnitude, -directedImpulse)
+        Orientation.Right -> body.applyImpulseToCenter(magnitude, directedImpulse)
       }
     }
 

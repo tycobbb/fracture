@@ -16,19 +16,19 @@ import dev.wizrad.fracture.game.world.support.contactInfo
 class Ground(
   context: Context, body: Body, size: Vector2): Entity(context, body, size) {
 
-  // MARK: EntityBase
+  // MARK: Entity
   override val name = "Ground"
 
   // MARK: Lifecycle
-  class Factory(context: Context): Entity.Factory(context) {
+  class Factory(context: Context): Entity.UnitFactory(context) {
     private val size = Vector2(parent!!.size.x, 4.0f)
 
     // MARK: Output
     fun entity() = Ground(context, body(), size)
 
     // MARK: Body
-    override fun defineBody(): BodyDef {
-      val body = super.defineBody()
+    override fun defineBody(options: Unit): BodyDef {
+      val body = super.defineBody(options)
       body.type = BodyType.StaticBody
       body.position.set(transform(
         x = 0.0f,
@@ -38,8 +38,8 @@ class Ground(
       return body
     }
 
-    override fun defineFixtures(body: Body) {
-      super.defineFixtures(body)
+    override fun defineFixtures(body: Body, options: Unit) {
+      super.defineFixtures(body, options)
 
       // create fixtures
       val rect = PolygonShape()
@@ -54,7 +54,7 @@ class Ground(
       fixtureDef.filter.categoryBits = ContactType.Wall.bits
 
       val fixture = body.createFixture(fixtureDef)
-      fixture.contactInfo = ContactInfo(Orientation.Bottom)
+      fixture.contactInfo = ContactInfo(Orientation.Top)
 
       // dispose shapes
       rect.dispose()

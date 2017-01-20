@@ -18,8 +18,10 @@ class ReboundForm(context: Context): Form(context) {
 
   override fun defineFixtures(size: Vector2) {
     // create fixtures
+    val width = size.x / 2
+    val height = size.y / 2
     val square = PolygonShape()
-    square.setAsBox(size.x, size.y)
+    square.setAsBox(width, height, Vector2(width, height), 0.0f)
 
     val fixture = FixtureDef()
     fixture.shape = square
@@ -35,7 +37,7 @@ class ReboundForm(context: Context): Form(context) {
 
   // MARK: States
   class Standing(context: Context): FormState(context) {
-    private val runMagnitude = 30.0f
+    private val runMagnitude = 7.5f
 
     override fun update(delta: Float) {
       super.update(delta)
@@ -79,8 +81,8 @@ class ReboundForm(context: Context): Form(context) {
     }
   }
 
-  class JumpStart(context: Context, val isShort: Boolean): FormState(context) {
-    private val magnitude = if (isShort) 10.0f else 15.0f
+  class JumpStart(context: Context, isShort: Boolean): FormState(context) {
+    private val magnitude = if (isShort) 3.75f else 5.0f
     private val frameLength = 3
 
     override fun start() {
@@ -95,7 +97,7 @@ class ReboundForm(context: Context): Form(context) {
   }
 
   class Jumping(context: Context): FormState(context) {
-    private val driftMagnitude = 20.0f
+    private val driftMagnitude = 5.0f
     private val restingFrameLength = 2
 
     private var restingFrames = 0
@@ -152,8 +154,8 @@ class ReboundForm(context: Context): Form(context) {
   }
 
   class FastFalling(context: Context): FormState(context) {
-    private val magnitude = 50.0f
-    private val driftMagnitude = 20.0f
+    private val magnitude = 12.5f
+    private val driftMagnitude = 5.0f
 
     override fun start() {
       debug(Tag.World, "$this applying fastfall impulse")

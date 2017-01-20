@@ -19,5 +19,6 @@ fun Renderer.render(level: Level, delta: Float) {
   }
 
   render(level.ground, delta)
+  render(level.wall, delta)
   render(level.hero, delta)
 }

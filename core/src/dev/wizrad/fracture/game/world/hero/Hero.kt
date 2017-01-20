@@ -64,24 +64,23 @@ class Hero(
     }
   }
 
-  class Factory(context: Context): Entity.Factory(context) {
-    private val size = Vector2(1.0f, 1.0f)
+  class Factory(context: Context): Entity.Factory<Factory.Args>(context) {
+    data class Args(val center: Vector2)
 
     // MARK: Output
-    fun entity() = Hero(context, body(), size)
+    fun entity(center: Vector2) = Hero(context, body(Args(center)), size)
 
     // MARK: Body
-    override fun defineBody(): BodyDef {
-      val body = super.defineBody()
+    override fun defineBody(options: Args): BodyDef {
+      val body = super.defineBody(options)
       body.type = BodyType.DynamicBody
       body.fixedRotation = true
-      body.position.set(transform(
-        x = (parent!!.size.x - size.x) / 2,
-        y = 5.0f
-      ))
-
+      body.position.set(transform(options.center))
       return body
     }
   }
 
+  companion object {
+    val size = Vector2(1.0f, 1.0f)
+  }
 }
