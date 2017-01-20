@@ -1,7 +1,8 @@
-package dev.wizrad.fracture.game.renderer
+package dev.wizrad.fracture.game.renderer.level
 
 import com.badlogic.gdx.graphics.Color
 import dev.wizrad.fracture.game.renderer.core.Renderer
+import dev.wizrad.fracture.game.renderer.hero.render
 import dev.wizrad.fracture.game.renderer.support.draw
 import dev.wizrad.fracture.game.renderer.support.pause
 import dev.wizrad.fracture.game.world.level.Level

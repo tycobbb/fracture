@@ -1,4 +1,4 @@
-package dev.wizrad.fracture.game.renderer
+package dev.wizrad.fracture.game.renderer.level
 
 import com.badlogic.gdx.graphics.Color
 import dev.wizrad.fracture.game.renderer.core.Renderer
