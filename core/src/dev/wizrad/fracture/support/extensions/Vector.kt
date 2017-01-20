@@ -26,6 +26,12 @@ fun Vector2.invert(): Vector2 {
   return this
 }
 
+fun Vector2.negate(): Vector2 {
+  x = -x
+  y = -y
+  return this
+}
+
 // MARK: Geometry
 fun Vector2.angleTo(other: Vector2): Float {
   return atan2(other.y - y, other.x - x)

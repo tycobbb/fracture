@@ -5,12 +5,14 @@ import com.badlogic.gdx.physics.box2d.Body
 import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.physics.box2d.FixtureDef
 import com.badlogic.gdx.physics.box2d.PolygonShape
+import dev.wizrad.fracture.game.world.components.contact.ContactInfo
 import dev.wizrad.fracture.game.world.components.contact.ContactInfo.Orientation
 import dev.wizrad.fracture.game.world.components.contact.ContactType
 import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.core.EntitySequence
 import dev.wizrad.fracture.game.world.core.World
 import dev.wizrad.fracture.game.world.hero.Hero
+import dev.wizrad.fracture.game.world.support.contactInfo
 
 class Level(
   world: World): Entity(parent = null, world = world) {
@@ -47,7 +49,7 @@ class Level(
       wallDef.filter.categoryBits = ContactType.Wall.bits
 
       val wall = body.createFixture(wallDef)
-      wall.userData = orientation
+      wall.contactInfo = ContactInfo(orientation)
     }
 
     val width = size.x / 2

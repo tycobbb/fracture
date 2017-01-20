@@ -1,18 +1,18 @@
 package dev.wizrad.fracture.game.world
 
-import com.badlogic.gdx.math.Vector2
 import dev.wizrad.fracture.game.components.controls.Controls
 import dev.wizrad.fracture.game.components.projection.Projection
 import dev.wizrad.fracture.game.components.projection.Projections
 import dev.wizrad.fracture.game.world.components.contact.ContactGraph
 import dev.wizrad.fracture.game.world.core.World
 import dev.wizrad.fracture.game.world.level.Level
+import dev.wizrad.fracture.game.world.support.Physics
 import dev.wizrad.fracture.support.extensions.min
 import com.badlogic.gdx.physics.box2d.World as PhysicsWorld
 
 class EntityWorld: World {
   // MARK: World
-  override val physics = com.badlogic.gdx.physics.box2d.World(gravity, true)
+  override val physics = PhysicsWorld(Physics.gravity, true)
   override val controls = Controls()
   override val contact = ContactGraph()
 
@@ -50,6 +50,5 @@ class EntityWorld: World {
   companion object {
     // MARK: Constants
     private val timestep = 1.0f / 60.0f
-    private val gravity = Vector2(0.0f, 9.81f)
   }
 }

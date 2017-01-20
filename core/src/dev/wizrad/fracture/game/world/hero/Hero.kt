@@ -21,7 +21,7 @@ class Hero(
   // MARK: Behavior
   override fun start() {
     super.start()
-    selectForm(SpearForm(context()))
+    transitionToForm(SpearForm(context()))
   }
 
   override fun update(delta: Float) {
@@ -40,18 +40,23 @@ class Hero(
   }
 
   // MARK: Forms
-  fun selectForm(form: Form? = null) {
+  fun selectForm() {
     body.fixtureList.forEach { body.destroyFixture(it) }
+    form.destroy()
+    transitionToForm(createRandomForm())
+  }
 
-    this.form = form ?: createRandomForm()
-    this.form.defineFixtures(size)
-    this.form.start()
+  private fun transitionToForm(newForm: Form) {
+    form = newForm
+    form.defineFixtures(size)
+    form.start()
   }
 
   private fun createRandomForm(): Form {
     return when (form) {
       is SingleJumpForm -> SpaceJumpForm(context())
       is SpaceJumpForm -> ReboundForm(context())
+      is ReboundForm -> SpearForm(context())
       else -> SingleJumpForm(context())
     }
   }
@@ -67,7 +72,7 @@ class Hero(
     body.fixedRotation = true
     body.position.set(transform(
       x = (parent!!.size.x - size.x) / 2,
-      y = 0.0f
+      y = 5.0f
     ))
 
     return body

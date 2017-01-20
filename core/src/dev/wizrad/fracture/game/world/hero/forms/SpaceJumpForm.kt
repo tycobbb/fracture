@@ -67,7 +67,7 @@ class SpaceJumpForm(
 
     private fun canJump(): Boolean {
       assert(body.fixtureList.size != 0) { "body must have at least one fixture" }
-      return world.contact.exists(body.fixtureList.first(), Orientation.Bottom)
+      return world.contact.oriented(body.fixtureList.first(), Orientation.Bottom)
     }
   }
 
@@ -135,7 +135,7 @@ class SpaceJumpForm(
 
     private fun didLand(): Boolean {
       assert(body.fixtureList.size != 0) { "body must have at least one fixture" }
-      return world.contact.exists(body.fixtureList.first(), Orientation.Bottom)
+      return world.contact.oriented(body.fixtureList.first(), Orientation.Bottom)
     }
 
     private fun isFalling(): Boolean {
@@ -230,7 +230,7 @@ class SpaceJumpForm(
 
     private fun didLand(): Boolean {
       assert(body.fixtureList.size != 0) { "body must have at least one fixture" }
-      return world.contact.exists(body.fixtureList.first(), Orientation.Bottom)
+      return world.contact.oriented(body.fixtureList.first(), Orientation.Bottom)
     }
   }
 

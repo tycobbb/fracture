@@ -64,7 +64,7 @@ class SingleJumpForm(
 
     private fun canJump(): Boolean {
       assert(body.fixtureList.size != 0) { "body must have at least one fixture" }
-      return world.contact.exists(body.fixtureList.first(), Orientation.Bottom)
+      return world.contact.oriented(body.fixtureList.first(), Orientation.Bottom)
     }
   }
 
@@ -120,7 +120,7 @@ class SingleJumpForm(
 
     private fun didLand(): Boolean {
       assert(body.fixtureList.size != 0) { "body must have at least one fixture" }
-      return world.contact.exists(body.fixtureList.first(), Orientation.Bottom)
+      return world.contact.oriented(body.fixtureList.first(), Orientation.Bottom)
     }
   }
 

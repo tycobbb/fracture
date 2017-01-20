@@ -1,5 +1,6 @@
 package dev.wizrad.fracture.game.world.components.statemachine
 
+import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
 import dev.wizrad.fracture.game.world.core.Behavior
 import dev.wizrad.fracture.game.world.core.World
@@ -32,4 +33,9 @@ abstract class State(
     val body: Body,
     val world: World
   )
+
+  // MARK: Companion
+  companion object {
+    val scratch = Vector2()
+  }
 }

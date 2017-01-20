@@ -6,14 +6,27 @@ import com.badlogic.gdx.physics.box2d.PolygonShape
 import dev.wizrad.fracture.game.world.components.contact.ContactInfo.Orientation
 import dev.wizrad.fracture.game.world.components.contact.ContactType
 import dev.wizrad.fracture.game.world.components.statemachine.State
+import dev.wizrad.fracture.game.world.support.applyImpulseToCenter
+import dev.wizrad.fracture.game.world.support.cancelMomentum
 import dev.wizrad.fracture.support.Tag
 import dev.wizrad.fracture.support.debug
 
 class SpearForm(
-  context: State.Context): Form(initialState = Standing(context)) {
+  context: State.Context): Form(initialState = Standing(context, Orientation.Bottom)) {
 
   // MARK: Properties
   private val body = context.body
+
+  // MARK: Behavior
+  override fun start() {
+    super.start()
+    body.gravityScale = 0.0f
+  }
+
+  override fun destroy() {
+    body.gravityScale = 1.0f
+    super.destroy()
+  }
 
   // MARK: Form
   override fun defineFixtures(size: Vector2) {
@@ -37,9 +50,13 @@ class SpearForm(
   enum class Direction { None, Left, Right }
 
   // MARK: States
-  class Standing(context: Context): State(context) {
+  class Standing(
+    context: Context,
+    private val orientation: Orientation): State(context) {
+
     override fun start() {
       super.start()
+
       world.controls.left.requireUniquePress()
       world.controls.right.requireUniquePress()
     }
@@ -49,7 +66,7 @@ class SpearForm(
 
       return when (direction) {
         Direction.None -> null
-        else -> Prepare(context, direction)
+        else -> Prepare(context, orientation, direction)
       }
     }
 
@@ -65,38 +82,45 @@ class SpearForm(
     }
   }
 
-  class Prepare(context: Context, val direction: Direction): State(context) {
-    private val frameLength = 20
-    private val velocityX = if (direction == Direction.Left) -2.0f else 2.0f
+  class Prepare(
+    context: Context,
+    private val orientation: Orientation,
+    private val direction: Direction): State(context) {
 
+    private val frameLength = 20
+    private val velocityMagnitude = if (direction == Direction.Left) -2.0f else 2.0f
     private var preparedFrames: Int = 0
 
     override fun update(delta: Float) {
       super.update(delta)
 
-      val velocity = body.linearVelocity
+      var velocity = 0.0f
       val nextDirection = inputDirection()
 
+      // move towards ready state if same direction, backwards otherwise
       if (nextDirection == direction) {
         preparedFrames++
-        velocity.x = velocityX
+        velocity = velocityMagnitude
       } else if (nextDirection != Direction.None) {
         preparedFrames--
         if (preparedFrames >= 0) {
-          velocity.x = -velocityX
+          velocity = -velocityMagnitude
         }
-      } else {
-        velocity.x = 0.0f
       }
 
-      body.linearVelocity = velocity
+      // update correct velocity component according to orientation
+      when (orientation) {
+        Orientation.Bottom, Orientation.Top -> body.setLinearVelocity(velocity, 0.0f)
+        Orientation.Left -> body.setLinearVelocity(0.0f, velocity)
+        Orientation.Right -> body.setLinearVelocity(0.0f, -velocity)
+      }
     }
 
     override fun nextState(): State? {
       if (preparedFrames >= frameLength) {
-        return Ready(context, direction)
+        return Ready(context, orientation, direction)
       } else if (preparedFrames < 0) {
-        return Standing(context)
+        return Standing(context, orientation)
       } else {
         return null
       }
@@ -114,27 +138,30 @@ class SpearForm(
     }
   }
 
-  class Ready(context: Context, val direction: Direction): State(context) {
+  class Ready(
+    context: Context,
+    val orientation: Orientation,
+    val direction: Direction): State(context) {
+
     override fun start() {
       super.start()
 
       world.controls.left.requireUniquePress()
       world.controls.right.requireUniquePress()
 
-      // cancel horizontal momentum
-      val velocity = body.linearVelocity
-      velocity.x = 0.0f
-      body.linearVelocity = velocity
+      // cancel all momentum
+      body.cancelMomentum()
     }
 
     override fun nextState(): State? {
       if (world.controls.jump.isPressedUnique) {
-        return Windup(context, direction)
+        return Windup(context, orientation, direction)
       }
 
-      val nextDirection = inputDirection()
-      if (nextDirection != Direction.None && nextDirection != direction) {
-        return Standing(context)
+      inputDirection().let {
+        if (it != Direction.None && it != direction) {
+          return Standing(context, orientation)
+        }
       }
 
       return null
@@ -152,27 +179,45 @@ class SpearForm(
     }
   }
 
-  class Windup(context: Context, val direction: Direction): State(context) {
+  class Windup(
+    context: Context,
+    val orientation: Orientation,
+    val direction: Direction): State(context) {
+
     private val frameLength = 4
 
     override fun nextState(): State? {
       if (frame >= frameLength) {
-        return JumpStart(context, direction, isShort = !world.controls.jump.isPressed)
+        val isShort = !world.controls.jump.isPressed
+        return JumpStart(context, orientation, direction, isShort)
       }
 
       return null
     }
   }
 
-  class JumpStart(context: Context, direction: Direction, isShort: Boolean): State(context) {
+  class JumpStart(
+    context: Context,
+    val orientation: Orientation,
+    direction: Direction,
+    isShort: Boolean): State(context) {
+
     private val frameLength = 3
     private val magnitude = if (isShort) 15.0f else 20.0f
     private val cartesianDirection = if (direction == Direction.Left) -1.0f else 1.0f
 
     override fun start() {
+      body.gravityScale = 1.0f
+
+      // apply impulse according to orientation
       debug(Tag.World, "$this applying impulse: $magnitude")
-      val center = body.worldCenter
-      body.applyLinearImpulse(cartesianDirection * magnitude, -magnitude, center.x, center.y, true)
+      val directedImpulse = cartesianDirection * magnitude
+      when (orientation) {
+        Orientation.Top -> body.applyImpulseToCenter(directedImpulse, magnitude)
+        Orientation.Bottom -> body.applyImpulseToCenter(directedImpulse, -magnitude)
+        Orientation.Left -> body.applyImpulseToCenter(magnitude, directedImpulse)
+        Orientation.Right -> body.applyImpulseToCenter(-magnitude, -directedImpulse)
+      }
     }
 
     override fun nextState(): State? {
@@ -182,32 +227,30 @@ class SpearForm(
 
   class Jumping(context: Context): State(context) {
     override fun nextState(): State? {
-      return if (landingOrientation() != null) Landing(context) else null
+      val orientation = landingOrientation()
+      return if (orientation != null) Landing(context, orientation) else null
     }
 
     private fun landingOrientation(): Orientation? {
       assert(body.fixtureList.size != 0) { "body must have at least one fixture" }
-      val hasContact = world.contact.exists(body.fixtureList.first(), Orientation.Bottom)
-      return if (hasContact) Orientation.Bottom else null
+      return world.contact.first(body.fixtureList.first())?.orientation
     }
   }
 
-  class Landing(context: Context): State(context) {
+  class Landing(context: Context, val orientation: Orientation): State(context) {
     private val frameLength = 3
 
     override fun start() {
       super.start()
 
-      world.controls.jump.requireUniquePress()
+      body.gravityScale = 0.0f
+      body.cancelMomentum()
 
-      // cancel horizontal momentum on land
-      val velocity = body.linearVelocity
-      velocity.x = 0.0f
-      body.linearVelocity = velocity
+      world.controls.jump.requireUniquePress()
     }
 
     override fun nextState(): State? {
-      return if (frame >= frameLength) Standing(context) else null
+      return if (frame >= frameLength) Standing(context, orientation) else null
     }
   }
 }
