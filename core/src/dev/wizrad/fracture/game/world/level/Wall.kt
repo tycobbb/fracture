@@ -35,9 +35,6 @@ class Wall(
     override fun defineFixtures(body: Body, options: Args) {
       super.defineFixtures(body, options)
 
-      val edge = 0.05f
-      val edge2 = edge * 2
-
       val width = size.x / 2
       val height = size.y / 2
       val rect = PolygonShape()
@@ -47,15 +44,17 @@ class Wall(
       val wallDef = defineBox(rect)
       wallDef.density = 1.0f
       wallDef.friction = 0.2f
-
       body.createFixture(wallDef)
 
+      // create sensors
+      val edge = 0.05f
+
       // create left sensor
-      rect.setAsBox(edge, height - edge2, scratch.set(edge, height), 0.0f)
+      rect.setAsBox(edge, height - edge * 2, scratch.set(edge, height), 0.0f)
       createSensor(body, rect, orientation = Orientation.Left)
 
       // create right sensor
-      rect.setAsBox(edge, height - edge2, scratch.set(size.x - edge, height), 0.0f)
+      rect.setAsBox(edge, height - edge * 2, scratch.set(size.x - edge, height), 0.0f)
       createSensor(body, rect, orientation = Orientation.Right)
 
       // create top sensor

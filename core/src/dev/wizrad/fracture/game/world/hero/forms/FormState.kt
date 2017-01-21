@@ -64,7 +64,7 @@ abstract class FormState(
 
   protected fun contactOrientation(): ContactInfo.Orientation? {
     assert(body.fixtureList.size != 0) { "body must have at least one fixture" }
-    return contact.first(body.fixtureList.first())?.orientation
+    return contact.closestSurface(body.fixtureList.first())?.orientation
   }
 
   protected fun currentDirection(): Direction {

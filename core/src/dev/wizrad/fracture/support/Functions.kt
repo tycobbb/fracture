@@ -23,11 +23,3 @@ inline fun <T> T?.bind(crossinline action: (T) -> Unit) {
     action(this)
   }
 }
-
-inline fun <T, U> T?.map(crossinline transform: (T) -> U): U? {
-  if(this != null) {
-    return transform(this)
-  } else {
-    return null
-  }
-}
