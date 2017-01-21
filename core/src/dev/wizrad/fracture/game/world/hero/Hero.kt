@@ -15,7 +15,7 @@ class Hero(
   override val name = "Hero"
 
   // MARK: Properties
-  var form: Form = SingleJumpForm(context()); private set
+  var form: Form = PhasingForm(context()); private set
 
   // MARK: Behavior
   override fun start() {
@@ -60,6 +60,7 @@ class Hero(
       is SingleJumpForm -> SpaceJumpForm(context())
       is SpaceJumpForm -> ReboundForm(context())
       is ReboundForm -> SpearForm(context())
+      is SpearForm -> PhasingForm(context())
       else -> SingleJumpForm(context())
     }
   }
