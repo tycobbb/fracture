@@ -8,7 +8,6 @@ import dev.wizrad.fracture.game.world.components.contact.ContactType
 import dev.wizrad.fracture.game.world.components.statemachine.State
 import dev.wizrad.fracture.game.world.core.Context
 import dev.wizrad.fracture.game.world.support.applyImpulseToCenter
-import dev.wizrad.fracture.game.world.support.cancelMomentum
 import dev.wizrad.fracture.support.Tag
 import dev.wizrad.fracture.support.debug
 
@@ -48,49 +47,33 @@ class SpearForm(context: Context): Form(context) {
     square.dispose()
   }
 
-  // MARK: Direction / Orientation
-  enum class Direction { None, Left, Right }
-
   // MARK: States
-  class Standing(
-    context: Context,
-    private val orientation: Orientation): FormState(context) {
+  class Standing(context: Context, orientation: Orientation): FormState(context) {
+    private val orientation = orientation
 
     override fun start() {
       super.start()
-
-      controls.left.requireUniquePress()
-      controls.right.requireUniquePress()
+      requireUniqueMovement()
     }
 
     override fun nextState(): State? {
-      val direction = inputDirection()
+      val direction = inputDirection(isUniqueInput = true)
 
       return when (direction) {
         Direction.None -> null
         else -> Prepare(context, orientation, direction)
       }
     }
-
-    private fun inputDirection(): Direction {
-      val leftPressed = controls.left.isPressedUnique
-      val rightPressed = controls.right.isPressedUnique
-
-      return when {
-        leftPressed && !rightPressed -> Direction.Left
-        !leftPressed && rightPressed -> Direction.Right
-        else -> Direction.None
-      }
-    }
   }
 
   class Prepare(
-    context: Context,
-    private val orientation: Orientation,
-    private val direction: Direction): FormState(context) {
+    context: Context, orientation: Orientation, direction: Direction): FormState(context) {
+
+    private val orientation = orientation
+    private val direction = direction
 
     private val frameLength = 20
-    private val velocityMagnitude = if (direction == Direction.Left) -2.0f else 2.0f
+    private val velocityMag = if (direction == Direction.Left) -2.0f else 2.0f
     private var preparedFrames: Int = 0
 
     override fun update(delta: Float) {
@@ -102,11 +85,11 @@ class SpearForm(context: Context): Form(context) {
       // move towards ready state if same direction, backwards otherwise
       if (nextDirection == direction) {
         preparedFrames++
-        velocity = velocityMagnitude
+        velocity = velocityMag
       } else if (nextDirection != Direction.None) {
         preparedFrames--
         if (preparedFrames >= 0) {
-          velocity = -velocityMagnitude
+          velocity = -velocityMag
         }
       }
 
@@ -127,32 +110,18 @@ class SpearForm(context: Context): Form(context) {
         return null
       }
     }
-
-    private fun inputDirection(): Direction {
-      val leftPressed = controls.left.isPressed
-      val rightPressed = controls.right.isPressed
-
-      return when {
-        leftPressed && !rightPressed -> Direction.Left
-        !leftPressed && rightPressed -> Direction.Right
-        else -> Direction.None
-      }
-    }
   }
 
   class Ready(
-    context: Context,
-    val orientation: Orientation,
-    val direction: Direction): FormState(context) {
+    context: Context, orientation: Orientation, direction: Direction): FormState(context) {
+
+    private val orientation = orientation
+    private val direction = direction
 
     override fun start() {
       super.start()
-
-      controls.left.requireUniquePress()
-      controls.right.requireUniquePress()
-
-      // cancel all momentum
-      body.cancelMomentum()
+      requireUniqueMovement()
+      cancelMomentum()
     }
 
     override fun nextState(): State? {
@@ -160,38 +129,25 @@ class SpearForm(context: Context): Form(context) {
         return Windup(context, orientation, direction)
       }
 
-      inputDirection().let {
-        if (it != Direction.None && it != direction) {
-          return Standing(context, orientation)
-        }
+      val inputDirection = inputDirection(isUniqueInput =  true)
+      if (inputDirection != Direction.None && inputDirection != direction) {
+        return Standing(context, orientation)
       }
 
       return null
     }
-
-    private fun inputDirection(): Direction {
-      val leftPressed = controls.left.isPressedUnique
-      val rightPressed = controls.right.isPressedUnique
-
-      return when {
-        leftPressed && !rightPressed -> Direction.Left
-        !leftPressed && rightPressed -> Direction.Right
-        else -> Direction.None
-      }
-    }
   }
 
   class Windup(
-    context: Context,
-    val orientation: Orientation,
-    val direction: Direction): FormState(context) {
+    context: Context, orientation: Orientation, direction: Direction): FormState(context) {
 
+    private val orientation = orientation
+    private val direction = direction
     private val frameLength = 4
 
     override fun nextState(): State? {
       if (frame >= frameLength) {
-        val isShort = !controls.jump.isPressed
-        return JumpStart(context, orientation, direction, isShort)
+        return JumpStart(context, orientation, direction, !controls.jump.isPressed)
       }
 
       return null
@@ -199,26 +155,26 @@ class SpearForm(context: Context): Form(context) {
   }
 
   class JumpStart(
-    context: Context,
-    val orientation: Orientation,
-    direction: Direction,
-    isShort: Boolean): FormState(context) {
+    context: Context, orientation: Orientation, direction: Direction, isShort: Boolean): FormState(context) {
 
+    private val orientation = orientation
     private val frameLength = 3
-    private val magnitude = if (isShort) 3.75f else 5.0f
+    private val jumpMag = if (isShort) 3.75f else 5.0f
     private val cartesianDirection = if (direction == Direction.Left) -1.0f else 1.0f
 
     override fun start() {
+      super.start()
+
       body.gravityScale = 1.0f
 
       // apply impulse according to orientation
-      debug(Tag.World, "$this applying impulse: $magnitude")
-      val directedImpulse = cartesianDirection * magnitude
+      debug(Tag.World, "$this applying impulse: $jumpMag")
+      val directedImpulse = cartesianDirection * jumpMag
       when (orientation) {
-        Orientation.Top -> body.applyImpulseToCenter(directedImpulse, -magnitude)
-        Orientation.Bottom -> body.applyImpulseToCenter(directedImpulse, magnitude)
-        Orientation.Left -> body.applyImpulseToCenter(-magnitude, -directedImpulse)
-        Orientation.Right -> body.applyImpulseToCenter(magnitude, directedImpulse)
+        Orientation.Top -> body.applyImpulseToCenter(directedImpulse, -jumpMag)
+        Orientation.Bottom -> body.applyImpulseToCenter(directedImpulse, jumpMag)
+        Orientation.Left -> body.applyImpulseToCenter(-jumpMag, -directedImpulse)
+        Orientation.Right -> body.applyImpulseToCenter(jumpMag, directedImpulse)
       }
     }
 
@@ -229,26 +185,21 @@ class SpearForm(context: Context): Form(context) {
 
   class Jumping(context: Context): FormState(context) {
     override fun nextState(): State? {
-      val orientation = landingOrientation()
+      val orientation = contactOrientation()
       return if (orientation != null) Landing(context, orientation) else null
-    }
-
-    private fun landingOrientation(): Orientation? {
-      assert(body.fixtureList.size != 0) { "body must have at least one fixture" }
-      return contact.first(body.fixtureList.first())?.orientation
     }
   }
 
-  class Landing(context: Context, val orientation: Orientation): FormState(context) {
+  class Landing(context: Context, orientation: Orientation): FormState(context) {
+    private val orientation = orientation
     private val frameLength = 3
 
     override fun start() {
       super.start()
 
       body.gravityScale = 0.0f
-      body.cancelMomentum()
-
-      controls.jump.requireUniquePress()
+      cancelMomentum()
+      requireUniqueJump()
     }
 
     override fun nextState(): State? {

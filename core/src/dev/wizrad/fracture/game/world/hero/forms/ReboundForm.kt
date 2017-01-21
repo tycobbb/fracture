@@ -3,12 +3,9 @@ package dev.wizrad.fracture.game.world.hero.forms
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.FixtureDef
 import com.badlogic.gdx.physics.box2d.PolygonShape
-import dev.wizrad.fracture.game.world.components.contact.ContactInfo.Orientation
 import dev.wizrad.fracture.game.world.components.contact.ContactType
 import dev.wizrad.fracture.game.world.components.statemachine.State
 import dev.wizrad.fracture.game.world.core.Context
-import dev.wizrad.fracture.support.Tag
-import dev.wizrad.fracture.support.debug
 
 class ReboundForm(context: Context): Form(context) {
   // MARK: Form
@@ -39,33 +36,17 @@ class ReboundForm(context: Context): Form(context) {
   class Standing(context: Context): FormState(context) {
     private val runMagnitude = 7.5f
 
-    override fun update(delta: Float) {
-      super.update(delta)
-
-      // apply running movement
-      val force = scratch1.setZero()
-      if (controls.left.isPressed) {
-        force.x -= runMagnitude
-      }
-
-      if (controls.right.isPressed) {
-        force.x += runMagnitude
-      }
-
-      body.applyForceToCenter(force, true)
+    override fun step(delta: Float) {
+      super.step(delta)
+      applyMovementForce(runMagnitude)
     }
 
     override fun nextState(): State? {
-      if (controls.jump.isPressedUnique && canJump()) {
+      if (controls.jump.isPressedUnique && isOnGround()) {
         return Windup(context)
       }
 
       return null
-    }
-
-    private fun canJump(): Boolean {
-      assert(body.fixtureList.size != 0) { "body must have at least one fixture" }
-      return contact.oriented(body.fixtureList.first(), Orientation.Bottom)
     }
   }
 
@@ -82,13 +63,12 @@ class ReboundForm(context: Context): Form(context) {
   }
 
   class JumpStart(context: Context, isShort: Boolean): FormState(context) {
-    private val magnitude = if (isShort) 3.75f else 5.0f
     private val frameLength = 3
+    private val jumpMagnitude = if (isShort) 3.75f else 5.0f
 
     override fun start() {
-      debug(Tag.World, "$this applying impulse: $magnitude")
-      val center = body.worldCenter
-      body.applyLinearImpulse(0.0f, -magnitude, center.x, center.y, true)
+      super.start()
+      applyJumpForce(jumpMagnitude)
     }
 
     override fun nextState(): State? {
@@ -97,35 +77,24 @@ class ReboundForm(context: Context): Form(context) {
   }
 
   class Jumping(context: Context): FormState(context) {
-    private val driftMagnitude = 5.0f
     private val restingFrameLength = 2
+    private val driftMagnitude = 5.0f
 
     private var restingFrames = 0
     private var canFastfall = false
 
-    override fun update(delta: Float) {
-      super.update(delta)
-
-      // apply directional influence
-      val force = scratch1.setZero()
-      if (controls.left.isPressed) {
-        force.x -= driftMagnitude
-      }
-
-      if (controls.right.isPressed) {
-        force.x += driftMagnitude
-      }
-
-      body.applyForceToCenter(force, true)
+    override fun step(delta: Float) {
+      super.step(delta)
+      applyMovementForce(driftMagnitude)
 
       // allow fastfalling any time after reaching the first jump's peak
       if (!canFastfall && isFalling()) {
         canFastfall = true
-        controls.jump.requireUniquePress()
+        requireUniqueJump()
       }
 
-      // if in contact with floor, increment resting frame count
-      if (isLanding()) {
+      // if in contact with ground, increment resting frame count
+      if (isOnGround()) {
         restingFrames++
       } else {
         restingFrames = 0
@@ -143,11 +112,6 @@ class ReboundForm(context: Context): Form(context) {
       return null
     }
 
-    private fun isLanding(): Boolean {
-      assert(body.fixtureList.size != 0) { "body must have at least one fixture" }
-      return contact.oriented(body.fixtureList.first(), Orientation.Bottom)
-    }
-
     private fun isFalling(): Boolean {
       return body.linearVelocity.y >= 0.0
     }
@@ -158,35 +122,18 @@ class ReboundForm(context: Context): Form(context) {
     private val driftMagnitude = 5.0f
 
     override fun start() {
-      debug(Tag.World, "$this applying fastfall impulse")
-      val center = body.worldCenter
-      body.applyLinearImpulse(0.0f, magnitude, center.x, center.y, true)
+      super.start()
+      applyFastfallImpulse(magnitude)
     }
 
-    override fun update(delta: Float) {
-      super.update(delta)
-
-      // apply directional influence
-      val force = Vector2()
-      if (controls.left.isPressed) {
-        force.x -= driftMagnitude
-      }
-
-      if (controls.right.isPressed) {
-        force.x += driftMagnitude
-      }
-
-      body.applyForceToCenter(force, true)
+    override fun step(delta: Float) {
+      super.step(delta)
+      applyMovementForce(driftMagnitude)
     }
 
     override fun nextState(): State? {
       // return to jumping at first contact to allow for re-falling
-      return if (didLand()) Jumping(context) else null
-    }
-
-    private fun didLand(): Boolean {
-      assert(body.fixtureList.size != 0) { "body must have at least one fixture" }
-      return contact.oriented(body.fixtureList.first(), Orientation.Bottom)
+      return if (isOnGround()) Jumping(context) else null
     }
   }
 
@@ -195,7 +142,7 @@ class ReboundForm(context: Context): Form(context) {
 
     override fun start() {
       super.start()
-      controls.jump.requireUniquePress()
+      requireUniqueJump()
     }
 
     override fun nextState(): State? {
