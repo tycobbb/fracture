@@ -10,13 +10,11 @@ import dev.wizrad.fracture.game.world.components.statemachine.State
 import dev.wizrad.fracture.game.world.core.Context
 import dev.wizrad.fracture.game.world.support.contactInfo
 import dev.wizrad.fracture.game.world.support.orientation
-import dev.wizrad.fracture.game.world.support.raycast
+import dev.wizrad.fracture.game.world.support.reduceRaycast
 import dev.wizrad.fracture.support.Tag
-import dev.wizrad.fracture.support.className
 import dev.wizrad.fracture.support.debug
 import dev.wizrad.fracture.support.extensions.Polar
 import dev.wizrad.fracture.support.extensions.angleTo
-import dev.wizrad.fracture.support.extensions.append
 import dev.wizrad.fracture.support.fmt
 
 class PhasingForm(context: Context): Form(context) {
@@ -43,51 +41,8 @@ class PhasingForm(context: Context): Form(context) {
   }
 
   // MARK: States
-  data class Target(
-    val fixture: Fixture,
-    val point: Vector2,
-    val fraction: Float) {
-
-    override fun toString(): String {
-      return "[$className fixture=[${fixture.className} o=${fixture.orientation}] p:${point.fmt()}]"
-    }
-  }
-
-  class Standing(context: Context): FormState(context) {
+  class Standing(context: Context): Phaseable(context) {
     private val runMag = 7.5f
-    var phaseTarget: Target? = null; private set
-
-    override fun update(delta: Float) {
-      super.update(delta)
-
-      if (controls.touch.isActive) {
-        val source = body.position
-        val destination = controls.touch.location
-
-        debug(Tag.World, "begin raycasting: $source to $destination")
-
-        // cast in reverse so that we can grab the outer edge
-        val intersections = mutableListOf<Target>()
-        physics.raycast(destination, source) { fixture, point, n, f ->
-          val contactInfo = fixture.contactInfo
-          if (contactInfo == null || !contactInfo.isPhaseable) {
-            return@raycast -1.0f
-          } else {
-            intersections.append(Target(fixture, point.cpy(), f))
-            return@raycast 1.0f
-          }
-        }
-
-        if (intersections.size != 0) {
-          // TODO: handle fixtures attached to multiple bodies
-          val intersection = intersections.reduce { memo, data ->
-            if (data.fraction < memo.fraction) data else memo
-          }
-
-          phaseTarget = intersection
-        }
-      }
-    }
 
     override fun step(delta: Float) {
       super.step(delta)
@@ -95,14 +50,11 @@ class PhasingForm(context: Context): Form(context) {
     }
 
     override fun nextState(): State? {
-      val target = phaseTarget
-      if (!controls.touch.isActive && target != null) {
-        return Phasing(context, target)
+      return if (canPhase()) {
+        phasing()
       } else if (controls.jump.isPressedUnique && isOnGround()) {
-        return Windup(context)
-      }
-
-      return null
+        Windup(context)
+      } else null
     }
   }
 
@@ -128,6 +80,23 @@ class PhasingForm(context: Context): Form(context) {
 
     override fun nextState(): State? {
       return if (frame >= frameLength) Jumping(context) else null
+    }
+  }
+
+  class Jumping(context: Context): Phaseable(context) {
+    private val driftMag = 5.0f
+
+    override fun step(delta: Float) {
+      super.step(delta)
+      applyMovementForce(driftMag)
+    }
+
+    override fun nextState(): State? {
+      return if (canPhase()) {
+        phasing()
+      } else if (isOnGround()) {
+        Landing(context)
+      } else null
     }
   }
 
@@ -168,19 +137,6 @@ class PhasingForm(context: Context): Form(context) {
     }
   }
 
-  class Jumping(context: Context): FormState(context) {
-    private val driftMag = 5.0f
-
-    override fun step(delta: Float) {
-      super.step(delta)
-      applyMovementForce(driftMag)
-    }
-
-    override fun nextState(): State? {
-      return if (isOnGround()) Landing(context) else null
-    }
-  }
-
   class Landing(context: Context): FormState(context) {
     private val frameLength = 3
 
@@ -193,4 +149,46 @@ class PhasingForm(context: Context): Form(context) {
       return if (frame >= frameLength) Standing(context) else null
     }
   }
+
+  // MARK: Phaseable
+  data class Target(
+    val fixture: Fixture, val point: Vector2, val fraction: Float
+  )
+
+  abstract class Phaseable(context: Context): FormState(context) {
+    var target: Target? = null; private set
+
+    override fun update(delta: Float) {
+      super.update(delta)
+
+      if (!controls.touch.isActive) {
+        return
+      }
+
+      val source = body.position
+      val dest = controls.touch.location
+
+      // cast in reverse so that we can grab the outer edge
+      // TODO: handle fixtures attached to multiple bodies
+      target = physics.reduceRaycast(dest, source) { memo, fixture, point, n, f ->
+        val contact = fixture.contactInfo
+        if (contact == null || !contact.isPhaseable) {
+          (-1.0f).to(memo)
+        } else if(memo == null || f < memo.fraction) {
+          1.0f.to(Target(fixture, point.cpy(), f))
+        } else {
+          1.0f.to(memo)
+        }
+      }
+    }
+
+    fun canPhase(): Boolean {
+      return !controls.touch.isActive && target != null
+    }
+
+    fun phasing(): Phasing {
+      return Phasing(context, target!!)
+    }
+  }
+
 }
