@@ -11,8 +11,8 @@ abstract class State: Behavior() {
   abstract fun nextState(): State?
 
   // MARK: Behavior
-  override fun update(delta: Float) {
-    super.update(delta)
+  override fun step(delta: Float) {
+    super.step(delta)
     frame++
   }
 

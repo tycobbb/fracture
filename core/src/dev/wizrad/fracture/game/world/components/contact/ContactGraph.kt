@@ -20,7 +20,7 @@ class ContactGraph: ContactListener, ContactFilter {
 
   fun oriented(fixture: Fixture, orientation: ContactInfo.Orientation): Boolean {
     return contactSet(fixture).any {
-      val contact = fixture.contactInfo
+      val contact = it.contactInfo
       if (contact != null && contact is ContactInfo.Surface) {
         return@any contact.orientation == orientation
       }

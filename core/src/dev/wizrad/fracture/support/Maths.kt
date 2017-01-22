@@ -16,6 +16,9 @@ val atan2d: (Double, Double) -> Double = Math::atan2
 val sqrt:  (Float)  -> Float  = { sqrtd(it.toDouble()).toFloat() }
 val sqrtd: (Double) -> Double = Math::sqrt
 
+val pow: (Float, Float) -> Float = { b, e -> powd(b.toDouble(), e.toDouble()).toFloat() }
+val powd: (Double, Double) -> Double = Math::pow
+
 val abs:   (Float)  -> Float  = Math::abs
 val absd:  (Double) -> Double = Math::abs
 

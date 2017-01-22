@@ -74,8 +74,8 @@ class SpearForm(context: Context): Form(context) {
     private val velocityMag = if (direction == Direction.Left) -2.0f else 2.0f
     private var preparedFrames: Int = 0
 
-    override fun update(delta: Float) {
-      super.update(delta)
+    override fun step(delta: Float) {
+      super.step(delta)
 
       var velocity = 0.0f
       val nextDirection = inputDirection()

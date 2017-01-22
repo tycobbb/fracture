@@ -140,8 +140,8 @@ class SpaceJumpForm(context: Context): Form(context) {
   class Jumping2(context: Context): FormState(context) {
     private val driftMag = 5.0f
 
-    override fun update(delta: Float) {
-      super.update(delta)
+    override fun step(delta: Float) {
+      super.step(delta)
       applyMovementForce(driftMag)
     }
 

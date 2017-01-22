@@ -16,6 +16,7 @@ import dev.wizrad.fracture.support.Tag
 import dev.wizrad.fracture.support.debug
 import dev.wizrad.fracture.support.extensions.Polar
 import dev.wizrad.fracture.support.extensions.angleTo
+import dev.wizrad.fracture.support.pow
 
 class PhasingForm(context: Context): Form(context) {
   // MARK: Form
@@ -115,8 +116,12 @@ class PhasingForm(context: Context): Form(context) {
 
     override fun start() {
       super.start()
+
       debug(Tag.World, "$this moving to $end")
-      setPhasing(true)
+      body.gravityScale = 0.0f
+      body.fixtureList.forEach {
+        it.contactInfo = ContactInfo.Hero(true)
+      }
     }
 
     override fun step(delta: Float) {
@@ -125,6 +130,7 @@ class PhasingForm(context: Context): Form(context) {
       val remaining = phaseDuration - phaseElapsed
       phaseElapsed += delta
 
+      // TODO: tween velocity (integral of v(t) == dst)
       val velocity = if (remaining < delta) {
         scratch1.set(phaseVelocity).scl(remaining / delta)
       } else {
@@ -135,12 +141,11 @@ class PhasingForm(context: Context): Form(context) {
     }
 
     override fun nextState(): State? {
-      return if (phaseElapsed >= phaseDuration) Jumping(context) else null
-    }
+      if (phaseElapsed >= phaseDuration) {
+        return PhasingEnd(context)
+      }
 
-    override fun destroy() {
-      super.destroy()
-      setPhasing(false)
+      return null
     }
 
     private fun destination(): Vector2 {
@@ -159,11 +164,33 @@ class PhasingForm(context: Context): Form(context) {
         Orientation.Right -> point.add(size.x / 2, 0.0f)
       }
     }
+  }
 
-    private fun setPhasing(isPhasing: Boolean) {
+  class PhasingEnd(context: Context): Phaseable(context) {
+    private val frameLength = 3
+    private val velocityPercent = 0.2f
+    private val velocityScale = pow(velocityPercent, 1.0f / frameLength)
+
+    override fun step(delta: Float) {
+      super.step(delta)
+      body.linearVelocity = body.linearVelocity.scl(velocityScale)
+    }
+
+    override fun destroy() {
+      super.destroy()
+
+      body.gravityScale = 1.0f
       body.fixtureList.forEach {
-        it.contactInfo = ContactInfo.Hero(isPhasing)
+        it.contactInfo = ContactInfo.Hero(false)
       }
+    }
+
+    override fun nextState(): State? {
+      if (frame >= frameLength) {
+        return if (isOnGround()) Landing(context) else Jumping(context)
+      }
+
+      return null
     }
   }
 
@@ -182,7 +209,9 @@ class PhasingForm(context: Context): Form(context) {
 
   // MARK: Phaseable
   data class Target(
-    val fixture: Fixture, val point: Vector2, val fraction: Float
+    val fixture: Fixture,
+    val point: Vector2,
+    val fraction: Float
   )
 
   abstract class Phaseable(context: Context): FormState(context) {
@@ -200,16 +229,23 @@ class PhasingForm(context: Context): Form(context) {
 
       // cast in reverse so that we can grab the outer edge
       // TODO: handle fixtures attached to multiple bodies
-      target = physics.reduceRaycast(dest, source) { memo, fixture, point, n, f ->
+      var count = 0
+      val intersection: Target? = physics.reduceRaycast(dest, source) { memo, fixture, point, n, f ->
         val contact = fixture.surface
         if (contact == null || !contact.isPhasingTarget) {
-          (-1.0f).to(memo)
-        } else if(memo == null || f < memo.fraction) {
+          return@reduceRaycast (-1.0f).to(memo)
+        }
+
+        count++
+        if(memo == null || f < memo.fraction) {
           1.0f.to(Target(fixture, point.cpy(), f))
         } else {
           1.0f.to(memo)
         }
       }
+
+      // only target this intersection if there were at least 2 candidates
+      target = if (count > 1) intersection else null
     }
 
     fun canPhase(): Boolean {
@@ -220,5 +256,4 @@ class PhasingForm(context: Context): Form(context) {
       return Phasing(context, target!!)
     }
   }
-
 }
