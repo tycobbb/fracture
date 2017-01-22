@@ -52,7 +52,7 @@ class Ground(
       fixtureDef.filter.categoryBits = ContactType.Wall.bits
 
       val fixture = body.createFixture(fixtureDef)
-      fixture.contactInfo = ContactInfo(Orientation.Top)
+      fixture.contactInfo = ContactInfo.Surface(Orientation.Top)
 
       // dispose shapes
       rect.dispose()

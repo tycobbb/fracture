@@ -3,10 +3,21 @@ package dev.wizrad.fracture.game.world.support
 import com.badlogic.gdx.physics.box2d.Fixture
 import dev.wizrad.fracture.game.world.components.contact.ContactInfo
 
+// MARK: ContactInfo
 var Fixture.contactInfo: ContactInfo?
-  get() { return userData as? ContactInfo }
-  set(value) { userData = value }
+  get() = userData as? ContactInfo
+  set(value) {
+    userData = value
+  }
 
-var Fixture.orientation: ContactInfo.Orientation?
-  get() { return contactInfo?.orientation }
-  set(value) { contactInfo = ContactInfo(orientation = value!!) }
+val Fixture.hero: ContactInfo.Hero?
+  get() = userData as? ContactInfo.Hero
+
+val Fixture.obstruction: ContactInfo.Obstruction?
+  get() = userData as? ContactInfo.Obstruction
+
+val Fixture.barrier: ContactInfo.Barrier?
+  get() = userData as? ContactInfo.Barrier
+
+val Fixture.surface: ContactInfo.Surface?
+  get() = userData as? ContactInfo.Surface

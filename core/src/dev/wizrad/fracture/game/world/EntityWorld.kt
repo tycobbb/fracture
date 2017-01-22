@@ -28,6 +28,7 @@ class EntityWorld: World {
   // MARK: Lifecycle
   init {
     physics.setContactListener(contact)
+    physics.setContactFilter(contact)
     level.start()
 
     val offset = Projection.offset(level.center)

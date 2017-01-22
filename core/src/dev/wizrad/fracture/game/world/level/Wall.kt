@@ -45,7 +45,11 @@ class Wall(
       val wallDef = defineBox(rect)
       wallDef.density = 1.0f
       wallDef.friction = 0.2f
-      body.createFixture(wallDef)
+
+      val wall = body.createFixture(wallDef)
+      wall.contactInfo = ContactInfo.Barrier(
+        isPhaseable = true
+      )
 
       // create sensors
       val edge = 0.05f
@@ -72,7 +76,11 @@ class Wall(
 
     private fun createSensor(body: Body, rect: PolygonShape, orientation: Orientation) {
       val sensor = body.createFixture(defineBox(rect, isSensor = true))
-      sensor.contactInfo = ContactInfo(orientation, isPhaseable = orientation != Orientation.Bottom)
+      sensor.contactInfo = ContactInfo.Surface(
+        orientation = orientation,
+        isPhasingTarget = orientation != Orientation.Bottom,
+        isPhaseable = true
+      )
     }
 
     private fun defineBox(rect: PolygonShape, isSensor: Boolean = false): FixtureDef {

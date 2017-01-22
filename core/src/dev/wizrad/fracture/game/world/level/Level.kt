@@ -5,13 +5,14 @@ import com.badlogic.gdx.physics.box2d.Body
 import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.physics.box2d.FixtureDef
 import com.badlogic.gdx.physics.box2d.PolygonShape
+import dev.wizrad.fracture.game.world.components.contact.ContactInfo
 import dev.wizrad.fracture.game.world.components.contact.ContactInfo.Orientation
 import dev.wizrad.fracture.game.world.components.contact.ContactType
 import dev.wizrad.fracture.game.world.core.Context
 import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.core.EntitySequence
 import dev.wizrad.fracture.game.world.hero.Hero
-import dev.wizrad.fracture.game.world.support.orientation
+import dev.wizrad.fracture.game.world.support.contactInfo
 
 class Level(
   context: Context, body: Body, size: Vector2): Entity(context, body, size) {
@@ -67,17 +68,23 @@ class Level(
       // create left wall
       rect.setAsBox(0.0f, height, scratch.set(0.0f, height), 0.0f)
       val leftWall = body.createFixture(defineWall(rect))
-      leftWall.orientation = Orientation.Right
+      leftWall.contactInfo = ContactInfo.Surface(
+        orientation = Orientation.Right
+      )
 
       // create right wall
       rect.setAsBox(0.0f, height, scratch.set(size.x, height), 0.0f)
       val rightWall = body.createFixture(defineWall(rect))
-      rightWall.orientation = Orientation.Left
+      rightWall.contactInfo = ContactInfo.Surface(
+        orientation = Orientation.Left
+      )
 
       // create ceiling
       rect.setAsBox(width, 0.0f, scratch.set(width, 0.0f), 0.0f)
       val ceiling = body.createFixture(defineWall(rect))
-      ceiling.orientation = Orientation.Bottom
+      ceiling.contactInfo = ContactInfo.Surface(
+        orientation = Orientation.Bottom
+      )
 
       // dispose shapes
       rect.dispose()

@@ -4,18 +4,18 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Fixture
 import com.badlogic.gdx.physics.box2d.FixtureDef
 import com.badlogic.gdx.physics.box2d.PolygonShape
+import dev.wizrad.fracture.game.world.components.contact.ContactInfo
 import dev.wizrad.fracture.game.world.components.contact.ContactInfo.Orientation
 import dev.wizrad.fracture.game.world.components.contact.ContactType
 import dev.wizrad.fracture.game.world.components.statemachine.State
 import dev.wizrad.fracture.game.world.core.Context
 import dev.wizrad.fracture.game.world.support.contactInfo
-import dev.wizrad.fracture.game.world.support.orientation
 import dev.wizrad.fracture.game.world.support.reduceRaycast
+import dev.wizrad.fracture.game.world.support.surface
 import dev.wizrad.fracture.support.Tag
 import dev.wizrad.fracture.support.debug
 import dev.wizrad.fracture.support.extensions.Polar
 import dev.wizrad.fracture.support.extensions.angleTo
-import dev.wizrad.fracture.support.fmt
 
 class PhasingForm(context: Context): Form(context) {
   // MARK: Form
@@ -102,37 +102,67 @@ class PhasingForm(context: Context): Form(context) {
 
   class Phasing(context: Context, target: Target): FormState(context) {
     private val target = target
-    private val phaseSpeed = 1.0f
-    private val destination = destination()
+    private val start = body.position.cpy()
+    private val end = destination()
+
+    private val phaseSpeed = 10.0f
+    private var phaseElapsed = 0.0f
+    private val phaseDuration = start.dst(end) / phaseSpeed
     private val phaseVelocity = Polar.vector(
       magnitude = phaseSpeed,
-      angle = body.position.angleTo(destination)
+      angle = start.angleTo(end)
     )
 
     override fun start() {
       super.start()
-      debug(Tag.World, "$this moving to ${destination.fmt()}")
-      body.setTransform(destination, body.angle)
+      debug(Tag.World, "$this moving to $end")
+      setPhasing(true)
     }
 
-//    override fun step(delta: Float) {
-//      super.step(delta)
-//    }
+    override fun step(delta: Float) {
+      super.step(delta)
+
+      val remaining = phaseDuration - phaseElapsed
+      phaseElapsed += delta
+
+      val velocity = if (remaining < delta) {
+        scratch1.set(phaseVelocity).scl(remaining / delta)
+      } else {
+        phaseVelocity
+      }
+
+      body.linearVelocity = velocity
+    }
 
     override fun nextState(): State? {
-      return Jumping(context)
+      return if (phaseElapsed >= phaseDuration) Jumping(context) else null
+    }
+
+    override fun destroy() {
+      super.destroy()
+      setPhasing(false)
     }
 
     private fun destination(): Vector2 {
-      val point = target.point.cpy()
+      val contact = target.fixture.contactInfo
+      if (contact !is ContactInfo.Surface) {
+        error("attempted to phase to a target that is not a Surface")
+      }
 
       val size = entity.size
-      return when (target.fixture.orientation) {
+      val point = target.point.cpy()
+
+      return when (contact.orientation) {
         Orientation.Top -> point.add(0.0f, -size.y / 2)
         Orientation.Bottom -> point.add(0.0f, size.y / 2)
         Orientation.Left -> point.add(-size.x / 2, 0.0f)
         Orientation.Right -> point.add(size.x / 2, 0.0f)
-        else -> error("attempted to phase to a target with no orientation")
+      }
+    }
+
+    private fun setPhasing(isPhasing: Boolean) {
+      body.fixtureList.forEach {
+        it.contactInfo = ContactInfo.Hero(isPhasing)
       }
     }
   }
@@ -171,8 +201,8 @@ class PhasingForm(context: Context): Form(context) {
       // cast in reverse so that we can grab the outer edge
       // TODO: handle fixtures attached to multiple bodies
       target = physics.reduceRaycast(dest, source) { memo, fixture, point, n, f ->
-        val contact = fixture.contactInfo
-        if (contact == null || !contact.isPhaseable) {
+        val contact = fixture.surface
+        if (contact == null || !contact.isPhasingTarget) {
           (-1.0f).to(memo)
         } else if(memo == null || f < memo.fraction) {
           1.0f.to(Target(fixture, point.cpy(), f))
