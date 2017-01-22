@@ -18,7 +18,7 @@ fun Renderer.render(hero: Hero, form: PhasingForm, delta: Float) {
 
     val state = form.state
     when (state) {
-      is PhasingForm.Phaseable -> render(state.target, delta)
+      is PhasingForm.PhasingState -> render(state.phasingTarget, delta)
     }
   }
 }

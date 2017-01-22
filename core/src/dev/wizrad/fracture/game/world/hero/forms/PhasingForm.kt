@@ -21,7 +21,7 @@ import dev.wizrad.fracture.support.pow
 class PhasingForm(context: Context): Form(context) {
   // MARK: Form
   override fun initialState(): State {
-    return Standing(context)
+    return Standing(context, phasesLeft = 3)
   }
 
   override fun defineFixtures(size: Vector2) {
@@ -42,7 +42,7 @@ class PhasingForm(context: Context): Form(context) {
   }
 
   // MARK: States
-  class Standing(context: Context): Phaseable(context) {
+  class Standing(context: Context, phasesLeft: Int): PhasingState(context, phasesLeft) {
     private val runMag = 7.5f
 
     override fun step(delta: Float) {
@@ -52,26 +52,26 @@ class PhasingForm(context: Context): Form(context) {
 
     override fun nextState(): State? {
       return if (canPhase()) {
-        phasing()
+        phasingState()
       } else if (controls.jump.isPressedUnique && isOnGround()) {
-        Windup(context)
+        Windup(context, phasesLeft)
       } else null
     }
   }
 
-  class Windup(context: Context): FormState(context) {
+  class Windup(context: Context, phasesLeft: Int): PhasingState(context, phasesLeft) {
     private val frameLength = 4
 
     override fun nextState(): State? {
       if (frame >= frameLength) {
-        return JumpStart(context, isShort = !controls.jump.isPressed)
+        return JumpStart(context, phasesLeft, isShort = !controls.jump.isPressed)
       }
 
       return null
     }
   }
 
-  class JumpStart(context: Context, isShort: Boolean): FormState(context) {
+  class JumpStart(context: Context, phasesLeft: Int, isShort: Boolean): PhasingState(context, phasesLeft) {
     private val frameLength = 3
     private val jumpMag = if (isShort) 2.5f else 5.0f
 
@@ -80,11 +80,11 @@ class PhasingForm(context: Context): Form(context) {
     }
 
     override fun nextState(): State? {
-      return if (frame >= frameLength) Jumping(context) else null
+      return if (frame >= frameLength) Jumping(context, phasesLeft) else null
     }
   }
 
-  class Jumping(context: Context): Phaseable(context) {
+  class Jumping(context: Context, phasesLeft: Int): PhasingState(context, phasesLeft) {
     private val driftMag = 5.0f
 
     override fun step(delta: Float) {
@@ -94,14 +94,14 @@ class PhasingForm(context: Context): Form(context) {
 
     override fun nextState(): State? {
       return if (canPhase()) {
-        phasing()
+        phasingState()
       } else if (isOnGround()) {
-        Landing(context)
+        Landing(context, phasesLeft)
       } else null
     }
   }
 
-  class Phasing(context: Context, target: Target): FormState(context) {
+  class Phasing(context: Context, phasesLeft: Int, target: Target): PhasingState(context, phasesLeft) {
     private val target = target
     private val start = body.position.cpy()
     private val end = destination()
@@ -113,6 +113,10 @@ class PhasingForm(context: Context): Form(context) {
       magnitude = phaseSpeed,
       angle = start.angleTo(end)
     )
+
+    override fun initiatesPhasing(): Boolean {
+      return false
+    }
 
     override fun start() {
       super.start()
@@ -142,7 +146,7 @@ class PhasingForm(context: Context): Form(context) {
 
     override fun nextState(): State? {
       if (phaseElapsed >= phaseDuration) {
-        return PhasingEnd(context)
+        return PhasingEnd(context, phasesLeft - 1)
       }
 
       return null
@@ -151,7 +155,7 @@ class PhasingForm(context: Context): Form(context) {
     private fun destination(): Vector2 {
       val contact = target.fixture.contactInfo
       if (contact !is ContactInfo.Surface) {
-        error("attempted to phase to a target that is not a Surface")
+        error("attempted to phase to a phasingTarget that is not a Surface")
       }
 
       val size = entity.size
@@ -166,7 +170,7 @@ class PhasingForm(context: Context): Form(context) {
     }
   }
 
-  class PhasingEnd(context: Context): Phaseable(context) {
+  class PhasingEnd(context: Context, phasesLeft: Int): PhasingState(context, phasesLeft) {
     private val frameLength = 3
     private val velocityPercent = 0.2f
     private val velocityScale = pow(velocityPercent, 1.0f / frameLength)
@@ -187,14 +191,14 @@ class PhasingForm(context: Context): Form(context) {
 
     override fun nextState(): State? {
       if (frame >= frameLength) {
-        return if (isOnGround()) Landing(context) else Jumping(context)
+        return if (isOnGround()) Landing(context, phasesLeft) else Jumping(context, phasesLeft)
       }
 
       return null
     }
   }
 
-  class Landing(context: Context): FormState(context) {
+  class Landing(context: Context, phasesLeft: Int): PhasingState(context, phasesLeft) {
     private val frameLength = 3
 
     override fun start() {
@@ -203,34 +207,54 @@ class PhasingForm(context: Context): Form(context) {
     }
 
     override fun nextState(): State? {
-      return if (frame >= frameLength) Standing(context) else null
+      return if (frame >= frameLength) Standing(context, phasesLeft) else null
     }
   }
 
-  // MARK: Phaseable
+  // MARK: Base States
   data class Target(
-    val fixture: Fixture,
-    val point: Vector2,
-    val fraction: Float
+    val fixture: Fixture, val point: Vector2, val fraction: Float
   )
 
-  abstract class Phaseable(context: Context): FormState(context) {
-    var target: Target? = null; private set
+  abstract class PhasingState(context: Context, phasesLeft: Int): FormState(context) {
+    // MARK: Properties
+    val phasesLeft = phasesLeft
+    var phasingTarget: Target? = null; private set
 
+    // MARK: Behavior
     override fun update(delta: Float) {
       super.update(delta)
 
-      if (!controls.touch.isActive) {
-        return
+      // look for a phasingTarget if allowed
+      if (canInitiatePhasing() && !controls.touch.isActive) {
+        phasingTarget = findTarget(controls.touch.location)
       }
+    }
 
-      val source = body.position
-      val dest = controls.touch.location
+    // MARK: Phasing
+    open fun initiatesPhasing(): Boolean {
+      return true
+    }
+
+    fun canInitiatePhasing(): Boolean {
+      return initiatesPhasing() && phasesLeft > 0
+    }
+
+    fun canPhase(): Boolean {
+      return !controls.touch.isActive && phasingTarget != null
+    }
+
+    fun phasingState(): Phasing {
+      return Phasing(context, phasesLeft, phasingTarget!!)
+    }
+
+    // TODO: handle fixtures attached to multiple bodies
+    private fun findTarget(dest: Vector2): Target? {
+      var count = 0
+      var intersection: Target? = null
 
       // cast in reverse so that we can grab the outer edge
-      // TODO: handle fixtures attached to multiple bodies
-      var count = 0
-      val intersection: Target? = physics.reduceRaycast(dest, source) { memo, fixture, point, n, f ->
+      intersection = physics.reduceRaycast(dest, body.position) { memo, fixture, point, n, f ->
         val contact = fixture.surface
         if (contact == null || !contact.isPhasingTarget) {
           return@reduceRaycast (-1.0f).to(memo)
@@ -244,16 +268,8 @@ class PhasingForm(context: Context): Form(context) {
         }
       }
 
-      // only target this intersection if there were at least 2 candidates
-      target = if (count > 1) intersection else null
-    }
-
-    fun canPhase(): Boolean {
-      return !controls.touch.isActive && target != null
-    }
-
-    fun phasing(): Phasing {
-      return Phasing(context, target!!)
+      // only phasingTarget this intersection if there were at least 2 candidates
+      return if (count > 1) intersection else null
     }
   }
 }
