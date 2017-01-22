@@ -41,7 +41,7 @@ class Wall(
       val rect = PolygonShape()
 
       // create wall
-      rect.setAsBox(width, height, Vector2(width, height), 0.0f)
+      rect.setAsBox(width, height)
       val wallDef = defineBox(rect)
       wallDef.density = 1.0f
       wallDef.friction = 0.2f
@@ -51,19 +51,19 @@ class Wall(
       val edge = 0.05f
 
       // create left sensor
-      rect.setAsBox(edge, height - edge * 2, scratch.set(edge, height), 0.0f)
+      rect.setAsBox(edge, height - edge * 2, scratch.set(edge - width, 0.0f), 0.0f)
       createSensor(body, rect, orientation = Orientation.Left)
 
       // create right sensor
-      rect.setAsBox(edge, height - edge * 2, scratch.set(size.x - edge, height), 0.0f)
+      rect.setAsBox(edge, height - edge * 2, scratch.set(width - edge, 0.0f), 0.0f)
       createSensor(body, rect, orientation = Orientation.Right)
 
       // create top sensor
-      rect.setAsBox(width, edge, scratch.set(width, edge), 0.0f)
+      rect.setAsBox(width, edge, scratch.set(0.0f, edge - height), 0.0f)
       createSensor(body, rect, orientation = Orientation.Top)
 
       // create bottom sensor
-      rect.setAsBox(width, edge, scratch.set(width, size.y - edge), 0.0f)
+      rect.setAsBox(width, edge, scratch.set(0.0f, height - edge), 0.0f)
       createSensor(body, rect, orientation = Orientation.Bottom)
 
       // dispose shapes

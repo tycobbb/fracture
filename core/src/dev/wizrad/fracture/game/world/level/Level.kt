@@ -24,15 +24,15 @@ class Level(
 
   val wall = Wall.Factory(context()).entity(
     center = Vector2(
-      (size.x - Wall.size.x) / 2 + 1.0f,
-      (size.y - ground.size.y - Wall.size.y)
+      (size.x) / 2 + 1.0f,
+      (size.y - ground.size.y - Wall.size.y / 2)
     )
   )
 
   val hero = Hero.Factory(context()).entity(
     center = Vector2(
-      (size.x - Hero.size.x) / 2,
-      (size.y - ground.size.y - Hero.size.y)
+      (size.x) / 2,
+      (size.y - ground.size.y - Hero.size.y / 2)
     )
   )
 

@@ -12,7 +12,7 @@ fun Renderer.render(ground: Ground, delta: Float) {
       it.color = Color(0x596D85)
       val center = scale(ground.center, Renderer.scratch1)
       val size = scale(ground.size, Renderer.scratch2)
-      it.rect(center.x, center.y, size.x, size.y)
+      it.rect(center.x - size.x / 2, center.y - size.y / 2, size.x, size.y)
     }
   }
 }

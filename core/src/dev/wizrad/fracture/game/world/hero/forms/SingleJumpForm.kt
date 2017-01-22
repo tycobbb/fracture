@@ -15,10 +15,8 @@ class SingleJumpForm(context: Context): Form(context) {
 
   override fun defineFixtures(size: Vector2) {
     // create fixtures
-    val width = size.x / 2
-    val height = size.y / 2
     val square = PolygonShape()
-    square.setAsBox(width, height, Vector2(width, height), 0.0f)
+    square.setAsBox(size.x / 2, size.y / 2)
 
     val fixture = FixtureDef()
     fixture.shape = square

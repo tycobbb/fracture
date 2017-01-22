@@ -31,8 +31,8 @@ class Ground(
       val body = super.defineBody(options)
       body.type = BodyType.StaticBody
       body.position.set(transform(
-        x = 0.0f,
-        y = parent!!.size.y - size.y
+        x = size.x / 2,
+        y = parent!!.size.y - size.y / 2
       ))
 
       return body
@@ -43,9 +43,7 @@ class Ground(
 
       // create fixtures
       val rect = PolygonShape()
-      val width = size.x / 2
-      val height = size.y / 2
-      rect.setAsBox(width, height, scratch.set(width, height), 0.0f)
+      rect.setAsBox(size.x / 2, size.y / 2)
 
       val fixtureDef = FixtureDef()
       fixtureDef.shape = rect

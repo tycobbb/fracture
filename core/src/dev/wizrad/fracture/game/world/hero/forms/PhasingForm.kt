@@ -27,10 +27,8 @@ class PhasingForm(context: Context): Form(context) {
 
   override fun defineFixtures(size: Vector2) {
     // create fixtures
-    val width = size.x / 2
-    val height = size.y / 2
     val square = PolygonShape()
-    square.setAsBox(width, height, Vector2(width, height), 0.0f)
+    square.setAsBox(size.x / 2, size.y / 2)
 
     val fixture = FixtureDef()
     fixture.shape = square
@@ -82,9 +80,11 @@ class PhasingForm(context: Context): Form(context) {
 
         if (intersections.size != 0) {
           // TODO: handle fixtures attached to multiple bodies
-          phaseTarget = intersections.reduce { memo, data ->
+          val intersection = intersections.reduce { memo, data ->
             if (data.fraction < memo.fraction) data else memo
           }
+
+          phaseTarget = intersection
         }
       }
     }
@@ -142,7 +142,7 @@ class PhasingForm(context: Context): Form(context) {
 
     override fun start() {
       super.start()
-      debug(Tag.World, "$this phasing to $target @ ${destination}")
+      debug(Tag.World, "$this moving to ${destination.fmt()}")
       body.setTransform(destination, body.angle)
     }
 
@@ -155,9 +155,9 @@ class PhasingForm(context: Context): Form(context) {
     }
 
     private fun destination(): Vector2 {
-      val size = entity.size
       val point = target.point.cpy()
 
+      val size = entity.size
       return when (target.fixture.orientation) {
         Orientation.Top -> point.add(0.0f, -size.y / 2)
         Orientation.Bottom -> point.add(0.0f, size.y / 2)
