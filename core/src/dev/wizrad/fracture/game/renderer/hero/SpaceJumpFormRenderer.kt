@@ -13,7 +13,7 @@ fun Renderer.render(hero: Hero, form: SpaceJumpForm, delta: Float) {
       it.color = Color.CHARTREUSE
       val center = scale(hero.center, Renderer.scratch1)
       val size = scale(hero.size, Renderer.scratch2)
-      it.rect(center.x, center.y, size.x, size.y)
+      it.rect(center.x - size.x / 2, center.y - size.y / 2, size.x, size.y)
     }
   }
 }
