@@ -4,9 +4,8 @@ import com.badlogic.gdx.math.Vector2
 import dev.wizrad.fracture.support.then
 
 fun project(point: Vector2, from: Projection, to: Projection): Vector2 {
-  val result = point.cpy()
-  to.denormalizer(from.normalizer(result))
-  return result
+  to.denormalizer(from.normalizer(point))
+  return point
 }
 
 fun projector(from: Projection, to: Projection): (Vector2) -> Vector2 {

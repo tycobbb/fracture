@@ -3,9 +3,9 @@ package dev.wizrad.fracture.game.world
 import dev.wizrad.fracture.game.components.controls.Controls
 import dev.wizrad.fracture.game.components.projection.Projection
 import dev.wizrad.fracture.game.components.projection.Projections
+import dev.wizrad.fracture.game.components.projection.then
 import dev.wizrad.fracture.game.world.components.contact.ContactGraph
 import dev.wizrad.fracture.game.world.core.Context
-import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.core.World
 import dev.wizrad.fracture.game.world.level.Level
 import dev.wizrad.fracture.game.world.support.Physics
@@ -29,7 +29,10 @@ class EntityWorld: World {
   init {
     physics.setContactListener(contact)
     level.start()
-    Projections.world = Projection.scaling(level.size)
+
+    val offset = Projection.offset(level.center)
+    val scale = Projection.scaling(level.size)
+    Projections.world = offset then scale
   }
 
   fun update(delta: Float) {

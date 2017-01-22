@@ -8,6 +8,13 @@ data class Projection(
   val denormalizer: (Vector2) -> Vector2) {
 
   companion object {
+    fun offset(offset: Vector2): Projection {
+      return Projection(
+        normalizer = { it.add(offset) },
+        denormalizer = { it.add(offset) }
+      )
+    }
+
     fun scaling(width: Int, height: Int): Projection {
       return scaling(width.toFloat(), height.toFloat())
     }

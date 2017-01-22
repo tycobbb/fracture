@@ -15,5 +15,23 @@ fun Renderer.render(hero: Hero, form: PhasingForm, delta: Float) {
       val size = scale(hero.size, Renderer.scratch2)
       it.rect(center.x, center.y, size.x, size.y)
     }
+
+    val state = form.state
+    when (state) {
+      is PhasingForm.Standing -> render(state.phaseTarget, delta)
+    }
+  }
+}
+
+private fun Renderer.render(phaseTarget: PhasingForm.Target?, delta: Float) {
+  if (phaseTarget == null) {
+    return
+  }
+
+  shaper.draw {
+    it.color = Color.SCARLET
+    val center = scale(phaseTarget.point, Renderer.scratch1)
+    val size = scale(Renderer.scratch2.set(0.25f, 0.25f), Renderer.scratch2)
+    it.rect(center.x - size.x / 2, center.y - size.y / 2, size.x, size.y)
   }
 }

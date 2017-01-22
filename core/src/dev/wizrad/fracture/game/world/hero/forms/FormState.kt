@@ -10,6 +10,7 @@ import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.support.applyImpulseToCenter
 import dev.wizrad.fracture.support.Tag
 import dev.wizrad.fracture.support.debug
+import com.badlogic.gdx.physics.box2d.World as PhysicsWorld
 
 abstract class FormState(
   protected val context: Context): State() {
@@ -21,6 +22,8 @@ abstract class FormState(
   protected val body: Body get() = entity.body
   /** A reference to the world's shared controls */
   protected val controls: Controls get() = context.world.controls
+  /** A reference to the world's shared physics world */
+  protected val physics: PhysicsWorld get() = context.world.physics
   /** A reference to the world's shared contact graph */
   protected val contact: ContactGraph get() = context.world.contact
 

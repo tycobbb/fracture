@@ -10,7 +10,6 @@ import dev.wizrad.fracture.game.world.hero.forms.*
 
 class Hero(
   context: Context, body: Body, size: Vector2): Entity(context, body, size) {
-
   // MARK: Entity
   override val name = "Hero"
 

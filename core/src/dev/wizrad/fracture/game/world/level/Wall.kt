@@ -5,11 +5,12 @@ import com.badlogic.gdx.physics.box2d.Body
 import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.physics.box2d.FixtureDef
 import com.badlogic.gdx.physics.box2d.PolygonShape
+import dev.wizrad.fracture.game.world.components.contact.ContactInfo
 import dev.wizrad.fracture.game.world.components.contact.ContactInfo.Orientation
 import dev.wizrad.fracture.game.world.components.contact.ContactType
 import dev.wizrad.fracture.game.world.core.Context
 import dev.wizrad.fracture.game.world.core.Entity
-import dev.wizrad.fracture.game.world.support.orientation
+import dev.wizrad.fracture.game.world.support.contactInfo
 
 class Wall(
   context: Context, body: Body, size: Vector2): Entity(context, body, size) {
@@ -71,7 +72,7 @@ class Wall(
 
     private fun createSensor(body: Body, rect: PolygonShape, orientation: Orientation) {
       val sensor = body.createFixture(defineBox(rect, isSensor = true))
-      sensor.orientation = orientation
+      sensor.contactInfo = ContactInfo(orientation, isPhaseable = orientation != Orientation.Bottom)
     }
 
     private fun defineBox(rect: PolygonShape, isSensor: Boolean = false): FixtureDef {
