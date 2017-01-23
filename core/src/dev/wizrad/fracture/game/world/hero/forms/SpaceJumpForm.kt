@@ -53,7 +53,7 @@ class SpaceJumpForm(context: Context): Form(context) {
 
   class JumpStart(context: Context, isShort: Boolean): FormState(context) {
     private val frameLength = 3
-    private val jumpMag = if (isShort) 2.5f else 5.0f
+    private val jumpMag = if (isShort) 4.0f else 5.5f
 
     override fun start() {
       super.start()
@@ -88,10 +88,6 @@ class SpaceJumpForm(context: Context): Form(context) {
       }
 
       return null
-    }
-
-    private fun isFalling(): Boolean {
-      return body.linearVelocity.y >= 0.0
     }
   }
 

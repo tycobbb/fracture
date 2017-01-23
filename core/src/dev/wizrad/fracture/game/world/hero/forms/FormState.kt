@@ -63,6 +63,10 @@ abstract class FormState(
   }
 
   // MARK: Helpers - Checks
+  protected fun isFalling(frameTimeout: Int = 10, velocityPeak: Float = -2.7f): Boolean {
+    return frame > frameTimeout && body.linearVelocity.y > velocityPeak
+  }
+
   protected fun isNearStationary(threshold: Float = 1.0f): Boolean {
     return body.linearVelocity.len2() <= threshold
   }

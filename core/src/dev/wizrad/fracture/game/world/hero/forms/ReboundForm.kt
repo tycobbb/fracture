@@ -102,10 +102,6 @@ class ReboundForm(context: Context): Form(context) {
 
       return null
     }
-
-    private fun isFalling(): Boolean {
-      return body.linearVelocity.y >= 0.0
-    }
   }
 
   class FastFalling(context: Context): FormState(context) {
