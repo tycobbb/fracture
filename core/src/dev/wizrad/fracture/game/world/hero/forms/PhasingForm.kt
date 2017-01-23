@@ -43,9 +43,11 @@ class PhasingForm(context: Context): Form(context) {
     }
 
     override fun nextState(): State? {
-      return if (canPhase()) {
+      return if(canPhase()) {
         phasingState()
-      } else if (controls.jump.isPressedUnique && isOnGround()) {
+      }else if (!isOnGround()) {
+        Jumping(context, phasesLeft)
+      } else if (controls.jump.isPressedUnique) {
         Windup(context, phasesLeft)
       } else null
     }

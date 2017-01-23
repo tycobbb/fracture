@@ -32,11 +32,11 @@ class AirDashForm(context: Context): Form(context) {
     }
 
     override fun nextState(): State? {
-      if (controls.jump.isPressedUnique && isOnGround()) {
-        return Windup(context)
-      }
-
-      return null
+      return if (!isOnGround()) {
+        Jumping(context)
+      } else if (controls.jump.isPressedUnique) {
+        Windup(context)
+      } else null
     }
   }
 

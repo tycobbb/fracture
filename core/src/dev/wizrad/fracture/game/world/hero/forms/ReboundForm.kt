@@ -33,11 +33,11 @@ class ReboundForm(context: Context): Form(context) {
     }
 
     override fun nextState(): State? {
-      if (controls.jump.isPressedUnique && isOnGround()) {
-        return Windup(context)
-      }
-
-      return null
+      return if (!isOnGround()) {
+        Jumping(context)
+      } else if (controls.jump.isPressedUnique) {
+        Windup(context)
+      } else null
     }
   }
 
@@ -68,7 +68,7 @@ class ReboundForm(context: Context): Form(context) {
   }
 
   class Jumping(context: Context): FormState(context) {
-    private val restingFrameLength = 4
+    private val restingFrameLength = 10
     private val driftMagnitude = 5.0f
 
     private var restingFrames = 0

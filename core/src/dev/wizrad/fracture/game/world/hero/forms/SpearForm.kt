@@ -46,7 +46,6 @@ class SpearForm(context: Context): Form(context) {
 
     override fun nextState(): State? {
       val direction = inputDirection(isUniqueInput = true)
-
       return when (direction) {
         Direction.None -> null
         else -> Prepare(context, orientation, direction)
