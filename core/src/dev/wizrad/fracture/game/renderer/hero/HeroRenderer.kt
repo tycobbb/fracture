@@ -8,7 +8,7 @@ fun Renderer.render(hero: Hero, delta: Float) {
   val form = hero.form
 
   when (form) {
-    is SingleJumpForm -> render(hero, form, delta)
+    is VanillaForm -> render(hero, form, delta)
     is SpaceJumpForm -> render(hero, form, delta)
     is ReboundForm -> render(hero, form, delta)
     is SpearForm -> render(hero, form, delta)

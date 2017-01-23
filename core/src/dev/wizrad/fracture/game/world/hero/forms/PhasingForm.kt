@@ -226,7 +226,7 @@ class PhasingForm(context: Context): Form(context) {
       super.update(delta)
 
       // look for a phasingTarget if allowed
-      if (canInitiatePhasing() && !controls.touch.isActive) {
+      if (canInitiatePhasing() && controls.touch.isActive) {
         phasingTarget = findTarget(controls.touch.location)
       }
     }

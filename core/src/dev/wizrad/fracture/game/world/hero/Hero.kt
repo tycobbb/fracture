@@ -56,11 +56,11 @@ class Hero(
 
   private fun createRandomForm(): Form {
     return when (form) {
-      is SingleJumpForm -> SpaceJumpForm(context())
+      is VanillaForm -> SpaceJumpForm(context())
       is SpaceJumpForm -> ReboundForm(context())
       is ReboundForm -> SpearForm(context())
       is SpearForm -> PhasingForm(context())
-      else -> SingleJumpForm(context())
+      else -> VanillaForm(context())
     }
   }
 

@@ -7,7 +7,7 @@ import dev.wizrad.fracture.game.world.components.contact.ContactType
 import dev.wizrad.fracture.game.world.components.statemachine.State
 import dev.wizrad.fracture.game.world.core.Context
 
-class SingleJumpForm(context: Context): Form(context) {
+class VanillaForm(context: Context): Form(context) {
   // MARK: Form
   override fun initialState(): State {
     return Standing(context)

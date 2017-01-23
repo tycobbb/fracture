@@ -5,9 +5,9 @@ import dev.wizrad.fracture.game.renderer.core.Renderer
 import dev.wizrad.fracture.game.renderer.support.draw
 import dev.wizrad.fracture.game.renderer.support.pause
 import dev.wizrad.fracture.game.world.hero.Hero
-import dev.wizrad.fracture.game.world.hero.forms.SingleJumpForm
+import dev.wizrad.fracture.game.world.hero.forms.VanillaForm
 
-fun Renderer.render(hero: Hero, form: SingleJumpForm, delta: Float) {
+fun Renderer.render(hero: Hero, form: VanillaForm, delta: Float) {
   batch.pause {
     shaper.draw {
       it.color = Color.WHITE
