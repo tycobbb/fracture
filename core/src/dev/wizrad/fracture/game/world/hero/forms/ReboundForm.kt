@@ -66,7 +66,7 @@ class ReboundForm(context: Context): Form(context) {
 
     override fun start() {
       super.start()
-      applyJumpForce(jumpMagnitude)
+      applyJumpImpulse(jumpMagnitude)
     }
 
     override fun nextState(): State? {

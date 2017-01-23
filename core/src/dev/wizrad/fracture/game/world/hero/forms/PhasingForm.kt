@@ -16,7 +16,6 @@ import dev.wizrad.fracture.support.Tag
 import dev.wizrad.fracture.support.debug
 import dev.wizrad.fracture.support.extensions.Polar
 import dev.wizrad.fracture.support.extensions.angleTo
-import dev.wizrad.fracture.support.pow
 
 class PhasingForm(context: Context): Form(context) {
   // MARK: Form
@@ -76,7 +75,7 @@ class PhasingForm(context: Context): Form(context) {
     private val jumpMag = if (isShort) 2.5f else 5.0f
 
     override fun start() {
-      applyJumpForce(jumpMag)
+      applyJumpImpulse(jumpMag)
     }
 
     override fun nextState(): State? {
@@ -122,10 +121,8 @@ class PhasingForm(context: Context): Form(context) {
       super.start()
 
       debug(Tag.World, "$this moving to $end")
-      body.gravityScale = 0.0f
-      body.fixtureList.forEach {
-        it.contactInfo = ContactInfo.Hero(true)
-      }
+      stopGravity()
+      startPhasing()
     }
 
     override fun step(delta: Float) {
@@ -171,26 +168,23 @@ class PhasingForm(context: Context): Form(context) {
   }
 
   class PhasingEnd(context: Context, phasesLeft: Int): PhasingState(context, phasesLeft) {
-    private val frameLength = 3
-    private val velocityPercent = 0.2f
-    private val velocityScale = pow(velocityPercent, 1.0f / frameLength)
+    private val phasingDamping = 10.0f
 
-    override fun step(delta: Float) {
-      super.step(delta)
-      body.linearVelocity = body.linearVelocity.scl(velocityScale)
+    override fun start() {
+      super.start()
+      startDamping(phasingDamping)
     }
 
     override fun destroy() {
       super.destroy()
 
-      body.gravityScale = 1.0f
-      body.fixtureList.forEach {
-        it.contactInfo = ContactInfo.Hero(false)
-      }
+      stopDamping()
+      startGravity()
+      stopPhasing()
     }
 
     override fun nextState(): State? {
-      if (frame >= frameLength) {
+      if (isNearStationary()) {
         return if (isOnGround()) Landing(context, phasesLeft) else Jumping(context, phasesLeft)
       }
 
@@ -246,6 +240,18 @@ class PhasingForm(context: Context): Form(context) {
 
     fun phasingState(): Phasing {
       return Phasing(context, phasesLeft, phasingTarget!!)
+    }
+
+    fun startPhasing() {
+      body.fixtureList.forEach {
+        it.contactInfo = ContactInfo.Hero(true)
+      }
+    }
+
+    fun stopPhasing() {
+      body.fixtureList.forEach {
+        it.contactInfo = ContactInfo.Hero(false)
+      }
     }
 
     // TODO: handle fixtures attached to multiple bodies

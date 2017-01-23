@@ -13,6 +13,7 @@ fun Renderer.render(hero: Hero, delta: Float) {
     is ReboundForm -> render(hero, form, delta)
     is SpearForm -> render(hero, form, delta)
     is PhasingForm -> render(hero, form, delta)
+    is AirDashForm -> render(hero, form, delta)
     else -> error("attempted to render unknown form: $form")
   }
 }

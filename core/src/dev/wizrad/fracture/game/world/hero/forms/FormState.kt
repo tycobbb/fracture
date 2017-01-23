@@ -10,6 +10,7 @@ import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.support.applyImpulseToCenter
 import dev.wizrad.fracture.support.Tag
 import dev.wizrad.fracture.support.debug
+import dev.wizrad.fracture.support.extensions.Polar
 import com.badlogic.gdx.physics.box2d.World as PhysicsWorld
 
 abstract class FormState(
@@ -65,6 +66,10 @@ abstract class FormState(
     return contact.oriented(body.fixtureList.first(), ContactInfo.Orientation.Top)
   }
 
+  protected fun isNearStationary(threshold: Float = 1.0f): Boolean {
+    return body.linearVelocity.len2() <= threshold
+  }
+
   protected fun contactOrientation(): ContactInfo.Orientation? {
     assert(body.fixtureList.size != 0) { "body must have at least one fixture" }
     return contact.closestSurface(body.fixtureList.first())?.orientation
@@ -80,7 +85,7 @@ abstract class FormState(
   }
 
   // MARK: Helpers - Physics
-  protected fun applyJumpForce(magnitude: Float) {
+  protected fun applyJumpImpulse(magnitude: Float) {
     debug(Tag.World, "$this applying jump impulse: $magnitude")
     body.applyImpulseToCenter(0.0f, -magnitude)
   }
@@ -88,6 +93,12 @@ abstract class FormState(
   protected fun applyFastfallImpulse(magnitude: Float) {
     debug(Tag.World, "$this applying fall impulse: $magnitude")
     body.applyImpulseToCenter(0.0f, magnitude)
+  }
+
+  protected fun applyImpulse(magnitude: Float, angle: Float) {
+    debug(Tag.World, "$this applying angled impulse: $magnitude")
+    val impulse = Polar.vector(magnitude = magnitude, angle = angle)
+    body.applyImpulseToCenter(impulse.x, impulse.y)
   }
 
   protected fun applyMovementForce(magnitude: Float) {
@@ -119,5 +130,21 @@ abstract class FormState(
     }
 
     body.linearVelocity = velocity
+  }
+
+  protected fun startGravity() {
+    body.gravityScale = 1.0f
+  }
+
+  protected fun stopGravity() {
+    body.gravityScale = 0.0f
+  }
+
+  protected fun startDamping(damping: Float) {
+    body.linearDamping = damping
+  }
+
+  protected fun stopDamping() {
+    body.linearDamping = 0.0f
   }
 }

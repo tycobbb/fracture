@@ -6,8 +6,9 @@ import com.badlogic.gdx.physics.box2d.PolygonShape
 import dev.wizrad.fracture.game.world.components.contact.ContactType
 import dev.wizrad.fracture.game.world.components.statemachine.State
 import dev.wizrad.fracture.game.world.core.Context
+import dev.wizrad.fracture.support.Maths
 
-class SpaceJumpForm(context: Context): Form(context) {
+class AirDashForm(context: Context): Form(context) {
   // MARK: Form
   override fun initialState(): State {
     return Standing(context)
@@ -62,10 +63,9 @@ class SpaceJumpForm(context: Context): Form(context) {
 
   class JumpStart(context: Context, isShort: Boolean): FormState(context) {
     private val frameLength = 3
-    private val jumpMag = if (isShort) 2.5f else 5.0f
+    private val jumpMag = if (isShort) 3.75f else 7.5f
 
     override fun start() {
-      super.start()
       applyJumpImpulse(jumpMag)
     }
 
@@ -75,69 +75,73 @@ class SpaceJumpForm(context: Context): Form(context) {
   }
 
   class Jumping(context: Context): FormState(context) {
-    private val driftMag = 10.0f
-    private var canJump: Boolean = false
+    private val driftMag = 5.0f
+
+    override fun start() {
+      super.start()
+      requireUniqueJump()
+    }
 
     override fun step(delta: Float) {
       super.step(delta)
       applyMovementForce(driftMag)
-
-      // allow re-jump when the apex is reached
-      if (!canJump && isFalling()) {
-        canJump = true
-        requireUniqueJump()
-      }
     }
 
     override fun nextState(): State? {
-      if (isOnGround()) {
-        return Landing(context)
-      } else if (controls.jump.isPressedUnique && canJump) {
-        return Windup2(context)
-      }
-
-      return null
-    }
-
-    private fun isFalling(): Boolean {
-      return body.linearVelocity.y >= 0.0
+      val direction = inputDirection()
+      return if (controls.jump.isPressedUnique && direction != Direction.None) {
+        AirDashStart(context, direction)
+      } else if(isOnGround()) {
+        Landing(context)
+      } else null
     }
   }
 
-  class Windup2(context: Context): FormState(context) {
+  class AirDashStart(context: Context, direction: Direction): FormState(context) {
+    private val direction = direction
     private val frameLength = 4
 
     override fun nextState(): State? {
       if (frame >= frameLength) {
-        return JumpStart2(context, isShort = !controls.jump.isPressed, direction = inputDirection())
+        return AirDash(context, direction, isShort = !controls.jump.isPressed)
       }
 
       return null
     }
   }
 
-  class JumpStart2(context: Context, direction: Direction, isShort: Boolean): FormState(context) {
-    private val frameLength = 3
-    private val direction = direction
-    private val jumpMag = if (isShort) 5.0f else 7.5f
+  class AirDash(context: Context, direction: Direction, isShort: Boolean): FormState(context) {
+    private val dashMag = if (isShort) 15.0f else 25.0f
+    private val dashDamping = 10.0f
+    private val dashAngle = if (direction == Direction.Left) {
+      Maths.F_PI + Maths.F_PI_4
+    } else {
+      Maths.F_PI + Maths.F_PI_4 * 3
+    }
 
     override fun start() {
       super.start()
 
-      cancelComponentMomentum(
-        x = direction != Direction.None && currentDirection() != direction,
-        y = true
-      )
+      stopGravity()
+      startDamping(dashDamping)
 
-      applyJumpImpulse(jumpMag)
+      cancelMomentum()
+      applyImpulse(magnitude = dashMag, angle = dashAngle)
+    }
+
+    override fun destroy() {
+      super.destroy()
+
+      startGravity()
+      stopDamping()
     }
 
     override fun nextState(): State? {
-      return if (frame >= frameLength) Jumping2(context) else null
+      return if (isNearStationary()) AirDashEnd(context) else null
     }
   }
 
-  class Jumping2(context: Context): FormState(context) {
+  class AirDashEnd(context: Context): FormState(context) {
     private val driftMag = 5.0f
 
     override fun step(delta: Float) {

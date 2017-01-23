@@ -162,10 +162,8 @@ class SpearForm(context: Context): Form(context) {
 
     override fun start() {
       super.start()
+      startGravity()
 
-      body.gravityScale = 1.0f
-
-      // apply impulse according to orientation
       debug(Tag.World, "$this applying impulse: $jumpMag")
       val directedImpulse = cartesianDirection * jumpMag
       when (orientation) {
@@ -195,7 +193,7 @@ class SpearForm(context: Context): Form(context) {
     override fun start() {
       super.start()
 
-      body.gravityScale = 0.0f
+      stopGravity()
       cancelMomentum()
       requireUniqueJump()
     }

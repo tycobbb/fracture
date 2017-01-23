@@ -65,7 +65,7 @@ class VanillaForm(context: Context): Form(context) {
     private val jumpMag = if (isShort) 3.75f else 12.5f
 
     override fun start() {
-      applyJumpForce(jumpMag)
+      applyJumpImpulse(jumpMag)
     }
 
     override fun nextState(): State? {
