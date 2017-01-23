@@ -1,10 +1,7 @@
 package dev.wizrad.fracture.game.world.hero.forms
 
-import com.badlogic.gdx.math.Vector2
-import com.badlogic.gdx.physics.box2d.FixtureDef
 import com.badlogic.gdx.physics.box2d.PolygonShape
 import dev.wizrad.fracture.game.world.components.contact.ContactInfo.Orientation
-import dev.wizrad.fracture.game.world.components.contact.ContactType
 import dev.wizrad.fracture.game.world.components.statemachine.State
 import dev.wizrad.fracture.game.world.core.Context
 import dev.wizrad.fracture.game.world.support.applyImpulseToCenter
@@ -28,21 +25,14 @@ class SpearForm(context: Context): Form(context) {
     return Standing(context, Orientation.Top)
   }
 
-  override fun defineFixtures(size: Vector2) {
+  override fun defineFixtures() {
+    val polygon = PolygonShape()
+
     // create fixtures
-    val square = PolygonShape()
-    square.setAsBox(size.x / 2, size.y / 2)
-
-    val fixture = FixtureDef()
-    fixture.shape = square
-    fixture.density = 1.0f
-    fixture.friction = 1.0f
-    fixture.filter.categoryBits = ContactType.Hero.bits
-
-    body.createFixture(fixture)
+    createBox(defineBox(polygon))
 
     // dispose shapes
-    square.dispose()
+    polygon.dispose()
   }
 
   // MARK: States

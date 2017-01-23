@@ -3,11 +3,13 @@ package dev.wizrad.fracture.game.world.hero.forms
 import com.badlogic.gdx.physics.box2d.Body
 import dev.wizrad.fracture.game.components.controls.Controls
 import dev.wizrad.fracture.game.world.components.contact.ContactGraph
-import dev.wizrad.fracture.game.world.components.contact.ContactInfo
+import dev.wizrad.fracture.game.world.components.contact.ContactInfo.Orientation
 import dev.wizrad.fracture.game.world.components.statemachine.State
 import dev.wizrad.fracture.game.world.core.Context
 import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.support.applyImpulseToCenter
+import dev.wizrad.fracture.game.world.support.foot
+import dev.wizrad.fracture.game.world.support.hero
 import dev.wizrad.fracture.support.Tag
 import dev.wizrad.fracture.support.debug
 import dev.wizrad.fracture.support.extensions.Polar
@@ -61,18 +63,18 @@ abstract class FormState(
   }
 
   // MARK: Helpers - Checks
-  protected fun isOnGround(): Boolean {
-    assert(body.fixtureList.size != 0) { "body must have at least one fixture" }
-    return contact.oriented(body.fixtureList.first(), ContactInfo.Orientation.Top)
-  }
-
   protected fun isNearStationary(threshold: Float = 1.0f): Boolean {
     return body.linearVelocity.len2() <= threshold
   }
 
-  protected fun contactOrientation(): ContactInfo.Orientation? {
-    assert(body.fixtureList.size != 0) { "body must have at least one fixture" }
-    return contact.closestSurface(body.fixtureList.first())?.orientation
+  protected fun isOnGround(): Boolean {
+    val foot = body.fixtureList.find { it.foot != null } ?: error("body must have a foot")
+    return contact.isOnSurface(fixture = foot, orientation = Orientation.Top)
+  }
+
+  protected fun contactOrientation(): Orientation? {
+    val hero = body.fixtureList.find { it.hero != null } ?: error("body must have a hero")
+    return contact.nearestSurface(hero)?.orientation
   }
 
   protected fun currentDirection(): Direction {
@@ -139,6 +141,7 @@ abstract class FormState(
   protected fun stopGravity() {
     body.gravityScale = 0.0f
   }
+
 
   protected fun startDamping(damping: Float) {
     body.linearDamping = damping

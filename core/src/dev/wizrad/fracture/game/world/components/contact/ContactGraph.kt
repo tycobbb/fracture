@@ -14,18 +14,17 @@ class ContactGraph: ContactListener, ContactFilter {
   private val defaultSet = { mutableSetOf<Fixture>() }
 
   // MARK: Lookup
-  fun closestSurface(fixture: Fixture): ContactInfo.Surface? {
+  fun nearestSurface(fixture: Fixture): ContactInfo.Surface? {
     return contactSet(fixture).findMapped { it.surface }
   }
 
-  fun oriented(fixture: Fixture, orientation: ContactInfo.Orientation): Boolean {
+  fun isOnSurface(fixture: Fixture, orientation: ContactInfo.Orientation): Boolean {
     return contactSet(fixture).any {
-      val contact = it.contactInfo
-      if (contact != null && contact is ContactInfo.Surface) {
-        return@any contact.orientation == orientation
+      val surface = it.contactInfo
+      when (surface) {
+        is ContactInfo.Surface -> surface.orientation == orientation
+        else -> false
       }
-
-      false
     }
   }
 

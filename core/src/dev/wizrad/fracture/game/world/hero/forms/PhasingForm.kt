@@ -2,14 +2,13 @@ package dev.wizrad.fracture.game.world.hero.forms
 
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Fixture
-import com.badlogic.gdx.physics.box2d.FixtureDef
 import com.badlogic.gdx.physics.box2d.PolygonShape
 import dev.wizrad.fracture.game.world.components.contact.ContactInfo
 import dev.wizrad.fracture.game.world.components.contact.ContactInfo.Orientation
-import dev.wizrad.fracture.game.world.components.contact.ContactType
 import dev.wizrad.fracture.game.world.components.statemachine.State
 import dev.wizrad.fracture.game.world.core.Context
 import dev.wizrad.fracture.game.world.support.contactInfo
+import dev.wizrad.fracture.game.world.support.hero
 import dev.wizrad.fracture.game.world.support.reduceRaycast
 import dev.wizrad.fracture.game.world.support.surface
 import dev.wizrad.fracture.support.Tag
@@ -23,21 +22,15 @@ class PhasingForm(context: Context): Form(context) {
     return Standing(context, phasesLeft = 3)
   }
 
-  override fun defineFixtures(size: Vector2) {
+  override fun defineFixtures() {
+    val polygon = PolygonShape()
+
     // create fixtures
-    val square = PolygonShape()
-    square.setAsBox(size.x / 2, size.y / 2)
-
-    val fixture = FixtureDef()
-    fixture.shape = square
-    fixture.density = 1.0f
-    fixture.friction = 0.2f
-    fixture.filter.categoryBits = ContactType.Hero.bits
-
-    body.createFixture(fixture)
+    createBox(defineBox(polygon))
+    createFoot(defineFoot(polygon))
 
     // dispose shapes
-    square.dispose()
+    polygon.dispose()
   }
 
   // MARK: States
@@ -243,14 +236,14 @@ class PhasingForm(context: Context): Form(context) {
     }
 
     fun startPhasing() {
-      body.fixtureList.forEach {
-        it.contactInfo = ContactInfo.Hero(true)
+      body.fixtureList.forEach { fixture ->
+        fixture.hero?.let { it.isPhasing = true }
       }
     }
 
     fun stopPhasing() {
-      body.fixtureList.forEach {
-        it.contactInfo = ContactInfo.Hero(false)
+      body.fixtureList.forEach { fixture ->
+        fixture.hero?.let { it.isPhasing = false }
       }
     }
 

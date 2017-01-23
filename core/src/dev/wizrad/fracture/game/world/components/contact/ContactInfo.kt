@@ -7,9 +7,11 @@ sealed class ContactInfo {
 
   // MARK: Actors
   class Hero(
-    val isPhasing: Boolean): ContactInfo() {
+    var isPhasing: Boolean = false): ContactInfo() {
     override fun toString(): String = "[$className p=$isPhasing]"
   }
+
+  class Foot: ContactInfo()
 
   // MARK: Obstructions
   interface Obstruction {

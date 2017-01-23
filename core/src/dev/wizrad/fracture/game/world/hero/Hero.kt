@@ -14,7 +14,7 @@ class Hero(
   override val name = "Hero"
 
   // MARK: Properties
-  var form: Form = AirDashForm(context()); private set
+  var form: Form = VanillaForm(context()); private set
 
   // MARK: Behavior
   override fun start() {
@@ -45,12 +45,15 @@ class Hero(
   }
 
   private fun willUpdateForm() {
-    body.fixtureList.forEach { body.destroyFixture(it) }
+    val fixtures = body.fixtureList
+    while (fixtures.size > 0) {
+      body.destroyFixture(fixtures[0])
+    }
     form.destroy()
   }
 
   private fun didUpdateForm() {
-    form.defineFixtures(size)
+    form.defineFixtures()
     form.start()
   }
 
