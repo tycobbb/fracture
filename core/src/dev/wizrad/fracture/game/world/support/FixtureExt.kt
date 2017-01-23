@@ -13,8 +13,8 @@ var Fixture.contactInfo: ContactInfo?
 val Fixture.hero: ContactInfo.Hero?
   get() = userData as? ContactInfo.Hero
 
-val Fixture.foot: ContactInfo.Foot?
-  get() = userData as? ContactInfo.Foot
+val Fixture.appendage: ContactInfo.Appendage?
+  get() = userData as? ContactInfo.Appendage
 
 val Fixture.obstruction: ContactInfo.Obstruction?
   get() = userData as? ContactInfo.Obstruction

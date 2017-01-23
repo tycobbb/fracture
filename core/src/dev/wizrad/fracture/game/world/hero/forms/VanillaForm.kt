@@ -1,6 +1,7 @@
 package dev.wizrad.fracture.game.world.hero.forms
 
 import com.badlogic.gdx.physics.box2d.PolygonShape
+import dev.wizrad.fracture.game.world.components.contact.ContactInfo.Orientation
 import dev.wizrad.fracture.game.world.components.statemachine.State
 import dev.wizrad.fracture.game.world.core.Context
 
@@ -15,7 +16,7 @@ class VanillaForm(context: Context): Form(context) {
 
     // create fixtures
     createBox(defineBox(polygon))
-    createFoot(defineFoot(polygon))
+    createAppendage(polygon, orientation = Orientation.Bottom)
 
     // dispose shapes
     polygon.dispose()

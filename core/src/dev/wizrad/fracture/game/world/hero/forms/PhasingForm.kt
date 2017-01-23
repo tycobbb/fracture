@@ -27,7 +27,7 @@ class PhasingForm(context: Context): Form(context) {
 
     // create fixtures
     createBox(defineBox(polygon))
-    createFoot(defineFoot(polygon))
+    createAppendage(polygon, orientation = Orientation.Bottom)
 
     // dispose shapes
     polygon.dispose()

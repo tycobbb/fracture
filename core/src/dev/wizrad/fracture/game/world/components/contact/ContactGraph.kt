@@ -1,6 +1,8 @@
 package dev.wizrad.fracture.game.world.components.contact
 
 import com.badlogic.gdx.physics.box2d.*
+import dev.wizrad.fracture.game.world.components.contact.ContactInfo.Orientation
+import dev.wizrad.fracture.game.world.components.contact.ContactInfo.Surface
 import dev.wizrad.fracture.game.world.support.contactInfo
 import dev.wizrad.fracture.game.world.support.surface
 import dev.wizrad.fracture.support.Tag
@@ -14,16 +16,24 @@ class ContactGraph: ContactListener, ContactFilter {
   private val defaultSet = { mutableSetOf<Fixture>() }
 
   // MARK: Lookup
-  fun nearestSurface(fixture: Fixture): ContactInfo.Surface? {
+  fun nearestSurface(fixture: Fixture): Surface? {
     return contactSet(fixture).findMapped { it.surface }
   }
 
-  fun isOnSurface(fixture: Fixture, orientation: ContactInfo.Orientation): Boolean {
-    return contactSet(fixture).any {
-      val surface = it.contactInfo
+  fun nearestSurface(fixture: Fixture, filter: (Surface) -> Boolean): Surface? {
+    return contactSet(fixture).findMapped { fixture ->
+      fixture.surface?.let {
+        if (filter(it)) it else null
+      }
+    }
+  }
+
+  fun isOnSurface(fixture: Fixture, orientation: Orientation): Boolean {
+    return contactSet(fixture).any { fixture ->
+      val surface = fixture.surface
       when (surface) {
-        is ContactInfo.Surface -> surface.orientation == orientation
-        else -> false
+        null -> false
+        else -> surface.orientation == orientation
       }
     }
   }
@@ -36,6 +46,7 @@ class ContactGraph: ContactListener, ContactFilter {
   override fun beginContact(contact: Contact?) {
     val contact = contact ?: return
 
+//    debug(Tag.Physics, "$this begin contact: ${contact.fixtureA.contactInfo} on ${contact.fixtureB.contactInfo}")
     contactSet(contact.fixtureA).add(contact.fixtureB)
     contactSet(contact.fixtureB).add(contact.fixtureA)
   }
@@ -43,6 +54,7 @@ class ContactGraph: ContactListener, ContactFilter {
   override fun endContact(contact: Contact?) {
     val contact = contact ?: return
 
+//    debug(Tag.Physics, "$this end contact: ${contact.fixtureA.contactInfo} on ${contact.fixtureB.contactInfo}")
     contactSet(contact.fixtureA).remove(contact.fixtureB)
     contactSet(contact.fixtureB).remove(contact.fixtureA)
   }

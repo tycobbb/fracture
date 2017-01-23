@@ -43,23 +43,33 @@ abstract class Entity(
 
   // MARK: Behavior
   override fun start() {
-    debug(Tag.World, "initializing $debugPrefix")
+    super.start()
 
+    debug(Tag.World, "initializing $debugPrefix")
     @Suppress("ConvertLambdaToReference")
     children.forEach { it.start() }
   }
 
   override fun update(delta: Float) {
+    super.update(delta)
     children.forEach { it.update(delta) }
   }
 
   override fun step(delta: Float) {
+    super.step(delta)
     children.forEach { it.step(delta) }
+  }
+
+  override fun lateUpdate(delta: Float) {
+    super.lateUpdate(delta)
+    children.forEach { it.lateUpdate(delta) }
   }
 
   override fun destroy() {
     @Suppress("ConvertLambdaToReference")
     children.forEach { it.destroy() }
+
+    super.destroy()
   }
 
   fun context(): Context {

@@ -12,6 +12,9 @@ abstract class Behavior {
   open fun step(delta: Float) {
   }
 
+  open fun lateUpdate(delta: Float) {
+  }
+
   open fun destroy() {
   }
 

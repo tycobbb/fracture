@@ -1,16 +1,19 @@
 package dev.wizrad.fracture.game.world.hero.forms
 
 import com.badlogic.gdx.physics.box2d.Body
+import com.badlogic.gdx.physics.box2d.Fixture
 import dev.wizrad.fracture.game.components.controls.Controls
 import dev.wizrad.fracture.game.world.components.contact.ContactGraph
+import dev.wizrad.fracture.game.world.components.contact.ContactInfo
 import dev.wizrad.fracture.game.world.components.contact.ContactInfo.Orientation
 import dev.wizrad.fracture.game.world.components.statemachine.State
 import dev.wizrad.fracture.game.world.core.Context
 import dev.wizrad.fracture.game.world.core.Entity
+import dev.wizrad.fracture.game.world.support.appendage
 import dev.wizrad.fracture.game.world.support.applyImpulseToCenter
-import dev.wizrad.fracture.game.world.support.foot
 import dev.wizrad.fracture.game.world.support.hero
 import dev.wizrad.fracture.support.Tag
+import dev.wizrad.fracture.support.abs
 import dev.wizrad.fracture.support.debug
 import dev.wizrad.fracture.support.extensions.Polar
 import com.badlogic.gdx.physics.box2d.World as PhysicsWorld
@@ -31,7 +34,13 @@ abstract class FormState(
   protected val contact: ContactGraph get() = context.world.contact
 
   // MARK: Direction
-  enum class Direction { None, Left, Right }
+  enum class Direction {
+    None, Left, Right;
+
+    val isNone: Boolean get() = this == None
+    val isLeft: Boolean get() = this == Left
+    val isRight: Boolean get() = this == Right
+  }
 
   // MARK: Helpers- Input
   protected fun requireUniqueJump() {
@@ -63,7 +72,7 @@ abstract class FormState(
   }
 
   // MARK: Helpers - Checks
-  protected fun isFalling(frameTimeout: Int = 10, velocityPeak: Float = -2.7f): Boolean {
+  protected fun hasReachedApex(frameTimeout: Int = 10, velocityPeak: Float = -2.7f): Boolean {
     return frame > frameTimeout && body.linearVelocity.y > velocityPeak
   }
 
@@ -71,24 +80,53 @@ abstract class FormState(
     return body.linearVelocity.len2() <= threshold
   }
 
-  protected fun isOnGround(): Boolean {
-    val foot = body.fixtureList.find { it.foot != null } ?: error("body must have a foot")
-    return contact.isOnSurface(fixture = foot, orientation = Orientation.Top)
+  protected fun isStopping(frameTimeout: Int = 10, threshold: Float = 1.0f): Boolean {
+    return frame > frameTimeout && abs(body.linearVelocity.x) <= threshold
+  }
+
+  protected fun isOnGround(frameTimeout: Int = 0): Boolean {
+    return if (frame < frameTimeout) {
+      false
+    } else {
+      val foot = body.fixtureList.find { it.appendage != null } ?: error("body must have a appendage")
+      contact.isOnSurface(fixture = foot, orientation = Orientation.Top)
+    }
   }
 
   protected fun contactOrientation(): Orientation? {
-    val hero = body.fixtureList.find { it.hero != null } ?: error("body must have a hero")
+    val hero = findFixture { it.hero != null }
     return contact.nearestSurface(hero)?.orientation
   }
 
-  protected fun currentDirection(): Direction {
-    val velocity = body.linearVelocity
+  protected fun wallContactOrientation(): Orientation? {
+    val left = findAppendage { it.orientation.isLeft }
+    val leftContact = contact.nearestSurface(left) { it.orientation.isRight }
+
+    val right = findAppendage { it.orientation.isRight }
+    val rightContact = contact.nearestSurface(right) { it.orientation.isLeft }
+
     return when {
-      velocity.x < 0.0 -> Direction.Left
-      velocity.x > 0.0 -> Direction.Right
+      leftContact != null && rightContact == null -> leftContact.orientation
+      leftContact == null && rightContact != null -> rightContact.orientation
+      else -> null
+    }
+  }
+
+  protected fun currentDirection(vx: Float = body.linearVelocity.x): Direction {
+    return when {
+      vx < 0.0 -> Direction.Left
+      vx > 0.0 -> Direction.Right
       else -> Direction.None
     }
   }
+
+  private fun findFixture(filter: (Fixture) -> Boolean) =
+    body.fixtureList.find(filter) ?: error("missing required fixture")
+
+  private fun findAppendage(filter: (ContactInfo.Appendage) -> Boolean) =
+    findFixture { fixture ->
+      fixture.appendage?.let { filter(it) } ?: false
+    }
 
   // MARK: Helpers - Physics
   protected fun applyJumpImpulse(magnitude: Float) {

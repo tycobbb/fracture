@@ -32,6 +32,11 @@ class Hero(
     form.step(delta)
   }
 
+  override fun lateUpdate(delta: Float) {
+    super.lateUpdate(delta)
+    form.lateUpdate(delta)
+  }
+
   override fun destroy() {
     super.destroy()
     form.destroy()

@@ -37,11 +37,11 @@ class EntityWorld: World {
   }
 
   fun update(delta: Float) {
-    // run updates before physics simulation
+    // 1. update controls / world
     controls.update(delta)
     level.update(delta)
 
-    // update physics according to fixed time step
+    // 2. update physics according to fixed time step
     // See: http://gafferongames.com/game-physics/fix-your-timestep/
     val frame = min(delta, 0.25f)
     accumulator += frame
@@ -51,6 +51,9 @@ class EntityWorld: World {
       physics.step(timestep, 6, 2)
       accumulator -= timestep
     }
+
+    // 3. give the world a last chance to update after physics
+    level.lateUpdate(delta)
   }
 
   companion object {
