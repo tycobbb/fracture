@@ -83,11 +83,11 @@ class Hero(
     fun entity(center: Vector2) = Hero(context, body(Args(center)), size)
 
     // MARK: Body
-    override fun defineBody(options: Args): BodyDef {
-      val body = super.defineBody(options)
+    override fun defineBody(args: Args): BodyDef {
+      val body = super.defineBody(args)
       body.type = BodyType.DynamicBody
       body.fixedRotation = true
-      body.position.set(transform(options.center))
+      body.position.set(transform(args.center))
       return body
     }
   }

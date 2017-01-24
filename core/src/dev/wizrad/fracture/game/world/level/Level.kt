@@ -12,6 +12,7 @@ import dev.wizrad.fracture.game.world.core.Context
 import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.core.EntitySequence
 import dev.wizrad.fracture.game.world.hero.Hero
+import dev.wizrad.fracture.game.world.level.loader.Loader
 import dev.wizrad.fracture.game.world.support.extensions.contactInfo
 
 class Level(
@@ -21,45 +22,44 @@ class Level(
   override val name = "Level"
 
   // MARK: Children
-  val ground = Ground.Factory(context()).entity()
-
-  val wall = Wall.Factory(context()).entity(
-    center = Vector2(
-      (size.x) / 2 + 1.0f,
-      (size.y - ground.size.y - Wall.size.y / 2)
-    )
-  )
-
+  val walls: List<Wall>
   val hero = Hero.Factory(context()).entity(
     center = Vector2(
       (size.x) / 2,
-      (size.y - ground.size.y - Hero.size.y / 2)
+      (size.y - 1.0f /* floor height */ - Hero.size.y / 2)
     )
   )
 
-  // MARK: Lifecycle
+  init {
+    val level = Loader().load()
+    val factory = Wall.Factory(context())
+
+    walls = level.walls.map {
+      factory.entity(it)
+    }
+  }
+
   override fun children(sequence: EntitySequence) =
     super.children(sequence)
-      .then(ground)
-      .then(wall)
+      .then(walls)
       .then(hero)
 
   class Factory(context: Context): Entity.UnitFactory(context) {
-    private val size: Vector2 = Vector2(10.0f, 17.75f)
+    private val size: Vector2 = Vector2(9.0f, 16.0f)
 
     // MARK: Output
     fun entity() = Level(context, body(), size)
 
     // MARK: Body
-    override fun defineBody(options: Unit): BodyDef {
-      val body = super.defineBody(options)
+    override fun defineBody(args: Unit): BodyDef {
+      val body = super.defineBody(args)
       body.type = BodyDef.BodyType.StaticBody
       body.position.set(size.cpy().scl(0.5f))
       return body
     }
 
-    override fun defineFixtures(body: Body, options: Unit) {
-      super.defineFixtures(body, options)
+    override fun defineFixtures(body: Body, args: Unit) {
+      super.defineFixtures(body, args)
 
       val width = size.x / 2
       val height = size.y / 2

@@ -20,7 +20,7 @@ class Renderer constructor(
   val debugr = Box2DDebugRenderer()
 
   // MARK: Properties
-  private val _scale = Vector2(32.0f, 32.0f)
+  private val _scale = Vector2(41.66f, 41.66f)
   private val debugEnabled = true
 
   // MARK: Lifecycle

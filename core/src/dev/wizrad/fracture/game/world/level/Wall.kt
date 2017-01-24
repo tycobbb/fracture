@@ -20,24 +20,28 @@ class Wall(
 
   // MARK: Lifecycle
   class Factory(context: Context): Entity.Factory<Factory.Args>(context) {
-    data class Args(val center: Vector2)
+    class Args {
+      lateinit var tag: String
+      lateinit var center: Vector2
+      lateinit var size: Vector2
+    }
 
     // MARK: Output
-    fun entity(center: Vector2) = Wall(context, body(Args(center)), size)
+    fun entity(args: Args) = Wall(context, body(args), args.size)
 
     // MARK: Body
-    override fun defineBody(options: Args): BodyDef {
-      val body = super.defineBody(options)
+    override fun defineBody(args: Args): BodyDef {
+      val body = super.defineBody(args)
       body.type = BodyDef.BodyType.StaticBody
-      body.position.set(transform(options.center))
+      body.position.set(transform(args.center))
       return body
     }
 
-    override fun defineFixtures(body: Body, options: Args) {
-      super.defineFixtures(body, options)
+    override fun defineFixtures(body: Body, args: Args) {
+      super.defineFixtures(body, args)
 
-      val width = size.x / 2
-      val height = size.y / 2
+      val width = args.size.x / 2
+      val height = args.size.y / 2
       val rect = PolygonShape()
 
       // create edges
@@ -77,9 +81,5 @@ class Wall(
         isPhaseable = true
       )
     }
-  }
-
-  companion object {
-    val size = Vector2(1.0f, 4.0f)
   }
 }

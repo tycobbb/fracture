@@ -92,18 +92,18 @@ abstract class Entity(
     val parent: Entity? get() = context.parent
 
     // MARK: Body
-    protected fun body(options: T): Body {
-      val definition = defineBody(options)
+    protected fun body(args: T): Body {
+      val definition = defineBody(args)
       val body = context.world.physics.createBody(definition)
-      defineFixtures(body, options)
+      defineFixtures(body, args)
       return body
     }
 
-    protected open fun defineBody(options: T): BodyDef {
+    protected open fun defineBody(args: T): BodyDef {
       return BodyDef()
     }
 
-    protected open fun defineFixtures(body: Body, options: T) {
+    protected open fun defineFixtures(body: Body, args: T) {
     }
 
     // MARK: Geometry
@@ -121,7 +121,7 @@ abstract class Entity(
   abstract class UnitFactory(context: Context): Factory<Unit>(context) {
     // MARK: Body
     protected fun body(): Body {
-      return body(options = Unit)
+      return body(args = Unit)
     }
   }
 }

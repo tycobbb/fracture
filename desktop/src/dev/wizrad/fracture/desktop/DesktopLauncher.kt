@@ -7,9 +7,8 @@ import dev.wizrad.fracture.Fracture
 object DesktopLauncher {
   @JvmStatic fun main(arg: Array<String>) {
     val config = LwjglApplicationConfiguration()
-    config.width = 320
-    config.height = 568
-
+    config.width = 375
+    config.height = 667
     LwjglApplication(Fracture(), config)
   }
 }
