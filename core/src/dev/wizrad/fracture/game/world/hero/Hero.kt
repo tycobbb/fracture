@@ -4,16 +4,15 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
 import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType
-import dev.wizrad.fracture.game.world.core.Context
 import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.hero.core.Form
 import dev.wizrad.fracture.game.world.hero.forms.*
 
 class Hero(
-  context: Context, body: Body, size: Vector2): Entity(context, body, size) {
+  body: Body, size: Vector2): Entity(body, size) {
 
   // MARK: Properties
-  var form: Form = DebugForm(context()); private set
+  var form: Form = DebugForm(this); private set
 
   // MARK: Behavior
   override fun start() {
@@ -63,26 +62,26 @@ class Hero(
 
   private fun createRandomForm(): Form {
     return when (form) {
-      is VanillaForm -> SpaceJumpForm(context())
-      is SpaceJumpForm -> ReboundForm(context())
-      is ReboundForm -> SpearForm(context())
-      is SpearForm -> PhasingForm(context())
-      is PhasingForm -> AirDashForm(context())
-      is AirDashForm -> FluidForm(context())
-      is FluidForm -> FlutterForm(context())
-      is FlutterForm -> DebugForm(context())
-      else -> VanillaForm(context())
+      is VanillaForm -> SpaceJumpForm(this)
+      is SpaceJumpForm -> ReboundForm(this)
+      is ReboundForm -> SpearForm(this)
+      is SpearForm -> PhasingForm(this)
+      is PhasingForm -> AirDashForm(this)
+      is AirDashForm -> FluidForm(this)
+      is FluidForm -> FlutterForm(this)
+      is FlutterForm -> DebugForm(this)
+      else -> VanillaForm(this)
     }
   }
 
   // MARK: Factory
   data class Args(val center: Vector2)
 
-  class Factory(context: Context): Entity.Factory<Hero, Args>(context) {
+  class Factory(parent: Entity?): Entity.Factory<Hero, Args>(parent) {
     fun entity(center: Vector2) = entity(Args(center))
 
     // MARK: Output
-    override fun entity(args: Args) = Hero(context, body(args), size)
+    override fun entity(args: Args) = Hero(body(args), size)
 
     // MARK: Body
     override fun defineBody(args: Args): BodyDef {

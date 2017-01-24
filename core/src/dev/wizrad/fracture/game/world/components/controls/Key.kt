@@ -1,4 +1,4 @@
-package dev.wizrad.fracture.game.components.controls
+package dev.wizrad.fracture.game.world.components.controls
 
 import com.badlogic.gdx.Gdx
 import dev.wizrad.fracture.game.core.Updatable

@@ -2,15 +2,15 @@ package dev.wizrad.fracture.game.world.hero.forms
 
 import com.badlogic.gdx.physics.box2d.PolygonShape
 import dev.wizrad.fracture.game.world.components.statemachine.State
-import dev.wizrad.fracture.game.world.core.Context
+import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.hero.core.Direction
 import dev.wizrad.fracture.game.world.hero.core.Form
 import dev.wizrad.fracture.game.world.hero.core.FormState
 
-class SpaceJumpForm(context: Context): Form(context) {
+class SpaceJumpForm(entity: Entity): Form(entity) {
   // MARK: Form
   override fun initialState(): State {
-    return Standing(context)
+    return Standing(this)
   }
 
   override fun defineFixtures() {
@@ -25,7 +25,7 @@ class SpaceJumpForm(context: Context): Form(context) {
   }
 
   // MARK: States
-  class Standing(context: Context): FormState(context) {
+  class Standing(form: SpaceJumpForm): FormState<SpaceJumpForm>(form) {
     private val runMag = 7.5f
 
     override fun step(delta: Float) {
@@ -35,26 +35,26 @@ class SpaceJumpForm(context: Context): Form(context) {
 
     override fun nextState(): State? {
       return if (!isOnGround()) {
-        Jumping(context)
+        Jumping(form)
       } else if (controls.jump.isPressedUnique) {
-        Windup(context)
+        Windup(form)
       } else null
     }
   }
 
-  class Windup(context: Context): FormState(context) {
+  class Windup(form: SpaceJumpForm): FormState<SpaceJumpForm>(form) {
     private val frameLength = 4
 
     override fun nextState(): State? {
       if (frame >= frameLength) {
-        return JumpStart(context, isShort = !controls.jump.isPressed)
+        return JumpStart(form, isShort = !controls.jump.isPressed)
       }
 
       return null
     }
   }
 
-  class JumpStart(context: Context, isShort: Boolean): FormState(context) {
+  class JumpStart(form: SpaceJumpForm, isShort: Boolean): FormState<SpaceJumpForm>(form) {
     private val frameLength = 3
     private val jumpMag = if (isShort) 4.0f else 5.5f
 
@@ -64,11 +64,11 @@ class SpaceJumpForm(context: Context): Form(context) {
     }
 
     override fun nextState(): State? {
-      return if (frame >= frameLength) Jumping(context) else null
+      return if (frame >= frameLength) Jumping(form) else null
     }
   }
 
-  class Jumping(context: Context): FormState(context) {
+  class Jumping(form: SpaceJumpForm): FormState<SpaceJumpForm>(form) {
     private val driftMag = 10.0f
     private var canJump: Boolean = false
 
@@ -85,28 +85,28 @@ class SpaceJumpForm(context: Context): Form(context) {
 
     override fun nextState(): State? {
       if (isOnGround()) {
-        return Landing(context)
+        return Landing(form)
       } else if (controls.jump.isPressedUnique && canJump) {
-        return Windup2(context)
+        return Windup2(form)
       }
 
       return null
     }
   }
 
-  class Windup2(context: Context): FormState(context) {
+  class Windup2(form: SpaceJumpForm): FormState<SpaceJumpForm>(form) {
     private val frameLength = 4
 
     override fun nextState(): State? {
       if (frame >= frameLength) {
-        return JumpStart2(context, isShort = !controls.jump.isPressed, direction = inputDirection())
+        return JumpStart2(form, isShort = !controls.jump.isPressed, direction = inputDirection())
       }
 
       return null
     }
   }
 
-  class JumpStart2(context: Context, direction: Direction, isShort: Boolean): FormState(context) {
+  class JumpStart2(form: SpaceJumpForm, isShort: Boolean, direction: Direction): FormState<SpaceJumpForm>(form) {
     private val frameLength = 3
     private val direction = direction
     private val jumpMag = if (isShort) 5.0f else 7.5f
@@ -123,11 +123,11 @@ class SpaceJumpForm(context: Context): Form(context) {
     }
 
     override fun nextState(): State? {
-      return if (frame >= frameLength) Jumping2(context) else null
+      return if (frame >= frameLength) Jumping2(form) else null
     }
   }
 
-  class Jumping2(context: Context): FormState(context) {
+  class Jumping2(form: SpaceJumpForm): FormState<SpaceJumpForm>(form) {
     private val driftMag = 5.0f
 
     override fun step(delta: Float) {
@@ -136,11 +136,11 @@ class SpaceJumpForm(context: Context): Form(context) {
     }
 
     override fun nextState(): State? {
-      return if (isOnGround()) Landing(context) else null
+      return if (isOnGround()) Landing(form) else null
     }
   }
 
-  class Landing(context: Context): FormState(context) {
+  class Landing(form: SpaceJumpForm): FormState<SpaceJumpForm>(form) {
     private val frameLength = 3
 
     override fun start() {
@@ -149,7 +149,7 @@ class SpaceJumpForm(context: Context): Form(context) {
     }
 
     override fun nextState(): State? {
-      return if (frame >= frameLength) Standing(context) else null
+      return if (frame >= frameLength) Standing(form) else null
     }
   }
 }

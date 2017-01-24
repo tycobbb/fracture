@@ -1,13 +1,12 @@
 package dev.wizrad.fracture.game.world.hero.core
 
+import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
 import com.badlogic.gdx.physics.box2d.Fixture
-import dev.wizrad.fracture.game.components.controls.Controls
-import dev.wizrad.fracture.game.world.components.contact.ContactGraph
 import dev.wizrad.fracture.game.world.components.contact.Orientation
 import dev.wizrad.fracture.game.world.components.statemachine.State
-import dev.wizrad.fracture.game.world.core.Context
-import dev.wizrad.fracture.game.world.core.Entity
+import dev.wizrad.fracture.game.world.core.Scene
+import dev.wizrad.fracture.game.world.core.SceneAware
 import dev.wizrad.fracture.game.world.support.extensions.applyImpulseToCenter
 import dev.wizrad.fracture.game.world.support.extensions.foot
 import dev.wizrad.fracture.game.world.support.extensions.hero
@@ -17,20 +16,16 @@ import dev.wizrad.fracture.support.debug
 import dev.wizrad.fracture.support.extensions.Polar
 import com.badlogic.gdx.physics.box2d.World as PhysicsWorld
 
-abstract class FormState(
-  protected val context: Context): State() {
+abstract class FormState<out F: Form>(
+  form: F, scene: Scene = Scene.instance): State(), SceneAware {
+
+  // MARK: SceneAware
+  override val scene = scene
 
   // MARK: Properties
-  /** The entity this state is attached to */
-  protected val entity: Entity get() = context.parent!!
-  /** The body of this state's attached entity */
-  protected val body: Body get() = entity.body
-  /** A reference to the world's shared controls */
-  protected val controls: Controls get() = context.world.controls
-  /** A reference to the world's shared physics world */
-  protected val physics: com.badlogic.gdx.physics.box2d.World get() = context.world.physics
-  /** A reference to the world's shared contact graph */
-  protected val contact: ContactGraph get() = context.world.contact
+  protected val form: F = form
+  protected val size: Vector2 = form.size
+  protected val body: Body get() = form.body
 
   // MARK: Helpers- Input
   protected fun requireUniqueJump() {

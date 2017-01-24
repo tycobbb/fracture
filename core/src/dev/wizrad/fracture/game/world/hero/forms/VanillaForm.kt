@@ -2,14 +2,14 @@ package dev.wizrad.fracture.game.world.hero.forms
 
 import com.badlogic.gdx.physics.box2d.PolygonShape
 import dev.wizrad.fracture.game.world.components.statemachine.State
-import dev.wizrad.fracture.game.world.core.Context
+import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.hero.core.Form
 import dev.wizrad.fracture.game.world.hero.core.FormState
 
-class VanillaForm(context: Context): Form(context) {
+class VanillaForm(entity: Entity): Form(entity) {
   // MARK: Form
   override fun initialState(): State {
-    return Standing(context)
+    return Standing(this)
   }
 
   override fun defineFixtures() {
@@ -24,7 +24,7 @@ class VanillaForm(context: Context): Form(context) {
   }
 
   // MARK: States
-  class Standing(context: Context): FormState(context) {
+  class Standing(form: VanillaForm): FormState<VanillaForm>(form) {
     private val runMag = 7.5f
 
     override fun step(delta: Float) {
@@ -34,26 +34,26 @@ class VanillaForm(context: Context): Form(context) {
 
     override fun nextState(): State? {
       return if (!isOnGround()) {
-        Jumping(context)
+        Jumping(form)
       } else if (controls.jump.isPressedUnique) {
-        JumpWindup(context)
+        JumpWindup(form)
       } else null
     }
   }
 
-  class JumpWindup(context: Context): FormState(context) {
+  class JumpWindup(form: VanillaForm): FormState<VanillaForm>(form) {
     private val frameLength = 7
 
     override fun nextState(): State? {
       if (frame >= frameLength) {
-        return JumpStart(context, isShort = !controls.jump.isPressed)
+        return JumpStart(form, isShort = !controls.jump.isPressed)
       }
 
       return null
     }
   }
 
-  class JumpStart(context: Context, isShort: Boolean): FormState(context) {
+  class JumpStart(form: VanillaForm, isShort: Boolean): FormState<VanillaForm>(form) {
     private val frameLength = 3
     private val jumpMag = if (isShort) 4.75f else 8.25f
 
@@ -62,11 +62,11 @@ class VanillaForm(context: Context): Form(context) {
     }
 
     override fun nextState(): State? {
-      return if (frame >= frameLength) Jumping(context) else null
+      return if (frame >= frameLength) Jumping(form) else null
     }
   }
 
-  class Jumping(context: Context): FormState(context) {
+  class Jumping(form: VanillaForm): FormState<VanillaForm>(form) {
     private val driftMag = 7.0f
 
     override fun step(delta: Float) {
@@ -75,11 +75,11 @@ class VanillaForm(context: Context): Form(context) {
     }
 
     override fun nextState(): State? {
-      return if (isOnGround()) Landing(context) else null
+      return if (isOnGround()) Landing(form) else null
     }
   }
 
-  class Landing(context: Context): FormState(context) {
+  class Landing(form: VanillaForm): FormState<VanillaForm>(form) {
     private val frameLength = 5
 
     override fun start() {
@@ -89,9 +89,9 @@ class VanillaForm(context: Context): Form(context) {
 
     override fun nextState(): State? = when {
       frame >= frameLength ->
-        Standing(context)
+        Standing(form)
       controls.jump.isPressedUnique ->
-        JumpWindup(context)
+        JumpWindup(form)
       else -> null
     }
   }

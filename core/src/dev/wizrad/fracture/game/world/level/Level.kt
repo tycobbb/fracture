@@ -1,13 +1,9 @@
 package dev.wizrad.fracture.game.world.level
 
 import com.badlogic.gdx.math.Vector2
-import com.badlogic.gdx.physics.box2d.Body
-import com.badlogic.gdx.physics.box2d.BodyDef
-import com.badlogic.gdx.physics.box2d.FixtureDef
-import com.badlogic.gdx.physics.box2d.PolygonShape
+import com.badlogic.gdx.physics.box2d.*
 import dev.wizrad.fracture.game.world.components.contact.ContactInfo
 import dev.wizrad.fracture.game.world.components.contact.Orientation
-import dev.wizrad.fracture.game.world.core.Context
 import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.core.EntitySequence
 import dev.wizrad.fracture.game.world.hero.Hero
@@ -15,38 +11,38 @@ import dev.wizrad.fracture.game.world.level.loader.Loader
 import dev.wizrad.fracture.game.world.support.extensions.contactInfo
 
 class Level(
-  context: Context, body: Body, size: Vector2): Entity(context, body, size) {
+  body: Body, size: Vector2): Entity(body, size) {
 
   // MARK: Children
   val hero: Hero
   val walls: List<Wall>
   val platforms: List<Platform>
 
+  // MARK: Lifecycle
   init {
     val level = Loader().load()
 
-    val wallFactory = Wall.Factory(context())
-    walls = wallFactory.entities(level.walls)
-
-    val platformFactory = Platform.Factory(context())
-    platforms = platformFactory.entities(level.platforms)
-
-    val heroFactory = Hero.Factory(context())
-    hero = heroFactory.entity(
-      center = Vector2(level.entryPoint.center)
-    )
+    hero = Hero.Factory(parent = this)
+      .entity(center = Vector2(level.entryPoint.center))
+    walls = Wall.Factory(parent = this)
+      .entities(level.walls)
+    platforms = Platform.Factory(parent = this)
+      .entities(level.platforms)
   }
 
-  override fun children(sequence: EntitySequence) =
-    super.children(sequence)
+  override fun children(sequence: EntitySequence): EntitySequence {
+    return super.children(sequence)
+      .then(walls)
       .then(platforms)
       .then(hero)
+  }
 
-  class Factory(context: Context): Entity.UnitFactory<Level>(context) {
+  // MARK: Factory
+  class Factory: Entity.UnitFactory<Level>(null) {
     private val size: Vector2 = Vector2(9.0f, 16.0f)
 
     // MARK: Output
-    override fun entity(args: Unit) = Level(context, body(), size)
+    override fun entity(args: Unit) = Level(body(), size)
 
     // MARK: Body
     override fun defineBody(args: Unit): BodyDef {
@@ -63,36 +59,31 @@ class Level(
       val height = size.y / 2
       val rect = PolygonShape()
 
-      // create left wall
+      // create left blast zone
       rect.setAsBox(0.0f, height, scratch.set(0.0f, height), 0.0f)
-      val leftWall = body.createFixture(defineWall(rect))
-      leftWall.contactInfo = ContactInfo.Surface(
-        orientation = Orientation.Right
-      )
+      createBlastZone(body, rect, orientation = Orientation.Right)
 
-      // create right wall
+      // create right blast zone
       rect.setAsBox(0.0f, height, scratch.set(size.x, height), 0.0f)
-      val rightWall = body.createFixture(defineWall(rect))
-      rightWall.contactInfo = ContactInfo.Surface(
-        orientation = Orientation.Left
-      )
+      createBlastZone(body, rect, orientation = Orientation.Left)
 
-      // create ceiling
+      // create top blast zone
       rect.setAsBox(width, 0.0f, scratch.set(width, 0.0f), 0.0f)
-      val ceiling = body.createFixture(defineWall(rect))
-      ceiling.contactInfo = ContactInfo.Surface(
-        orientation = Orientation.Bottom
-      )
+      createBlastZone(body, rect, orientation = Orientation.Bottom)
 
       // dispose shapes
       rect.dispose()
     }
 
-    private fun defineWall(rect: PolygonShape): FixtureDef {
-      val wallDef = FixtureDef()
-      wallDef.shape = rect
-      wallDef.isSensor = true
-      return wallDef
+    private fun createBlastZone(body: Body, rect: PolygonShape, orientation: Orientation): Fixture {
+      val blastZoneDef = FixtureDef()
+      blastZoneDef.shape = rect
+      blastZoneDef.isSensor = true
+
+      val blastZone = body.createFixture(blastZoneDef)
+      blastZone.contactInfo = ContactInfo.Surface(orientation = orientation)
+
+      return blastZone
     }
   }
 }

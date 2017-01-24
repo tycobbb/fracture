@@ -8,12 +8,12 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton
 import com.badlogic.gdx.utils.Align
 import com.badlogic.gdx.utils.viewport.ScreenViewport
 import dev.wizrad.fracture.game.ui.support.onChange
-import dev.wizrad.fracture.game.world.EntityWorld
+import dev.wizrad.fracture.game.world.MainScene
 import dev.wizrad.fracture.game.world.hero.Hero
 import dev.wizrad.fracture.game.world.hero.forms.PhasingForm
 
 class MainStage(
-  private val world: EntityWorld): Stage(ScreenViewport()) {
+  private val world: MainScene): Stage(ScreenViewport()) {
 
   // MARK: Properties
   private val skin = Skin(Gdx.files.internal("uiskin.json"))

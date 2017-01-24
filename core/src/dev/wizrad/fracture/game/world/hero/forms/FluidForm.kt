@@ -4,16 +4,16 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.PolygonShape
 import dev.wizrad.fracture.game.world.components.contact.Orientation
 import dev.wizrad.fracture.game.world.components.statemachine.State
-import dev.wizrad.fracture.game.world.core.Context
+import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.hero.core.Form
 import dev.wizrad.fracture.game.world.hero.core.FormState
 import dev.wizrad.fracture.support.Maths
 import dev.wizrad.fracture.support.abs
 
-class FluidForm(context: Context): Form(context) {
+class FluidForm(entity: Entity): Form(entity) {
   // MARK: Form
   override fun initialState(): State {
-    return Standing(context)
+    return Standing(this)
   }
 
   override fun defineFixtures() {
@@ -30,31 +30,31 @@ class FluidForm(context: Context): Form(context) {
   }
 
   // MARK: States
-  class Standing(context: Context): FormState(context) {
+  class Standing(form: FluidForm): FormState<FluidForm>(form) {
     override fun nextState(): State? = when {
       !isOnGround() ->
-        Jumping(context)
+        Jumping(form)
       controls.jump.isPressedUnique ->
-        JumpWindup(context)
+        JumpWindup(form)
       controls.left.isPressed || controls.right.isPressed ->
-        RunStart(context)
+        RunStart(form)
       else -> null
     }
   }
 
-  class RunStart(context: Context): FormState(context) {
+  class RunStart(form: FluidForm): FormState<FluidForm>(form) {
     private val frameLength = 3
 
     override fun nextState(): State? = when {
       frame < frameLength ->
         null
       canStartRunning() ->
-        Running(context)
-      else -> Standing(context)
+        Running(form)
+      else -> Standing(form)
     }
   }
 
-  class Running(context: Context, impact: Impact? = null): FormState(context) {
+  class Running(form: FluidForm, impact: Impact? = null): FormState<FluidForm>(form) {
     private val impact = impact
     private val runMag = 12.5f
     private val wallRunFrameTimeout = 5
@@ -86,19 +86,19 @@ class FluidForm(context: Context): Form(context) {
 
         when {
           direction.isRight && orientation == Orientation.Left ->
-            return WallRunning(context, impact = Impact(lastVelocity, Orientation.Left))
+            return WallRunning(form, impact = Impact(lastVelocity, Orientation.Left))
           direction.isLeft && orientation == Orientation.Right ->
-            return WallRunning(context, impact = Impact(lastVelocity, Orientation.Right))
+            return WallRunning(form, impact = Impact(lastVelocity, Orientation.Right))
         }
       }
 
       return when {
         isStopping() ->
-          Standing(context) // TODO: probably go into a run-stop type state
+          Standing(form) // TODO: probably go into a run-stop type state
         !isOnGround() ->
-          Jumping(context)
+          Jumping(form)
         controls.jump.isPressedUnique ->
-          JumpWindup(context)
+          JumpWindup(form)
         else -> null
       }
     }
@@ -109,17 +109,17 @@ class FluidForm(context: Context): Form(context) {
     }
   }
 
-  class JumpWindup(context: Context): FormState(context) {
+  class JumpWindup(form: FluidForm): FormState<FluidForm>(form) {
     private val frameLength = 4
 
     override fun nextState(): State? = when {
       frame >= frameLength ->
-        JumpStart(context, isShort = !controls.jump.isPressed)
+        JumpStart(form, isShort = !controls.jump.isPressed)
       else -> null
     }
   }
 
-  class JumpStart(context: Context, isShort: Boolean): FormState(context) {
+  class JumpStart(form: FluidForm, isShort: Boolean): FormState<FluidForm>(form) {
     private val frameLength = 3
     private val jumpMag = if (isShort) 2.5f else 5.0f
 
@@ -130,12 +130,12 @@ class FluidForm(context: Context): Form(context) {
 
     override fun nextState(): State? = when {
       frame >= frameLength ->
-        Jumping(context)
+        Jumping(form)
       else -> null
     }
   }
 
-  class Jumping(context: Context): FormState(context) {
+  class Jumping(form: FluidForm): FormState<FluidForm>(form) {
     private val driftMag = 5.0f
     private var lastVelocity = body.linearVelocity.cpy()
 
@@ -154,17 +154,17 @@ class FluidForm(context: Context): Form(context) {
 
       return when {
         orientation == Orientation.Left ->
-          WallRunning(context, impact = Impact(lastVelocity, orientation))
+          WallRunning(form, impact = Impact(lastVelocity, orientation))
         orientation == Orientation.Right ->
-          WallRunning(context, impact = Impact(lastVelocity, orientation))
+          WallRunning(form, impact = Impact(lastVelocity, orientation))
         isOnGround() ->
-          Landing(context)
+          Landing(form)
         else -> null
       }
     }
   }
 
-  class Landing(context: Context): FormState(context) {
+  class Landing(form: FluidForm): FormState<FluidForm>(form) {
     private val frameLength = 3
 
     override fun start() {
@@ -174,12 +174,12 @@ class FluidForm(context: Context): Form(context) {
 
     override fun nextState(): State? = when {
       frame >= frameLength ->
-        Standing(context)
+        Standing(form)
       else -> null
     }
   }
 
-  class WallRunning(context: Context, impact: Impact): FormState(context) {
+  class WallRunning(form: FluidForm, impact: Impact): FormState<FluidForm>(form) {
     private val impact = impact
     private val landingFrameTimeout = 5
     private val transferDecay = 0.85f
@@ -198,11 +198,11 @@ class FluidForm(context: Context): Form(context) {
 
     override fun nextState(): State? = when {
       isOnGround(frameTimeout = landingFrameTimeout) ->
-        Running(context, impact = Impact(lastVelocity, impact.orientation))
+        Running(form, impact = Impact(lastVelocity, impact.orientation))
       isAirborne() ->
-        Jumping(context)
+        Jumping(form)
       controls.jump.isPressedUnique ->
-        WallJumpWindup(context, impact.orientation)
+        WallJumpWindup(form, impact.orientation)
       else -> null
     }
 
@@ -218,18 +218,18 @@ class FluidForm(context: Context): Form(context) {
     }
   }
 
-  class WallJumpWindup(context: Context, orientation: Orientation): FormState(context) {
+  class WallJumpWindup(form: FluidForm, orientation: Orientation): FormState<FluidForm>(form) {
     private val orientation = orientation
     private val frameLength = 4
 
     override fun nextState(): State? = when {
       frame >= frameLength ->
-        WallJumpStart(context, orientation, isShort = !controls.jump.isPressed)
+        WallJumpStart(form, orientation, isShort = !controls.jump.isPressed)
       else -> null
     }
   }
 
-  class WallJumpStart(context: Context, orientation: Orientation, isShort: Boolean): FormState(context) {
+  class WallJumpStart(form: FluidForm, orientation: Orientation, isShort: Boolean): FormState<FluidForm>(form) {
     private val frameLength = 3
     private val wallJumpMag = if (isShort) 6.0f else 8.0f
     private val wallJumpAngle = if (orientation.isLeft) {
@@ -246,7 +246,7 @@ class FluidForm(context: Context): Form(context) {
 
     override fun nextState(): State? = when {
       frame >= frameLength ->
-        Jumping(context)
+        Jumping(form)
       else -> null
     }
   }

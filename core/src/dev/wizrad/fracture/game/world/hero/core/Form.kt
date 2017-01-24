@@ -1,5 +1,6 @@
 package dev.wizrad.fracture.game.world.hero.core
 
+import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
 import com.badlogic.gdx.physics.box2d.Fixture
 import com.badlogic.gdx.physics.box2d.FixtureDef
@@ -8,16 +9,21 @@ import dev.wizrad.fracture.game.world.components.contact.ContactInfo
 import dev.wizrad.fracture.game.world.components.contact.ContactType
 import dev.wizrad.fracture.game.world.components.statemachine.State
 import dev.wizrad.fracture.game.world.components.statemachine.StateMachine
-import dev.wizrad.fracture.game.world.core.Context
 import dev.wizrad.fracture.game.world.core.Entity
+import dev.wizrad.fracture.game.world.core.Scene
+import dev.wizrad.fracture.game.world.core.SceneAware
 import dev.wizrad.fracture.game.world.support.extensions.contactInfo
 
 abstract class Form(
-  val context: Context): StateMachine() {
+  entity: Entity, scene: Scene = Scene.instance): StateMachine(), SceneAware {
+
+  // MARK: SceneAware
+  override val scene = scene
 
   // MARK: Properties
-  protected val entity: Entity get() = context.parent!!
-  protected val body: Body get() = entity.body
+  val entity: Entity = entity
+  val body: Body get() = entity.body
+  val size: Vector2 get() = entity.size
 
   // MARK: Lifecycle
   protected abstract fun initialState(): State

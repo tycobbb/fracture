@@ -8,20 +8,19 @@ import com.badlogic.gdx.physics.box2d.PolygonShape
 import dev.wizrad.fracture.game.world.components.contact.ContactInfo
 import dev.wizrad.fracture.game.world.components.contact.ContactType
 import dev.wizrad.fracture.game.world.components.contact.Orientation
-import dev.wizrad.fracture.game.world.core.Context
 import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.level.loader.LevelFeatureArgs
 import dev.wizrad.fracture.game.world.support.extensions.contactInfo
 
 class Platform(
-  context: Context, body: Body, size: Vector2): Entity(context, body, size) {
+  body: Body, size: Vector2): Entity(body, size) {
 
-  // MARK: Lifecycle
+  // MARK: Factory
   class Args: LevelFeatureArgs()
 
-  class Factory(context: Context): Entity.Factory<Platform, Args>(context) {
+  class Factory(parent: Entity?): Entity.Factory<Platform, Args>(parent) {
     // MARK: Output
-    override fun entity(args: Args) = Platform(context, body(args), args.size)
+    override fun entity(args: Args) = Platform(body(args), args.size)
 
     // MARK: Body
     override fun defineBody(args: Args): BodyDef {

@@ -9,21 +9,21 @@ import dev.wizrad.fracture.game.components.projection.then
 import dev.wizrad.fracture.game.renderer.core.Camera
 import dev.wizrad.fracture.game.renderer.core.Renderer
 import dev.wizrad.fracture.game.ui.core.MainStage
-import dev.wizrad.fracture.game.world.EntityWorld
+import dev.wizrad.fracture.game.world.MainScene
 import dev.wizrad.fracture.support.extensions.Vector2
 
 class MainScreen: Screen {
-  private val world = EntityWorld()
-  private val renderer = Renderer(world, camera = Camera())
-  private val stage = MainStage(world)
+  private val scene = MainScene()
+  private val renderer = Renderer(scene, camera = Camera())
+  private val stage = MainStage(scene)
 
   init {
-    Gdx.input.inputProcessor = InputMultiplexer(stage, world.controls.touch)
+    Gdx.input.inputProcessor = InputMultiplexer(stage, scene.controls.touch)
   }
 
   // MARK: Screen
   override fun render(delta: Float) {
-    world.update(delta)
+    scene.update(delta)
     renderer.update(delta)
     stage.update(delta)
   }

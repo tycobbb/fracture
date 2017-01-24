@@ -8,10 +8,10 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer
 import dev.wizrad.fracture.game.core.Renderable
 import dev.wizrad.fracture.game.renderer.render
-import dev.wizrad.fracture.game.world.EntityWorld
+import dev.wizrad.fracture.game.world.MainScene
 
 class Renderer constructor(
-  val world: EntityWorld,
+  val scene: MainScene,
   val camera: Camera): Renderable {
 
   // MARK: Renderers
@@ -32,9 +32,9 @@ class Renderer constructor(
     batch.projectionMatrix = camera.combined
     shaper.projectionMatrix = camera.combined
 
-    // render the world
+    // render the scene
     batch.begin()
-    render(world, delta)
+    render(scene, delta)
     render(debugr)
     batch.end()
   }
@@ -50,7 +50,7 @@ class Renderer constructor(
 
     val debugMatrix = camera.combined.cpy()
     debugMatrix.scale(_scale.x, _scale.y, 1.0f)
-    debugRenderer.render(world.physics, debugMatrix)
+    debugRenderer.render(scene.world, debugMatrix)
   }
 
   // MARK: Scale

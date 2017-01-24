@@ -1,4 +1,4 @@
-package dev.wizrad.fracture.game.components.controls
+package dev.wizrad.fracture.game.world.components.controls
 
 import com.badlogic.gdx.InputProcessor
 import com.badlogic.gdx.math.Vector2
@@ -13,7 +13,7 @@ class Touch: InputProcessor {
   // MARK: Updatable
   private fun setLocation(screenX: Int, screenY: Int) {
     val point = scratch.set(screenX.toFloat(), screenY.toFloat())
-    val projected = project(point, from = Projections.touch, to = Projections.world)
+    val projected = project(point, from = Projections.Companion.touch, to = Projections.Companion.world)
     location.set(projected)
   }
 
