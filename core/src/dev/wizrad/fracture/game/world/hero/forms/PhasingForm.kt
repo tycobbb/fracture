@@ -7,6 +7,8 @@ import dev.wizrad.fracture.game.world.components.contact.ContactInfo
 import dev.wizrad.fracture.game.world.components.contact.Orientation
 import dev.wizrad.fracture.game.world.components.statemachine.State
 import dev.wizrad.fracture.game.world.core.Context
+import dev.wizrad.fracture.game.world.hero.core.Form
+import dev.wizrad.fracture.game.world.hero.core.FormState
 import dev.wizrad.fracture.game.world.support.contactInfo
 import dev.wizrad.fracture.game.world.support.hero
 import dev.wizrad.fracture.game.world.support.reduceRaycast

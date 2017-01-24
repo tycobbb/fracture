@@ -1,4 +1,4 @@
-package dev.wizrad.fracture.support.extensions
+package dev.wizrad.fracture.support
 
 import com.badlogic.gdx.math.MathUtils
 import java.util.*

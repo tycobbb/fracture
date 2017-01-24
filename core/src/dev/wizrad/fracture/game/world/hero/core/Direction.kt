@@ -1,4 +1,4 @@
-package dev.wizrad.fracture.game.world.hero.forms
+package dev.wizrad.fracture.game.world.hero.core
 
 enum class Direction {
   None, Left, Right;

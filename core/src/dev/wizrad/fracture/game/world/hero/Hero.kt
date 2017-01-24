@@ -6,6 +6,7 @@ import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType
 import dev.wizrad.fracture.game.world.core.Context
 import dev.wizrad.fracture.game.world.core.Entity
+import dev.wizrad.fracture.game.world.hero.core.Form
 import dev.wizrad.fracture.game.world.hero.forms.*
 
 class Hero(

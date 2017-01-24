@@ -1,4 +1,4 @@
-package dev.wizrad.fracture.game.world.hero.forms
+package dev.wizrad.fracture.game.world.hero.core
 
 import com.badlogic.gdx.physics.box2d.Body
 import com.badlogic.gdx.physics.box2d.Fixture

@@ -1,4 +1,4 @@
-package dev.wizrad.fracture.game.world.hero.forms
+package dev.wizrad.fracture.game.world.hero.core
 
 import com.badlogic.gdx.physics.box2d.Body
 import com.badlogic.gdx.physics.box2d.Fixture
@@ -28,7 +28,7 @@ abstract class FormState(
   /** A reference to the world's shared controls */
   protected val controls: Controls get() = context.world.controls
   /** A reference to the world's shared physics world */
-  protected val physics: PhysicsWorld get() = context.world.physics
+  protected val physics: com.badlogic.gdx.physics.box2d.World get() = context.world.physics
   /** A reference to the world's shared contact graph */
   protected val contact: ContactGraph get() = context.world.contact
 

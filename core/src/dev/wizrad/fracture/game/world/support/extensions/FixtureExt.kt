@@ -1,4 +1,4 @@
-package dev.wizrad.fracture.game.world.support
+package dev.wizrad.fracture.game.world.support.extensions
 
 import com.badlogic.gdx.physics.box2d.Fixture
 import dev.wizrad.fracture.game.world.components.contact.ContactInfo
