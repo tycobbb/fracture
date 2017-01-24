@@ -10,6 +10,8 @@ class Key(val code: Int): Updatable {
 
   /** Indicates that the key is currently pressed */
   var isPressed: Boolean = false; private set
+  /** Indicates that the key is pressed this frame */
+  val isJustPressed: Boolean get() = Gdx.input.isKeyJustPressed(code)
   /** Indicates that the key is currently press, and it is a new press since the last requireUniquePress */
   val isPressedUnique: Boolean get() = isPressed && count != mark
 

@@ -15,6 +15,7 @@ fun Renderer.render(hero: Hero, delta: Float) {
     is PhasingForm -> render(hero, form, delta)
     is AirDashForm -> render(hero, form, delta)
     is FluidForm -> render(hero, form, delta)
+    is FlutterForm -> render(hero, form, delta)
     else -> error("attempted to render unknown form: $form")
   }
 }

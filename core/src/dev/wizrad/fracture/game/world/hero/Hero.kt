@@ -14,7 +14,7 @@ class Hero(
   override val name = "Hero"
 
   // MARK: Properties
-  var form: Form = FluidForm(context()); private set
+  var form: Form = FlutterForm(context()); private set
 
   // MARK: Behavior
   override fun start() {
@@ -70,6 +70,7 @@ class Hero(
       is SpearForm -> PhasingForm(context())
       is PhasingForm -> AirDashForm(context())
       is AirDashForm -> FluidForm(context())
+      is FluidForm -> FlutterForm(context())
       else -> VanillaForm(context())
     }
   }
