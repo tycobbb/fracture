@@ -4,13 +4,12 @@ import com.badlogic.gdx.physics.box2d.Body
 import com.badlogic.gdx.physics.box2d.Fixture
 import dev.wizrad.fracture.game.components.controls.Controls
 import dev.wizrad.fracture.game.world.components.contact.ContactGraph
-import dev.wizrad.fracture.game.world.components.contact.ContactInfo
-import dev.wizrad.fracture.game.world.components.contact.ContactInfo.Orientation
+import dev.wizrad.fracture.game.world.components.contact.Orientation
 import dev.wizrad.fracture.game.world.components.statemachine.State
 import dev.wizrad.fracture.game.world.core.Context
 import dev.wizrad.fracture.game.world.core.Entity
-import dev.wizrad.fracture.game.world.support.appendage
 import dev.wizrad.fracture.game.world.support.applyImpulseToCenter
+import dev.wizrad.fracture.game.world.support.foot
 import dev.wizrad.fracture.game.world.support.hero
 import dev.wizrad.fracture.support.Tag
 import dev.wizrad.fracture.support.abs
@@ -32,15 +31,6 @@ abstract class FormState(
   protected val physics: PhysicsWorld get() = context.world.physics
   /** A reference to the world's shared contact graph */
   protected val contact: ContactGraph get() = context.world.contact
-
-  // MARK: Direction
-  enum class Direction {
-    None, Left, Right;
-
-    val isNone: Boolean get() = this == None
-    val isLeft: Boolean get() = this == Left
-    val isRight: Boolean get() = this == Right
-  }
 
   // MARK: Helpers- Input
   protected fun requireUniqueJump() {
@@ -84,31 +74,29 @@ abstract class FormState(
     return frame > frameTimeout && abs(body.linearVelocity.x) <= threshold
   }
 
-  protected fun isOnGround(frameTimeout: Int = 0): Boolean {
-    return if (frame < frameTimeout) {
-      false
-    } else {
-      val foot = body.fixtureList.find { it.appendage != null } ?: error("body must have a appendage")
-      contact.isOnSurface(fixture = foot, orientation = Orientation.Top)
-    }
+  protected fun isOnGround(frameTimeout: Int = 0, usesFoot: Boolean = true): Boolean {
+    val fixture = if (usesFoot) findFoot() else findHero()
+    return frame >= frameTimeout && contact.existsBetween(fixture, Orientation.Top)
   }
 
-  protected fun contactOrientation(): Orientation? {
-    val hero = findFixture { it.hero != null }
-    return contact.nearestSurface(hero)?.orientation
+  protected fun isAirborne(): Boolean {
+    return contact.none(findHero())
   }
 
-  protected fun wallContactOrientation(): Orientation? {
-    val left = findAppendage { it.orientation.isLeft }
-    val leftContact = contact.nearestSurface(left) { it.orientation.isRight }
+  protected fun isFalling(): Boolean {
+    return body.linearVelocity.y >= 0.0f
+  }
 
-    val right = findAppendage { it.orientation.isRight }
-    val rightContact = contact.nearestSurface(right) { it.orientation.isLeft }
+  protected fun canStartRunning(): Boolean {
+    val direction = inputDirection()
+    val orientation = currentWallContactOrientation()
 
     return when {
-      leftContact != null && rightContact == null -> leftContact.orientation
-      leftContact == null && rightContact != null -> rightContact.orientation
-      else -> null
+      orientation == null -> true
+      direction.isNone -> false
+      direction.isLeft && orientation.isRight -> false
+      direction.isRight && orientation.isLeft -> false
+      else -> true
     }
   }
 
@@ -120,13 +108,31 @@ abstract class FormState(
     }
   }
 
+  // MARK: Collisions
+  protected fun currentContactOrientation(): Orientation? {
+    return contact.nearestSurface(findHero())?.orientation
+  }
+
+  protected fun currentWallContactOrientation(): Orientation? {
+    val hero = findHero()
+    val isOnLeftWall = contact.existsBetween(hero, Orientation.Right)
+    val isOnRightWall = contact.existsBetween(hero, Orientation.Left)
+
+    return when {
+      isOnLeftWall && !isOnRightWall -> Orientation.Right
+      !isOnLeftWall && isOnRightWall -> Orientation.Left
+      else -> null
+    }
+  }
+
   private fun findFixture(filter: (Fixture) -> Boolean) =
     body.fixtureList.find(filter) ?: error("missing required fixture")
 
-  private fun findAppendage(filter: (ContactInfo.Appendage) -> Boolean) =
-    findFixture { fixture ->
-      fixture.appendage?.let { filter(it) } ?: false
-    }
+  private fun findHero() =
+    findFixture { it.hero != null }
+
+  private fun findFoot() =
+    findFixture { it.foot != null }
 
   // MARK: Helpers - Physics
   protected fun applyJumpImpulse(magnitude: Float) {

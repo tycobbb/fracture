@@ -4,7 +4,7 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Fixture
 import com.badlogic.gdx.physics.box2d.PolygonShape
 import dev.wizrad.fracture.game.world.components.contact.ContactInfo
-import dev.wizrad.fracture.game.world.components.contact.ContactInfo.Orientation
+import dev.wizrad.fracture.game.world.components.contact.Orientation
 import dev.wizrad.fracture.game.world.components.statemachine.State
 import dev.wizrad.fracture.game.world.core.Context
 import dev.wizrad.fracture.game.world.support.contactInfo
@@ -27,7 +27,7 @@ class PhasingForm(context: Context): Form(context) {
 
     // create fixtures
     createBox(defineBox(polygon))
-    createAppendage(polygon, orientation = Orientation.Bottom)
+    createFoot(polygon)
 
     // dispose shapes
     polygon.dispose()

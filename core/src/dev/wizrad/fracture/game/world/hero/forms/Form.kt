@@ -5,7 +5,6 @@ import com.badlogic.gdx.physics.box2d.Fixture
 import com.badlogic.gdx.physics.box2d.FixtureDef
 import com.badlogic.gdx.physics.box2d.PolygonShape
 import dev.wizrad.fracture.game.world.components.contact.ContactInfo
-import dev.wizrad.fracture.game.world.components.contact.ContactInfo.Orientation
 import dev.wizrad.fracture.game.world.components.contact.ContactType
 import dev.wizrad.fracture.game.world.components.statemachine.State
 import dev.wizrad.fracture.game.world.components.statemachine.StateMachine
@@ -51,31 +50,19 @@ abstract class Form(
     return boxDef
   }
 
-  protected fun createAppendage(polygon: PolygonShape, orientation: Orientation): Fixture {
-    val size = scratch1.set(entity.size)
-    when (orientation) {
-      Orientation.Top, Orientation.Bottom -> size.scl(0.5f, 0.125f)
-      Orientation.Left, Orientation.Right -> size.scl(0.125f, 0.5f)
-    }
-
-    val offset = scratch2.set(entity.size)
-    when (orientation) {
-      Orientation.Top -> offset.scl(0.0f, -0.5f)
-      Orientation.Bottom -> offset.scl(0.0f, 0.5f)
-      Orientation.Left -> offset.scl(-0.5f, 0.0f)
-      Orientation.Right -> offset.scl(0.5f, 0.0f)
-    }
-
+  protected fun createFoot(polygon: PolygonShape): Fixture {
+    val size = scratch1.set(entity.size).scl(0.49f, 0.17f)
+    val offset = scratch2.set(entity.size).scl(0.0f, 0.5f)
     polygon.setAsBox(size.x, size.y, offset, 0.0f)
 
-    val appendageDef = FixtureDef()
-    appendageDef.isSensor = true
-    appendageDef.shape = polygon
-    appendageDef.filter.categoryBits = ContactType.Hero.bits
+    val footDef = FixtureDef()
+    footDef.isSensor = true
+    footDef.shape = polygon
+    footDef.filter.categoryBits = ContactType.Hero.bits
 
-    val appendate = body.createFixture(appendageDef)
-    appendate.contactInfo = ContactInfo.Appendage(orientation)
+    val foot = body.createFixture(footDef)
+    foot.contactInfo = ContactInfo.Foot()
 
-    return appendate
+    return foot
   }
 }

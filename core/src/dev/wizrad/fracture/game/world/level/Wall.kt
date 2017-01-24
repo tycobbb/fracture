@@ -6,8 +6,8 @@ import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.physics.box2d.FixtureDef
 import com.badlogic.gdx.physics.box2d.PolygonShape
 import dev.wizrad.fracture.game.world.components.contact.ContactInfo
-import dev.wizrad.fracture.game.world.components.contact.ContactInfo.Orientation
 import dev.wizrad.fracture.game.world.components.contact.ContactType
+import dev.wizrad.fracture.game.world.components.contact.Orientation
 import dev.wizrad.fracture.game.world.core.Context
 import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.support.contactInfo
@@ -40,55 +40,42 @@ class Wall(
       val height = size.y / 2
       val rect = PolygonShape()
 
-      // create wall
-      rect.setAsBox(width, height)
-      val wallDef = defineBox(rect)
-      wallDef.density = 1.0f
-      wallDef.friction = 0.2f
-
-      val wall = body.createFixture(wallDef)
-      wall.contactInfo = ContactInfo.Barrier(
-        isPhaseable = true
-      )
-
-      // create sensors
+      // create edges
       val edge = 0.05f
 
-      // create left sensor
+      // create left edge
       rect.setAsBox(edge, height - edge * 2, scratch.set(edge - width, 0.0f), 0.0f)
-      createSensor(body, rect, orientation = Orientation.Left)
+      createSurface(body, rect, orientation = Orientation.Left)
 
-      // create right sensor
+      // create right edge
       rect.setAsBox(edge, height - edge * 2, scratch.set(width - edge, 0.0f), 0.0f)
-      createSensor(body, rect, orientation = Orientation.Right)
+      createSurface(body, rect, orientation = Orientation.Right)
 
-      // create top sensor
+      // create top edge
       rect.setAsBox(width, edge, scratch.set(0.0f, edge - height), 0.0f)
-      createSensor(body, rect, orientation = Orientation.Top)
+      createSurface(body, rect, orientation = Orientation.Top)
 
-      // create bottom sensor
+      // create bottom edge
       rect.setAsBox(width, edge, scratch.set(0.0f, height - edge), 0.0f)
-      createSensor(body, rect, orientation = Orientation.Bottom)
+      createSurface(body, rect, orientation = Orientation.Bottom)
 
       // dispose shapes
       rect.dispose()
     }
 
-    private fun createSensor(body: Body, rect: PolygonShape, orientation: Orientation) {
-      val sensor = body.createFixture(defineBox(rect, isSensor = true))
-      sensor.contactInfo = ContactInfo.Surface(
+    private fun createSurface(body: Body, rect: PolygonShape, orientation: Orientation) {
+      val surfaceDef = FixtureDef()
+      surfaceDef.shape = rect
+      surfaceDef.density = 1.0f
+      surfaceDef.friction = 0.2f
+      surfaceDef.filter.categoryBits = ContactType.Wall.bits
+
+      val surface = body.createFixture(surfaceDef)
+      surface.contactInfo = ContactInfo.Surface(
         orientation = orientation,
         isPhasingTarget = orientation != Orientation.Bottom,
         isPhaseable = true
       )
-    }
-
-    private fun defineBox(rect: PolygonShape, isSensor: Boolean = false): FixtureDef {
-      val boxDef = FixtureDef()
-      boxDef.shape = rect
-      boxDef.filter.categoryBits = ContactType.Wall.bits
-      boxDef.isSensor = isSensor
-      return boxDef
     }
   }
 

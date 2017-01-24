@@ -3,7 +3,7 @@ package dev.wizrad.fracture.support.extensions
 import com.badlogic.gdx.math.MathUtils
 import java.util.*
 
-// isOnSurface companion at top level for prettiness
+// expose companion at top level for prettiness
 val rand = Rand
 
 // wrapper around existing random functions

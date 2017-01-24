@@ -1,7 +1,6 @@
 package dev.wizrad.fracture.game.world.hero.forms
 
 import com.badlogic.gdx.physics.box2d.PolygonShape
-import dev.wizrad.fracture.game.world.components.contact.ContactInfo
 import dev.wizrad.fracture.game.world.components.statemachine.State
 import dev.wizrad.fracture.game.world.core.Context
 
@@ -18,7 +17,7 @@ class ReboundForm(context: Context): Form(context) {
     val boxDef = defineBox(polygon)
     boxDef.restitution = 0.5f
     createBox(boxDef)
-    createAppendage(polygon, orientation = ContactInfo.Orientation.Bottom)
+    createFoot(polygon)
 
     // dispose shapes
     polygon.dispose()

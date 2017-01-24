@@ -1,7 +1,6 @@
 package dev.wizrad.fracture.game.world.components.contact
 
 import com.badlogic.gdx.physics.box2d.*
-import dev.wizrad.fracture.game.world.components.contact.ContactInfo.Orientation
 import dev.wizrad.fracture.game.world.components.contact.ContactInfo.Surface
 import dev.wizrad.fracture.game.world.support.contactInfo
 import dev.wizrad.fracture.game.world.support.surface
@@ -16,6 +15,14 @@ class ContactGraph: ContactListener, ContactFilter {
   private val defaultSet = { mutableSetOf<Fixture>() }
 
   // MARK: Lookup
+  fun any(fixture: Fixture): Boolean {
+    return contactSet(fixture).size != 0
+  }
+
+  fun none(fixture: Fixture): Boolean {
+    return !any(fixture)
+  }
+
   fun nearestSurface(fixture: Fixture): Surface? {
     return contactSet(fixture).findMapped { it.surface }
   }
@@ -28,7 +35,7 @@ class ContactGraph: ContactListener, ContactFilter {
     }
   }
 
-  fun isOnSurface(fixture: Fixture, orientation: Orientation): Boolean {
+  fun existsBetween(fixture: Fixture, orientation: Orientation): Boolean {
     return contactSet(fixture).any { fixture ->
       val surface = fixture.surface
       when (surface) {

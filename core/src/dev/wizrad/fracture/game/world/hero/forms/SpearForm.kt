@@ -1,7 +1,7 @@
 package dev.wizrad.fracture.game.world.hero.forms
 
 import com.badlogic.gdx.physics.box2d.PolygonShape
-import dev.wizrad.fracture.game.world.components.contact.ContactInfo.Orientation
+import dev.wizrad.fracture.game.world.components.contact.Orientation
 import dev.wizrad.fracture.game.world.components.statemachine.State
 import dev.wizrad.fracture.game.world.core.Context
 import dev.wizrad.fracture.game.world.support.applyImpulseToCenter
@@ -170,7 +170,7 @@ class SpearForm(context: Context): Form(context) {
 
   class Jumping(context: Context): FormState(context) {
     override fun nextState(): State? {
-      val orientation = contactOrientation()
+      val orientation = currentContactOrientation()
       return if (orientation != null) Landing(context, orientation) else null
     }
   }
