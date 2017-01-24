@@ -71,7 +71,7 @@ abstract class FormState<out F: Form>(
 
   protected fun isOnGround(frameTimeout: Int = 0, usesFoot: Boolean = true): Boolean {
     val fixture = if (usesFoot) findFoot() else findHero()
-    return frame >= frameTimeout && contact.existsBetween(fixture, Orientation.Top)
+    return frame >= frameTimeout && contact.any(fixture, Orientation.Top)
   }
 
   protected fun isAirborne(): Boolean {
@@ -110,8 +110,8 @@ abstract class FormState<out F: Form>(
 
   protected fun currentWallContactOrientation(): Orientation? {
     val hero = findHero()
-    val isOnLeftWall = contact.existsBetween(hero, Orientation.Right)
-    val isOnRightWall = contact.existsBetween(hero, Orientation.Left)
+    val isOnLeftWall = contact.any(hero, Orientation.Right)
+    val isOnRightWall = contact.any(hero, Orientation.Left)
 
     return when {
       isOnLeftWall && !isOnRightWall -> Orientation.Right

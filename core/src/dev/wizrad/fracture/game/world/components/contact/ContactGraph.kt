@@ -13,15 +13,22 @@ class ContactGraph: ContactListener, ContactFilter {
   private val map = mutableMapOf<Fixture, MutableSet<Fixture>>()
   private val defaultSet = { mutableSetOf<Fixture>() }
 
-  // MARK: Lookup
+  // MARK: Category
   fun any(fixture: Fixture): Boolean {
     return contactSet(fixture).size != 0
+  }
+
+  fun any(fixture: Fixture, type: ContactType): Boolean {
+    return contactSet(fixture).any {
+      it.filterData.categoryBits == type.bits
+    }
   }
 
   fun none(fixture: Fixture): Boolean {
     return !any(fixture)
   }
 
+  // MARK: Surfaces
   fun nearestSurface(fixture: Fixture): ContactInfo.Surface? {
     return contactSet(fixture).findMapped { it.surface }
   }
@@ -34,7 +41,7 @@ class ContactGraph: ContactListener, ContactFilter {
     }
   }
 
-  fun existsBetween(fixture: Fixture, orientation: Orientation): Boolean {
+  fun any(fixture: Fixture, orientation: Orientation): Boolean {
     return contactSet(fixture).any { fixture ->
       val surface = fixture.surface
       when (surface) {

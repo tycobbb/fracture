@@ -15,6 +15,7 @@ class Level(
 
   // MARK: Children
   val hero: Hero
+  val goal: Goal
   val walls: List<Wall>
   val platforms: List<Platform>
 
@@ -23,7 +24,9 @@ class Level(
     val level = Loader().load()
 
     hero = Hero.Factory(parent = this)
-      .entity(center = Vector2(level.entryPoint.center))
+      .entity(center = level.hotspots.start.center)
+    goal = Goal.Factory(parent = this)
+      .entity(level.hotspots.goal)
     walls = Wall.Factory(parent = this)
       .entities(level.walls)
     platforms = Platform.Factory(parent = this)
@@ -35,6 +38,7 @@ class Level(
       .then(walls)
       .then(platforms)
       .then(hero)
+      .then(goal)
   }
 
   // MARK: Factory
