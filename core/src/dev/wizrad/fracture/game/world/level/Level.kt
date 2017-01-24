@@ -6,7 +6,6 @@ import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.physics.box2d.FixtureDef
 import com.badlogic.gdx.physics.box2d.PolygonShape
 import dev.wizrad.fracture.game.world.components.contact.ContactInfo
-import dev.wizrad.fracture.game.world.components.contact.ContactType
 import dev.wizrad.fracture.game.world.components.contact.Orientation
 import dev.wizrad.fracture.game.world.core.Context
 import dev.wizrad.fracture.game.world.core.Entity
@@ -18,37 +17,36 @@ import dev.wizrad.fracture.game.world.support.extensions.contactInfo
 class Level(
   context: Context, body: Body, size: Vector2): Entity(context, body, size) {
 
-  // MARK: Entity
-  override val name = "Level"
-
   // MARK: Children
+  val hero: Hero
   val walls: List<Wall>
-  val hero = Hero.Factory(context()).entity(
-    center = Vector2(
-      (size.x) / 2,
-      (size.y - 1.0f /* floor height */ - Hero.size.y / 2)
-    )
-  )
+  val platforms: List<Platform>
 
   init {
     val level = Loader().load()
-    val factory = Wall.Factory(context())
 
-    walls = level.walls.map {
-      factory.entity(it)
-    }
+    val wallFactory = Wall.Factory(context())
+    walls = wallFactory.entities(level.walls)
+
+    val platformFactory = Platform.Factory(context())
+    platforms = platformFactory.entities(level.platforms)
+
+    val heroFactory = Hero.Factory(context())
+    hero = heroFactory.entity(
+      center = Vector2(level.entryPoint.center)
+    )
   }
 
   override fun children(sequence: EntitySequence) =
     super.children(sequence)
-      .then(walls)
+      .then(platforms)
       .then(hero)
 
-  class Factory(context: Context): Entity.UnitFactory(context) {
+  class Factory(context: Context): Entity.UnitFactory<Level>(context) {
     private val size: Vector2 = Vector2(9.0f, 16.0f)
 
     // MARK: Output
-    fun entity() = Level(context, body(), size)
+    override fun entity(args: Unit) = Level(context, body(), size)
 
     // MARK: Body
     override fun defineBody(args: Unit): BodyDef {
@@ -93,9 +91,7 @@ class Level(
     private fun defineWall(rect: PolygonShape): FixtureDef {
       val wallDef = FixtureDef()
       wallDef.shape = rect
-      wallDef.density = 1.0f
-      wallDef.friction = 0.2f
-      wallDef.filter.categoryBits = ContactType.Wall.bits
+      wallDef.isSensor = true
       return wallDef
     }
   }

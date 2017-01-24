@@ -11,11 +11,9 @@ import dev.wizrad.fracture.game.world.hero.forms.*
 
 class Hero(
   context: Context, body: Body, size: Vector2): Entity(context, body, size) {
-  // MARK: Entity
-  override val name = "Hero"
 
   // MARK: Properties
-  var form: Form = VanillaForm(context()); private set
+  var form: Form = DebugForm(context()); private set
 
   // MARK: Behavior
   override fun start() {
@@ -72,15 +70,19 @@ class Hero(
       is PhasingForm -> AirDashForm(context())
       is AirDashForm -> FluidForm(context())
       is FluidForm -> FlutterForm(context())
+      is FlutterForm -> DebugForm(context())
       else -> VanillaForm(context())
     }
   }
 
-  class Factory(context: Context): Entity.Factory<Factory.Args>(context) {
-    data class Args(val center: Vector2)
+  // MARK: Factory
+  data class Args(val center: Vector2)
+
+  class Factory(context: Context): Entity.Factory<Hero, Args>(context) {
+    fun entity(center: Vector2) = entity(Args(center))
 
     // MARK: Output
-    fun entity(center: Vector2) = Hero(context, body(Args(center)), size)
+    override fun entity(args: Args) = Hero(context, body(args), size)
 
     // MARK: Body
     override fun defineBody(args: Args): BodyDef {
@@ -92,6 +94,7 @@ class Hero(
     }
   }
 
+  // MARK: Companion
   companion object {
     val size = Vector2(1.0f, 1.0f)
   }

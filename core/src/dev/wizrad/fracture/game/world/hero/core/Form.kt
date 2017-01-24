@@ -29,6 +29,7 @@ abstract class Form(
   override fun start() {
     super.start()
     state = initialState()
+    state.start()
   }
 
   // MARK: Helpers

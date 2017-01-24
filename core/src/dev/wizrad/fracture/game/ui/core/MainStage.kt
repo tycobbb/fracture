@@ -22,7 +22,6 @@ class MainStage(
 
   // MARK: Lifecycle
   init {
-    Gdx.input.inputProcessor = this
     addFormButton()
     addPhasesLeftLabel()
   }

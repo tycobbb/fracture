@@ -1,5 +1,7 @@
 package dev.wizrad.fracture.game
 
+import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.InputMultiplexer
 import com.badlogic.gdx.Screen
 import dev.wizrad.fracture.game.components.projection.Projection
 import dev.wizrad.fracture.game.components.projection.Projections
@@ -14,6 +16,10 @@ class MainScreen: Screen {
   private val world = EntityWorld()
   private val renderer = Renderer(world, camera = Camera())
   private val stage = MainStage(world)
+
+  init {
+    Gdx.input.inputProcessor = InputMultiplexer(stage, world.controls.touch)
+  }
 
   // MARK: Screen
   override fun render(delta: Float) {

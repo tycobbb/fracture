@@ -15,6 +15,5 @@ class Controls: Updatable {
     jump.update(delta)
     left.update(delta)
     right.update(delta)
-    touch.update(delta)
   }
 }

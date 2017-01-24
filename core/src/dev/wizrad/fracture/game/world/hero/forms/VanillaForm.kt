@@ -36,13 +36,13 @@ class VanillaForm(context: Context): Form(context) {
       return if (!isOnGround()) {
         Jumping(context)
       } else if (controls.jump.isPressedUnique) {
-        Windup(context)
+        JumpWindup(context)
       } else null
     }
   }
 
-  class Windup(context: Context): FormState(context) {
-    private val frameLength = 4
+  class JumpWindup(context: Context): FormState(context) {
+    private val frameLength = 7
 
     override fun nextState(): State? {
       if (frame >= frameLength) {
@@ -55,7 +55,7 @@ class VanillaForm(context: Context): Form(context) {
 
   class JumpStart(context: Context, isShort: Boolean): FormState(context) {
     private val frameLength = 3
-    private val jumpMag = if (isShort) 3.75f else 9.5f
+    private val jumpMag = if (isShort) 4.75f else 8.25f
 
     override fun start() {
       applyJumpImpulse(jumpMag)
@@ -67,7 +67,7 @@ class VanillaForm(context: Context): Form(context) {
   }
 
   class Jumping(context: Context): FormState(context) {
-    private val driftMag = 5.0f
+    private val driftMag = 7.0f
 
     override fun step(delta: Float) {
       super.step(delta)
@@ -80,15 +80,19 @@ class VanillaForm(context: Context): Form(context) {
   }
 
   class Landing(context: Context): FormState(context) {
-    private val frameLength = 3
+    private val frameLength = 5
 
     override fun start() {
       super.start()
       requireUniqueJump()
     }
 
-    override fun nextState(): State? {
-      return if (frame >= frameLength) Standing(context) else null
+    override fun nextState(): State? = when {
+      frame >= frameLength ->
+        Standing(context)
+      controls.jump.isPressedUnique ->
+        JumpWindup(context)
+      else -> null
     }
   }
 }

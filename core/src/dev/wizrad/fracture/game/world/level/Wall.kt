@@ -10,24 +10,20 @@ import dev.wizrad.fracture.game.world.components.contact.ContactType
 import dev.wizrad.fracture.game.world.components.contact.Orientation
 import dev.wizrad.fracture.game.world.core.Context
 import dev.wizrad.fracture.game.world.core.Entity
+import dev.wizrad.fracture.game.world.level.loader.LevelFeatureArgs
 import dev.wizrad.fracture.game.world.support.extensions.contactInfo
 
 class Wall(
-  context: Context, body: Body, size: Vector2): Entity(context, body, size) {
-
-  // MARK: Entity
-  override val name = "Wall"
+  context: Context, body: Body, size: Vector2) : Entity(context, body, size) {
 
   // MARK: Lifecycle
-  class Factory(context: Context): Entity.Factory<Factory.Args>(context) {
-    class Args {
-      lateinit var tag: String
-      lateinit var center: Vector2
-      lateinit var size: Vector2
-    }
+  class Args: LevelFeatureArgs() {
+    lateinit var orientation: Orientation
+  }
 
+  class Factory(context: Context) : Entity.Factory<Wall, Args>(context) {
     // MARK: Output
-    fun entity(args: Args) = Wall(context, body(args), args.size)
+    override fun entity(args: Args) = Wall(context, body(args), args.size)
 
     // MARK: Body
     override fun defineBody(args: Args): BodyDef {
@@ -40,45 +36,18 @@ class Wall(
     override fun defineFixtures(body: Body, args: Args) {
       super.defineFixtures(body, args)
 
-      val width = args.size.x / 2
-      val height = args.size.y / 2
       val rect = PolygonShape()
+      rect.setAsBox(args.size.x / 2, args.size.y / 2)
 
-      // create edges
-      val edge = 0.05f
+      val wallDef = FixtureDef()
+      wallDef.shape = rect
+      wallDef.density = 1.0f
+      wallDef.friction = 0.2f
+      wallDef.filter.categoryBits = ContactType.Wall.bits
 
-      // create left edge
-      rect.setAsBox(edge, height - edge * 2, scratch.set(edge - width, 0.0f), 0.0f)
-      createSurface(body, rect, orientation = Orientation.Left)
-
-      // create right edge
-      rect.setAsBox(edge, height - edge * 2, scratch.set(width - edge, 0.0f), 0.0f)
-      createSurface(body, rect, orientation = Orientation.Right)
-
-      // create top edge
-      rect.setAsBox(width, edge, scratch.set(0.0f, edge - height), 0.0f)
-      createSurface(body, rect, orientation = Orientation.Top)
-
-      // create bottom edge
-      rect.setAsBox(width, edge, scratch.set(0.0f, height - edge), 0.0f)
-      createSurface(body, rect, orientation = Orientation.Bottom)
-
-      // dispose shapes
-      rect.dispose()
-    }
-
-    private fun createSurface(body: Body, rect: PolygonShape, orientation: Orientation) {
-      val surfaceDef = FixtureDef()
-      surfaceDef.shape = rect
-      surfaceDef.density = 1.0f
-      surfaceDef.friction = 0.2f
-      surfaceDef.filter.categoryBits = ContactType.Wall.bits
-
-      val surface = body.createFixture(surfaceDef)
-      surface.contactInfo = ContactInfo.Surface(
-        orientation = orientation,
-        isPhasingTarget = orientation != Orientation.Bottom,
-        isPhaseable = true
+      val wall = body.createFixture(wallDef)
+      wall.contactInfo = ContactInfo.Surface(
+        orientation = args.orientation
       )
     }
   }

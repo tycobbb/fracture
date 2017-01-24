@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.utils.Json
 import com.badlogic.gdx.utils.JsonValue
+import dev.wizrad.fracture.game.world.components.contact.Orientation
 import dev.wizrad.fracture.support.debugPrefix
 
 class Loader {
@@ -13,11 +14,12 @@ class Loader {
   // MARK: Lifecycle
   init {
     json.setSerializer(Vector2::class.java, VectorSerializer())
+    json.setSerializer(Orientation::class.java, Orientation.Serializer())
   }
 
-  fun load(): LoaderLevel {
+  fun load(): LevelData {
     val file = Gdx.files.internal("level.json")
-    val level = json.fromJson(LoaderLevel::class.java, file)
+    val level = json.fromJson(LevelData::class.java, file)
     return level
   }
 
@@ -29,7 +31,7 @@ class Loader {
     }
 
     override fun write(json: Json?, `object`: Vector2?, knownType: Class<*>?) {
-      error("write not implemented")
+      throw UnsupportedOperationException("not implemented")
     }
 
     override fun toString() = "[$debugPrefix]"

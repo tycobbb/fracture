@@ -19,8 +19,6 @@ abstract class Entity(
   val size: Vector2): Behavior() {
 
   // MARK: Properties
-  /** A string identifier for this entity */
-  abstract val name: String
   /** Absolute position in world coords */
   val center: Vector2 get() = body.position
 
@@ -87,23 +85,30 @@ abstract class Entity(
   }
 
   // MARK: Factory
-  abstract class Factory<in T>(val context: Context) {
+  abstract class Factory<out E, in A>(val context: Context) {
     // MARK: Properties
     val parent: Entity? get() = context.parent
 
+    // MARK: Output
+    abstract fun entity(args: A): E
+
+    fun entities(args: Iterable<A>): List<E> {
+      return args.map { entity(args = it) }
+    }
+
     // MARK: Body
-    protected fun body(args: T): Body {
+    protected fun body(args: A): Body {
       val definition = defineBody(args)
       val body = context.world.physics.createBody(definition)
       defineFixtures(body, args)
       return body
     }
 
-    protected open fun defineBody(args: T): BodyDef {
+    protected open fun defineBody(args: A): BodyDef {
       return BodyDef()
     }
 
-    protected open fun defineFixtures(body: Body, args: T) {
+    protected open fun defineFixtures(body: Body, args: A) {
     }
 
     // MARK: Geometry
@@ -118,7 +123,12 @@ abstract class Entity(
     }
   }
 
-  abstract class UnitFactory(context: Context): Factory<Unit>(context) {
+  abstract class UnitFactory<out E: Entity>(context: Context): Factory<E, Unit>(context) {
+    // MARK: Output
+    fun entity(): E {
+      return entity(args = Unit)
+    }
+
     // MARK: Body
     protected fun body(): Body {
       return body(args = Unit)
