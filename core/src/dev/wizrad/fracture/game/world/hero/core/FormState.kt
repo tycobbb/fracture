@@ -8,9 +8,9 @@ import dev.wizrad.fracture.game.world.components.contact.Orientation
 import dev.wizrad.fracture.game.world.components.statemachine.State
 import dev.wizrad.fracture.game.world.core.Context
 import dev.wizrad.fracture.game.world.core.Entity
-import dev.wizrad.fracture.game.world.support.applyImpulseToCenter
-import dev.wizrad.fracture.game.world.support.foot
-import dev.wizrad.fracture.game.world.support.hero
+import dev.wizrad.fracture.game.world.support.extensions.applyImpulseToCenter
+import dev.wizrad.fracture.game.world.support.extensions.foot
+import dev.wizrad.fracture.game.world.support.extensions.hero
 import dev.wizrad.fracture.support.Tag
 import dev.wizrad.fracture.support.abs
 import dev.wizrad.fracture.support.debug

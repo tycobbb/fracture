@@ -6,13 +6,13 @@ import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.physics.box2d.FixtureDef
 import com.badlogic.gdx.physics.box2d.PolygonShape
 import dev.wizrad.fracture.game.world.components.contact.ContactInfo
-import dev.wizrad.fracture.game.world.components.contact.Orientation
 import dev.wizrad.fracture.game.world.components.contact.ContactType
+import dev.wizrad.fracture.game.world.components.contact.Orientation
 import dev.wizrad.fracture.game.world.core.Context
 import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.core.EntitySequence
 import dev.wizrad.fracture.game.world.hero.Hero
-import dev.wizrad.fracture.game.world.support.contactInfo
+import dev.wizrad.fracture.game.world.support.extensions.contactInfo
 
 class Level(
   context: Context, body: Body, size: Vector2): Entity(context, body, size) {

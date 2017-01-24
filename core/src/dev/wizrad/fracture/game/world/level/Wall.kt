@@ -10,7 +10,7 @@ import dev.wizrad.fracture.game.world.components.contact.ContactType
 import dev.wizrad.fracture.game.world.components.contact.Orientation
 import dev.wizrad.fracture.game.world.core.Context
 import dev.wizrad.fracture.game.world.core.Entity
-import dev.wizrad.fracture.game.world.support.contactInfo
+import dev.wizrad.fracture.game.world.support.extensions.contactInfo
 
 class Wall(
   context: Context, body: Body, size: Vector2): Entity(context, body, size) {

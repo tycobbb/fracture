@@ -25,7 +25,7 @@ class FlutterForm(context: Context): Form(context) {
 
   // MARK: States
   class Standing(context: Context): FormState(context) {
-    private val runMag = 2.0f
+    private val runMag = 5.0f
 
     override fun step(delta: Float) {
       super.step(delta)

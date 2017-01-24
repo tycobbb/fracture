@@ -1,5 +1,6 @@
 package dev.wizrad.fracture.support.extensions
 
+import dev.wizrad.fracture.support.rand
 import java.util.*
 
 // MARK: Append

@@ -15,7 +15,7 @@ class Hero(
   override val name = "Hero"
 
   // MARK: Properties
-  var form: Form = FlutterForm(context()); private set
+  var form: Form = VanillaForm(context()); private set
 
   // MARK: Behavior
   override fun start() {

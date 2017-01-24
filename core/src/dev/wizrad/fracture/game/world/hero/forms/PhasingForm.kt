@@ -9,10 +9,10 @@ import dev.wizrad.fracture.game.world.components.statemachine.State
 import dev.wizrad.fracture.game.world.core.Context
 import dev.wizrad.fracture.game.world.hero.core.Form
 import dev.wizrad.fracture.game.world.hero.core.FormState
-import dev.wizrad.fracture.game.world.support.contactInfo
-import dev.wizrad.fracture.game.world.support.hero
-import dev.wizrad.fracture.game.world.support.reduceRaycast
-import dev.wizrad.fracture.game.world.support.surface
+import dev.wizrad.fracture.game.world.support.extensions.contactInfo
+import dev.wizrad.fracture.game.world.support.extensions.hero
+import dev.wizrad.fracture.game.world.support.extensions.reduceRaycast
+import dev.wizrad.fracture.game.world.support.extensions.surface
 import dev.wizrad.fracture.support.Tag
 import dev.wizrad.fracture.support.debug
 import dev.wizrad.fracture.support.extensions.Polar

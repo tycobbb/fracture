@@ -7,7 +7,7 @@ import dev.wizrad.fracture.game.world.core.Context
 import dev.wizrad.fracture.game.world.hero.core.Direction
 import dev.wizrad.fracture.game.world.hero.core.Form
 import dev.wizrad.fracture.game.world.hero.core.FormState
-import dev.wizrad.fracture.game.world.support.applyImpulseToCenter
+import dev.wizrad.fracture.game.world.support.extensions.applyImpulseToCenter
 import dev.wizrad.fracture.support.Tag
 import dev.wizrad.fracture.support.debug
 

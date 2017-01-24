@@ -1,9 +1,8 @@
 package dev.wizrad.fracture.game.world.components.contact
 
 import com.badlogic.gdx.physics.box2d.*
-import dev.wizrad.fracture.game.world.components.contact.ContactInfo.Surface
-import dev.wizrad.fracture.game.world.support.contactInfo
-import dev.wizrad.fracture.game.world.support.surface
+import dev.wizrad.fracture.game.world.support.extensions.contactInfo
+import dev.wizrad.fracture.game.world.support.extensions.surface
 import dev.wizrad.fracture.support.Tag
 import dev.wizrad.fracture.support.debug
 import dev.wizrad.fracture.support.debugPrefix
@@ -23,11 +22,11 @@ class ContactGraph: ContactListener, ContactFilter {
     return !any(fixture)
   }
 
-  fun nearestSurface(fixture: Fixture): Surface? {
+  fun nearestSurface(fixture: Fixture): ContactInfo.Surface? {
     return contactSet(fixture).findMapped { it.surface }
   }
 
-  fun nearestSurface(fixture: Fixture, filter: (Surface) -> Boolean): Surface? {
+  fun nearestSurface(fixture: Fixture, filter: (ContactInfo.Surface) -> Boolean): ContactInfo.Surface? {
     return contactSet(fixture).findMapped { fixture ->
       fixture.surface?.let {
         if (filter(it)) it else null

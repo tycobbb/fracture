@@ -10,7 +10,7 @@ import dev.wizrad.fracture.game.world.components.statemachine.State
 import dev.wizrad.fracture.game.world.components.statemachine.StateMachine
 import dev.wizrad.fracture.game.world.core.Context
 import dev.wizrad.fracture.game.world.core.Entity
-import dev.wizrad.fracture.game.world.support.contactInfo
+import dev.wizrad.fracture.game.world.support.extensions.contactInfo
 
 abstract class Form(
   val context: Context): StateMachine() {
