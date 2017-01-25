@@ -1,4 +1,4 @@
-package dev.wizrad.fracture.game.world.level.loader
+package dev.wizrad.fracture.game.world.cycle.loader
 
 import dev.wizrad.fracture.game.world.level.Goal
 

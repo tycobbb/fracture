@@ -40,6 +40,11 @@ class Hero(
     form.destroy()
   }
 
+  // MARK: Actions
+  fun moveTo(position: Vector2) {
+    body.setTransform(position, body.angle)
+  }
+
   // MARK: Forms
   fun selectForm() {
     willUpdateForm()
@@ -75,20 +80,15 @@ class Hero(
   }
 
   // MARK: Factory
-  data class Args(val center: Vector2)
-
-  class Factory(parent: Entity?): Entity.Factory<Hero, Args>(parent) {
-    fun entity(center: Vector2) = entity(Args(center))
-
+  class Factory(parent: Entity?): Entity.UnitFactory<Hero>(parent) {
     // MARK: Output
-    override fun entity(args: Args) = Hero(body(args), size)
+    override fun entity(args: Unit) = Hero(body(args), size)
 
     // MARK: Body
-    override fun defineBody(args: Args): BodyDef {
+    override fun defineBody(args: Unit): BodyDef {
       val body = super.defineBody(args)
       body.type = BodyType.DynamicBody
       body.fixedRotation = true
-      body.position.set(transform(args.center))
       return body
     }
   }

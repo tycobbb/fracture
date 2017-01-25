@@ -7,7 +7,7 @@ import com.badlogic.gdx.physics.box2d.FixtureDef
 import com.badlogic.gdx.physics.box2d.PolygonShape
 import dev.wizrad.fracture.game.world.components.contact.ContactType
 import dev.wizrad.fracture.game.world.core.Entity
-import dev.wizrad.fracture.game.world.level.loader.LevelFeatureArgs
+import dev.wizrad.fracture.game.world.cycle.loader.LevelFeatureArgs
 import dev.wizrad.fracture.support.Tag
 import dev.wizrad.fracture.support.debug
 
@@ -17,7 +17,8 @@ class Goal(
   override fun lateUpdate(delta: Float) {
     super.lateUpdate(delta)
 
-    if (contact.any(body.fixtureList.first(), type = ContactType.Hero)) {
+    val fixture = body.fixtureList.first()
+    if (contact.any(fixture, type = ContactType.Hero)) {
       debug(Tag.World, "reached goal!")
     }
   }
@@ -31,7 +32,7 @@ class Goal(
     override fun defineBody(args: Args): BodyDef {
       val body = super.defineBody(args)
       body.type = BodyDef.BodyType.StaticBody
-      body.position.set(transform(args.center))
+      body.position.set(parent.transform(args.center))
       return body
     }
 

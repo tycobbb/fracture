@@ -41,7 +41,7 @@ class MainStage(
     formButton.setPosition((width - formButton.width) / 2, formButton.y)
     addActor(formButton)
 
-    val model = world.level.hero
+    val model = world.cycle.hero
     updateFormButtonText(model)
 
     formButton.onChange { event, actor ->
@@ -61,7 +61,7 @@ class MainStage(
   }
 
   private fun updatePhasesLeftLabel() {
-    val model = world.level.hero.form.state
+    val model = world.cycle.hero.form.state
 
     if (model is PhasingForm.PhasingState) {
       phasesLeftLabel.isVisible = true

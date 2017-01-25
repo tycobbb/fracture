@@ -9,7 +9,7 @@ import dev.wizrad.fracture.game.world.components.contact.ContactInfo
 import dev.wizrad.fracture.game.world.components.contact.ContactType
 import dev.wizrad.fracture.game.world.components.contact.Orientation
 import dev.wizrad.fracture.game.world.core.Entity
-import dev.wizrad.fracture.game.world.level.loader.LevelFeatureArgs
+import dev.wizrad.fracture.game.world.cycle.loader.LevelFeatureArgs
 import dev.wizrad.fracture.game.world.support.extensions.contactInfo
 
 class Wall(
@@ -28,7 +28,7 @@ class Wall(
     override fun defineBody(args: Args): BodyDef {
       val body = super.defineBody(args)
       body.type = BodyDef.BodyType.StaticBody
-      body.position.set(transform(args.center))
+      body.position.set(parent.transform(args.center))
       return body
     }
 

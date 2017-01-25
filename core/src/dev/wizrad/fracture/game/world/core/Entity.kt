@@ -21,6 +21,17 @@ abstract class Entity(
   /** Absolute position in scene coords */
   val center: Vector2 get() = body.position
 
+  // MARK: Geometry
+  /** Transforms a vector from the local -> absolute coordinate space */
+  fun transform(point: Vector2): Vector2 {
+    return scratch.set(point).add(center)
+  }
+
+  /** Transforms a vector from the local -> absolute coordinate space */
+  fun transform(x: Float, y: Float): Vector2 {
+    return scratch.set(x, y).add(center)
+  }
+
   // MARK: Relationships
   /** Cached list for traversing children in prescribed order */
   private val children: Array<Entity> by lazy {
@@ -74,8 +85,12 @@ abstract class Entity(
 
   // MARK: Factory
   abstract class Factory<out E, in A>(
-    private val parent: Entity?,
-    private val world: World = scene.world) {
+    parent: Entity?,
+    private val world: World = Scene.instance.world) {
+
+    // MARK: Properties
+    private val _parent = parent
+    protected val parent: Entity get() = checkNotNull(_parent) { "$this is missing parent" }
 
     // MARK: Output
     abstract fun entity(args: A): E
@@ -87,7 +102,7 @@ abstract class Entity(
     // MARK: Body
     protected fun body(args: A): Body {
       val definition = defineBody(args)
-      val body = scene.world.createBody(definition)
+      val body = world.createBody(definition)
       defineFixtures(body, args)
       return body
     }
@@ -97,17 +112,6 @@ abstract class Entity(
     }
 
     protected open fun defineFixtures(body: Body, args: A) {
-    }
-
-    // MARK: Geometry
-    /** Transforms a vector from the local -> absolute coordinate space */
-    protected fun transform(point: Vector2): Vector2 {
-      return scratch.set(point).add(parent?.center)
-    }
-
-    /** Transforms a vector from the local -> absolute coordinate space */
-    protected fun transform(x: Float, y: Float): Vector2 {
-      return scratch.set(x, y).add(parent?.center)
     }
   }
 

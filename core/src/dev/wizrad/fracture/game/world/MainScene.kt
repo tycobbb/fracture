@@ -6,19 +6,21 @@ import dev.wizrad.fracture.game.components.projection.Projections
 import dev.wizrad.fracture.game.components.projection.then
 import dev.wizrad.fracture.game.world.components.contact.ContactGraph
 import dev.wizrad.fracture.game.world.components.controls.Controls
+import dev.wizrad.fracture.game.world.components.session.Session
 import dev.wizrad.fracture.game.world.core.Scene
-import dev.wizrad.fracture.game.world.level.Level
+import dev.wizrad.fracture.game.world.cycle.Cycle
 import dev.wizrad.fracture.game.world.support.Physics
 import dev.wizrad.fracture.support.extensions.min
 
 class MainScene: Scene {
   // MARK: Scene
+  override val session = Session()
   override val world = World(Physics.gravity, true)
   override val controls = Controls()
   override val contact = ContactGraph()
 
   // MARK: Properties
-  val level: Level
+  val cycle: Cycle
   private var accumulator: Float = 0.0f
 
   // MARK: Lifecycle
@@ -29,18 +31,18 @@ class MainScene: Scene {
     world.setContactListener(contact)
     world.setContactFilter( contact)
 
-    // boostrap level
-    level = Level.Factory().entity()
-    level.start()
+    // boostrap cycle
+    cycle = Cycle.Factory().entity()
+    cycle.start()
 
     // set the world coordinate space transform
-    Projections.world = Projection.offset(level.center) then Projection.scaling(level.size)
+    Projections.world = Projection.offset(cycle.center) then Projection.scaling(cycle.size)
   }
 
   fun update(delta: Float) {
     // 1. update controls / scene
     controls.update(delta)
-    level.update(delta)
+    cycle.update(delta)
 
     // 2. update scene according to fixed time step
     // See: http://gafferongames.com/game-physics/fix-your-timestep/
@@ -48,13 +50,13 @@ class MainScene: Scene {
     accumulator += frame
 
     while(accumulator >= timestep) {
-      level.step(timestep)
+      cycle.step(timestep)
       world.step(timestep, 6, 2)
       accumulator -= timestep
     }
 
     // 3. give the scene a last chance to update after scene
-    level.lateUpdate(delta)
+    cycle.lateUpdate(delta)
   }
 
   companion object {

@@ -6,57 +6,52 @@ import dev.wizrad.fracture.game.world.components.contact.ContactInfo
 import dev.wizrad.fracture.game.world.components.contact.Orientation
 import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.core.EntitySequence
-import dev.wizrad.fracture.game.world.hero.Hero
-import dev.wizrad.fracture.game.world.level.loader.Loader
+import dev.wizrad.fracture.game.world.cycle.loader.LevelData
 import dev.wizrad.fracture.game.world.support.extensions.contactInfo
 
 class Level(
-  body: Body, size: Vector2): Entity(body, size) {
+  body: Body, size: Vector2, data: LevelData): Entity(body, size) {
 
   // MARK: Children
-  val hero: Hero
   val goal: Goal
   val walls: List<Wall>
   val platforms: List<Platform>
 
   // MARK: Lifecycle
   init {
-    val level = Loader().load()
-
-    hero = Hero.Factory(parent = this)
-      .entity(center = level.hotspots.start.center)
-    goal = Goal.Factory(parent = this)
-      .entity(level.hotspots.goal)
     walls = Wall.Factory(parent = this)
-      .entities(level.walls)
+      .entities(data.walls)
     platforms = Platform.Factory(parent = this)
-      .entities(level.platforms)
+      .entities(data.platforms)
+    goal = Goal.Factory(parent = this)
+      .entity(data.hotspots.goal)
   }
 
   override fun children(sequence: EntitySequence): EntitySequence {
     return super.children(sequence)
       .then(walls)
       .then(platforms)
-      .then(hero)
       .then(goal)
   }
 
   // MARK: Factory
-  class Factory: Entity.UnitFactory<Level>(null) {
+  data class Args(val data: LevelData)
+
+  class Factory(parent: Entity): Entity.Factory<Level, Args>(parent) {
     private val size: Vector2 = Vector2(9.0f, 16.0f)
 
     // MARK: Output
-    override fun entity(args: Unit) = Level(body(), size)
+    override fun entity(args: Args) = Level(body(args), size, args.data)
 
     // MARK: Body
-    override fun defineBody(args: Unit): BodyDef {
+    override fun defineBody(args: Args): BodyDef {
       val body = super.defineBody(args)
       body.type = BodyDef.BodyType.StaticBody
-      body.position.set(size.cpy().scl(0.5f))
+      body.position.set(parent.transform(Vector2.Zero))
       return body
     }
 
-    override fun defineFixtures(body: Body, args: Unit) {
+    override fun defineFixtures(body: Body, args: Args) {
       super.defineFixtures(body, args)
 
       val width = size.x / 2
