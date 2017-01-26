@@ -8,15 +8,16 @@ import com.badlogic.gdx.physics.box2d.PolygonShape
 import dev.wizrad.fracture.game.world.components.contact.ContactInfo
 import dev.wizrad.fracture.game.world.components.contact.ContactType
 import dev.wizrad.fracture.game.world.components.contact.Orientation
+import dev.wizrad.fracture.game.world.components.contact.set
+import dev.wizrad.fracture.game.world.components.loader.LevelData
 import dev.wizrad.fracture.game.world.core.Entity
-import dev.wizrad.fracture.game.world.cycle.loader.LevelFeatureArgs
 import dev.wizrad.fracture.game.world.support.extensions.contactInfo
 
 class Wall(
   body: Body, size: Vector2): Entity(body, size) {
 
   // MARK: Factory
-  class Args: LevelFeatureArgs() {
+  class Args: LevelData.Feature() {
     lateinit var orientation: Orientation
   }
 
@@ -42,7 +43,7 @@ class Wall(
       wallDef.shape = rect
       wallDef.density = 1.0f
       wallDef.friction = 0.2f
-      wallDef.filter.categoryBits = ContactType.Wall.bits
+      wallDef.filter.set(ContactType.Wall)
 
       val wall = body.createFixture(wallDef)
       wall.contactInfo = ContactInfo.Surface(

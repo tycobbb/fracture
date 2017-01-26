@@ -6,3 +6,10 @@ fun Body.applyImpulseToCenter(x: Float, y: Float) {
   val center = worldCenter
   applyLinearImpulse(x, y, center.x, center.y, true)
 }
+
+fun Body.destroyAllFixtures() {
+  val fixtures = fixtureList
+  while (fixtures.size > 0) {
+    destroyFixture(fixtures[0])
+  }
+}

@@ -8,7 +8,7 @@ import dev.wizrad.fracture.game.world.components.contact.ContactGraph
 import dev.wizrad.fracture.game.world.components.controls.Controls
 import dev.wizrad.fracture.game.world.components.session.Session
 import dev.wizrad.fracture.game.world.core.Scene
-import dev.wizrad.fracture.game.world.cycle.Cycle
+import dev.wizrad.fracture.game.world.Cycle
 import dev.wizrad.fracture.game.world.support.Physics
 import dev.wizrad.fracture.support.extensions.min
 

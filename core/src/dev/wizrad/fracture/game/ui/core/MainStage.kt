@@ -13,7 +13,7 @@ import dev.wizrad.fracture.game.world.hero.Hero
 import dev.wizrad.fracture.game.world.hero.forms.PhasingForm
 
 class MainStage(
-  private val world: MainScene): Stage(ScreenViewport()) {
+  private val scene: MainScene): Stage(ScreenViewport()) {
 
   // MARK: Properties
   private val skin = Skin(Gdx.files.internal("uiskin.json"))
@@ -41,11 +41,11 @@ class MainStage(
     formButton.setPosition((width - formButton.width) / 2, formButton.y)
     addActor(formButton)
 
-    val model = world.cycle.hero
+    val model = scene.cycle.hero
     updateFormButtonText(model)
 
     formButton.onChange { event, actor ->
-      model.selectForm()
+      model.randomizeForm()
       updateFormButtonText(model)
     }
   }
@@ -61,7 +61,7 @@ class MainStage(
   }
 
   private fun updatePhasesLeftLabel() {
-    val model = world.cycle.hero.form.state
+    val model = scene.cycle.hero.form.state
 
     if (model is PhasingForm.PhasingState) {
       phasesLeftLabel.isVisible = true

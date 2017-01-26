@@ -4,20 +4,30 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
 import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType
+import dev.wizrad.fracture.game.world.components.session.Event
+import dev.wizrad.fracture.game.world.components.session.toEvent
 import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.hero.core.Form
 import dev.wizrad.fracture.game.world.hero.forms.*
+import dev.wizrad.fracture.game.world.support.extensions.destroyAllFixtures
+import dev.wizrad.fracture.support.Tag
+import dev.wizrad.fracture.support.info
 
 class Hero(
   body: Body, size: Vector2): Entity(body, size) {
 
   // MARK: Properties
-  var form: Form = DebugForm(this); private set
+  var form: Form = FlutterForm(this); private set
 
   // MARK: Behavior
   override fun start() {
     super.start()
-    didUpdateForm()
+
+    // subscribe to events
+    subscribe(
+      toEvent<Event.LevelStarted> { onLevelStarted(it) },
+      toEvent<Event.TransitionStarted> { onTransitionStarted(it) }
+    )
   }
 
   override fun update(delta: Float) {
@@ -40,32 +50,33 @@ class Hero(
     form.destroy()
   }
 
+  // MARK: Events
+  private fun onLevelStarted(event: Event.LevelStarted) {
+    randomizeForm()
+    val center = event.level.transform(event.start.center)
+    body.setTransform(center, body.angle)
+  }
+
+  private fun onTransitionStarted(event: Event.TransitionStarted) {
+    val target = event.level.transform(event.start.center)
+    updateForm(next = TransitionForm(this, target))
+  }
+
   // MARK: Actions
-  fun moveTo(position: Vector2) {
-    body.setTransform(position, body.angle)
+  fun randomizeForm() {
+    updateForm(next = sampleForm())
   }
 
-  // MARK: Forms
-  fun selectForm() {
-    willUpdateForm()
-    form = createRandomForm()
-    didUpdateForm()
-  }
-
-  private fun willUpdateForm() {
-    val fixtures = body.fixtureList
-    while (fixtures.size > 0) {
-      body.destroyFixture(fixtures[0])
-    }
+  private fun updateForm(next: Form) {
+    info(Tag.World, "$this updating to form: $next")
+    body.destroyAllFixtures()
     form.destroy()
-  }
-
-  private fun didUpdateForm() {
+    form = next
     form.defineFixtures()
     form.start()
   }
 
-  private fun createRandomForm(): Form {
+  private fun sampleForm(): Form {
     return when (form) {
       is VanillaForm -> SpaceJumpForm(this)
       is SpaceJumpForm -> ReboundForm(this)

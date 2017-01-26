@@ -20,7 +20,7 @@ class ContactGraph: ContactListener, ContactFilter {
 
   fun any(fixture: Fixture, type: ContactType): Boolean {
     return contactSet(fixture).any {
-      it.filterData.categoryBits == type.bits
+      it.filterData.categoryBits == type.category
     }
   }
 
@@ -87,8 +87,22 @@ class ContactGraph: ContactListener, ContactFilter {
 
   // MARK: ContactFilter
   override fun shouldCollide(fixtureA: Fixture?, fixtureB: Fixture?): Boolean {
-    val contact1 = fixtureA?.contactInfo ?: return true
-    val contact2 = fixtureB?.contactInfo ?: return true
+    val fixture1 = fixtureA ?: return true
+    val fixture2 = fixtureB ?: return true
+
+    // check filters first
+    val filter1 = fixture1.filterData
+    val filter2 = fixture2.filterData
+    val filtersMatch = filter1.categoryBits.and(filter2.maskBits) != 0.toShort()
+      && (filter2.categoryBits and filter1.maskBits) != 0.toShort()
+
+    if (!filtersMatch) {
+      return false
+    }
+
+    // check phasing
+    val contact1 = fixtureA.contactInfo
+    val contact2 = fixtureB.contactInfo
 
     val shouldPhase = when {
       contact1 is ContactInfo.Obstruction && contact2 is ContactInfo.Hero ->

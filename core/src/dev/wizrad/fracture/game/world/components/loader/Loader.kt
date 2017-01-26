@@ -1,4 +1,4 @@
-package dev.wizrad.fracture.game.world.cycle.loader
+package dev.wizrad.fracture.game.world.components.loader
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.math.Vector2

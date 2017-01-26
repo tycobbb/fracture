@@ -4,10 +4,12 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
 import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.physics.box2d.World
+import dev.wizrad.fracture.game.world.components.session.Event
 import dev.wizrad.fracture.support.Tag
 import dev.wizrad.fracture.support.debug
 import dev.wizrad.fracture.support.debugPrefix
 import dev.wizrad.fracture.support.fmt
+import kotlin.reflect.KClass
 
 abstract class Entity(
   /** The scene body attached to this entity */
@@ -20,27 +22,8 @@ abstract class Entity(
   // MARK: Properties
   /** Absolute position in scene coords */
   val center: Vector2 get() = body.position
-
-  // MARK: Geometry
-  /** Transforms a vector from the local -> absolute coordinate space */
-  fun transform(point: Vector2): Vector2 {
-    return scratch.set(point).add(center)
-  }
-
-  /** Transforms a vector from the local -> absolute coordinate space */
-  fun transform(x: Float, y: Float): Vector2 {
-    return scratch.set(x, y).add(center)
-  }
-
-  // MARK: Relationships
-  /** Cached list for traversing children in prescribed order */
-  private val children: Array<Entity> by lazy {
-    children(EntitySequence()).toArray()
-  }
-
-  open fun children(sequence: EntitySequence): EntitySequence {
-    return sequence
-  }
+  /** Optional event subscription to be cleaned up on destroy */
+  private var unsubscribe: (() -> Unit)? = null
 
   // MARK: Behavior
   override fun start() {
@@ -69,8 +52,39 @@ abstract class Entity(
   override fun destroy() {
     @Suppress("ConvertLambdaToReference")
     children.forEach { it.destroy() }
-
+    unsubscribe?.invoke()
     super.destroy()
+  }
+
+  // MARK: Events
+  protected fun subscribe(subscriber: Pair<Class<*>, Function1<*, Unit>>) {
+    unsubscribe = session.subscribe(subscriber)
+  }
+
+  protected fun subscribe(vararg subscribers: Pair<Class<*>, Function1<*, Unit>>) {
+    subscribers
+    unsubscribe = session.subscribe(subscribers)
+  }
+
+  // MARK: Geometry
+  /** Transforms a vector from the local -> absolute coordinate space */
+  fun transform(point: Vector2): Vector2 {
+    return scratch.set(point).add(center)
+  }
+
+  /** Transforms a vector from the local -> absolute coordinate space */
+  fun transform(x: Float, y: Float): Vector2 {
+    return scratch.set(x, y).add(center)
+  }
+
+  // MARK: Relationships
+  /** Cached list for traversing children in prescribed order */
+  private val children: Array<Entity> by lazy {
+    children(EntitySequence()).toArray()
+  }
+
+  open fun children(sequence: EntitySequence): EntitySequence {
+    return sequence
   }
 
   // MARK: Debugging

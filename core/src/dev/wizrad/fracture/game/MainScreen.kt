@@ -6,7 +6,6 @@ import com.badlogic.gdx.Screen
 import dev.wizrad.fracture.game.components.projection.Projection
 import dev.wizrad.fracture.game.components.projection.Projections
 import dev.wizrad.fracture.game.components.projection.then
-import dev.wizrad.fracture.game.renderer.core.Camera
 import dev.wizrad.fracture.game.renderer.core.Renderer
 import dev.wizrad.fracture.game.ui.core.MainStage
 import dev.wizrad.fracture.game.world.MainScene
@@ -14,8 +13,8 @@ import dev.wizrad.fracture.support.extensions.Vector2
 
 class MainScreen: Screen {
   private val scene = MainScene()
-  private val renderer = Renderer(scene, camera = Camera())
   private val stage = MainStage(scene)
+  private val renderer = Renderer(scene)
 
   init {
     Gdx.input.inputProcessor = InputMultiplexer(stage, scene.controls.touch)

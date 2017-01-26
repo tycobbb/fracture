@@ -11,9 +11,21 @@ fun Vector2(width: Int, height: Int): Vector2 {
   return Vector2(width.toFloat(), height.toFloat())
 }
 
+fun Vector2(vector: Vector3): Vector2 {
+  return Vector2(vector.x, vector.y)
+}
+
 // MARK: Operations
-fun Vector3.set(x: Int, y: Int) {
-  set(x.toFloat(), y.toFloat(), 0.0f)
+fun Vector2.set(vector: Vector3): Vector2 {
+  return set(vector.x, vector.y)
+}
+
+fun Vector3.set(x: Int, y: Int): Vector3 {
+  return set(x.toFloat(), y.toFloat(), 0.0f)
+}
+
+fun Vector3.set(vector: Vector2): Vector3 {
+  return set(vector.x, vector.y, 0.0f)
 }
 
 fun Vector2.update(x: Float = this.x, y: Float = this.y): Vector2 {

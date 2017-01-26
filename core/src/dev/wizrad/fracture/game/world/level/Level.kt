@@ -3,10 +3,12 @@ package dev.wizrad.fracture.game.world.level
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.*
 import dev.wizrad.fracture.game.world.components.contact.ContactInfo
+import dev.wizrad.fracture.game.world.components.contact.ContactType
 import dev.wizrad.fracture.game.world.components.contact.Orientation
+import dev.wizrad.fracture.game.world.components.contact.set
+import dev.wizrad.fracture.game.world.components.loader.LevelData
 import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.core.EntitySequence
-import dev.wizrad.fracture.game.world.cycle.loader.LevelData
 import dev.wizrad.fracture.game.world.support.extensions.contactInfo
 
 class Level(
@@ -35,7 +37,7 @@ class Level(
   }
 
   // MARK: Factory
-  data class Args(val data: LevelData)
+  data class Args(val data: LevelData, val offset: Float)
 
   class Factory(parent: Entity): Entity.Factory<Level, Args>(parent) {
     private val size: Vector2 = Vector2(9.0f, 16.0f)
@@ -47,7 +49,7 @@ class Level(
     override fun defineBody(args: Args): BodyDef {
       val body = super.defineBody(args)
       body.type = BodyDef.BodyType.StaticBody
-      body.position.set(parent.transform(Vector2.Zero))
+      body.position.set(parent.transform(0.0f, args.offset))
       return body
     }
 
@@ -78,6 +80,7 @@ class Level(
       val blastZoneDef = FixtureDef()
       blastZoneDef.shape = rect
       blastZoneDef.isSensor = true
+      blastZoneDef.filter.set(ContactType.Event)
 
       val blastZone = body.createFixture(blastZoneDef)
       blastZone.contactInfo = ContactInfo.Surface(orientation = orientation)

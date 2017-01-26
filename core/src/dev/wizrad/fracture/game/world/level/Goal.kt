@@ -6,10 +6,9 @@ import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.physics.box2d.FixtureDef
 import com.badlogic.gdx.physics.box2d.PolygonShape
 import dev.wizrad.fracture.game.world.components.contact.ContactType
+import dev.wizrad.fracture.game.world.components.contact.set
+import dev.wizrad.fracture.game.world.components.loader.LevelData
 import dev.wizrad.fracture.game.world.core.Entity
-import dev.wizrad.fracture.game.world.cycle.loader.LevelFeatureArgs
-import dev.wizrad.fracture.support.Tag
-import dev.wizrad.fracture.support.debug
 
 class Goal(
   body: Body, size: Vector2) : Entity(body, size) {
@@ -19,12 +18,12 @@ class Goal(
 
     val fixture = body.fixtureList.first()
     if (contact.any(fixture, type = ContactType.Hero)) {
-      debug(Tag.World, "reached goal!")
+      session.finishLevel()
     }
   }
 
   // MARK: Factory
-  class Args: LevelFeatureArgs()
+  class Args: LevelData.Feature()
 
   class Factory(parent: Entity): Entity.Factory<Goal, Args>(parent) {
     override fun entity(args: Args): Goal = Goal(body(args), args.size)
@@ -46,7 +45,7 @@ class Goal(
       val goalDef = FixtureDef()
       goalDef.shape = rect
       goalDef.isSensor = true
-      goalDef.filter.categoryBits = ContactType.Event.bits
+      goalDef.filter.set(ContactType.Event)
 
       body.createFixture(goalDef)
 

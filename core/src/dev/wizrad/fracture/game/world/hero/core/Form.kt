@@ -7,12 +7,14 @@ import com.badlogic.gdx.physics.box2d.FixtureDef
 import com.badlogic.gdx.physics.box2d.PolygonShape
 import dev.wizrad.fracture.game.world.components.contact.ContactInfo
 import dev.wizrad.fracture.game.world.components.contact.ContactType
+import dev.wizrad.fracture.game.world.components.contact.set
 import dev.wizrad.fracture.game.world.components.statemachine.State
 import dev.wizrad.fracture.game.world.components.statemachine.StateMachine
 import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.core.Scene
 import dev.wizrad.fracture.game.world.core.SceneAware
 import dev.wizrad.fracture.game.world.support.extensions.contactInfo
+import dev.wizrad.fracture.support.debugPrefix
 
 abstract class Form(
   entity: Entity, scene: Scene = Scene.instance): StateMachine(), SceneAware {
@@ -52,7 +54,7 @@ abstract class Form(
     boxDef.shape = polygon
     boxDef.density = 1.0f
     boxDef.friction = 0.6f
-    boxDef.filter.categoryBits = ContactType.Hero.bits
+    boxDef.filter.set(ContactType.Hero)
 
     return boxDef
   }
@@ -65,11 +67,16 @@ abstract class Form(
     val footDef = FixtureDef()
     footDef.isSensor = true
     footDef.shape = polygon
-    footDef.filter.categoryBits = ContactType.Hero.bits
+    footDef.filter.set(ContactType.Hero)
 
     val foot = body.createFixture(footDef)
     foot.contactInfo = ContactInfo.Foot()
 
     return foot
+  }
+
+  // MARK: Debugging
+  override fun toString(): String {
+    return "[$debugPrefix]"
   }
 }

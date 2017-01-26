@@ -12,7 +12,7 @@ import dev.wizrad.fracture.game.world.MainScene
 
 class Renderer constructor(
   val scene: MainScene,
-  val camera: Camera): Renderable {
+  val camera: Camera = Camera(scene)): Renderable {
 
   // MARK: Renderers
   val batch = SpriteBatch()
@@ -20,7 +20,6 @@ class Renderer constructor(
   val debugr = Box2DDebugRenderer()
 
   // MARK: Properties
-  private val _scale = Vector2(41.66f, 41.66f)
   private val debugEnabled = true
 
   // MARK: Lifecycle
@@ -29,6 +28,7 @@ class Renderer constructor(
     Gdx.gl.glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
+    camera.update(delta)
     batch.projectionMatrix = camera.combined
     shaper.projectionMatrix = camera.combined
 
@@ -49,13 +49,13 @@ class Renderer constructor(
     }
 
     val debugMatrix = camera.combined.cpy()
-    debugMatrix.scale(_scale.x, _scale.y, 1.0f)
+    debugMatrix.scale(Camera.scale.x, Camera.scale.y, 1.0f)
     debugRenderer.render(scene.world, debugMatrix)
   }
 
   // MARK: Scale
   fun scale(vector: Vector2, scratch: Vector2): Vector2 {
-    return scratch.set(vector).scl(_scale)
+    return scratch.set(vector).scl(Camera.scale)
   }
 
   companion object {
