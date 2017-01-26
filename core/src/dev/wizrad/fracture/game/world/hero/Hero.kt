@@ -53,8 +53,10 @@ class Hero(
   // MARK: Events
   private fun onLevelStarted(event: Event.LevelStarted) {
     randomizeForm()
+
     val center = event.level.transform(event.start.center)
     body.setTransform(center, body.angle)
+    body.setLinearVelocity(0.0f, 0.0f)
   }
 
   private fun onTransitionStarted(event: Event.TransitionStarted) {

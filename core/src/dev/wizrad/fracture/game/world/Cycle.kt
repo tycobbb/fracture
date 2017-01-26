@@ -33,6 +33,7 @@ class Cycle(
 
     subscribe(
       toEvent<Event.LevelFinished> { onLevelFinished(it) },
+      toEvent<Event.LevelFailed> { onLevelFailed(it) },
       toEvent<Event.TransitionFinished> { onTransitionFinished(it) }
     )
 
@@ -53,6 +54,23 @@ class Cycle(
     invalidateChildren()
 
     session.startTransition(level)
+  }
+
+  private fun onLevelFailed(event: Event.LevelFailed) {
+    // reset offset
+    offset = 0.0f
+
+    // migrate to a new level
+    val data = session.loadLevel()
+    val level = buildLevel(data, offset = offset)
+
+    currentLevel.destroy()
+    currentLevel = level
+    currentLevel.start()
+    invalidateChildren()
+
+    // start the level
+    session.startLevel(level)
   }
 
   private fun onTransitionFinished(event: Event.TransitionFinished) {

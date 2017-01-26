@@ -33,6 +33,12 @@ class Session {
     bus.post(Event.LevelFinished())
   }
 
+  fun failLevel() {
+    currentLevel = -1
+    levelsFinished = 0
+    bus.post(Event.LevelFailed())
+  }
+
   fun loadLevel(): LevelData {
     val data = loader.load()
     nextLevelData = data

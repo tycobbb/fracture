@@ -2,14 +2,11 @@ package dev.wizrad.fracture.game.world.level
 
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.*
-import dev.wizrad.fracture.game.world.components.contact.ContactInfo
 import dev.wizrad.fracture.game.world.components.contact.ContactType
-import dev.wizrad.fracture.game.world.components.contact.Orientation
 import dev.wizrad.fracture.game.world.components.contact.set
 import dev.wizrad.fracture.game.world.components.loader.LevelData
 import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.core.EntitySequence
-import dev.wizrad.fracture.game.world.support.extensions.contactInfo
 
 class Level(
   body: Body, size: Vector2, data: LevelData): Entity(body, size) {
@@ -29,6 +26,21 @@ class Level(
       .entity(data.hotspots.goal)
   }
 
+  override fun update(delta: Float) {
+    super.update(delta)
+
+    if (isInBlastzone()) {
+      session.failLevel()
+    }
+  }
+
+  private fun isInBlastzone(): Boolean {
+    return body.fixtureList.any {
+      contact.any(it, type = ContactType.Hero)
+    }
+  }
+
+  // MARK: Relationships
   override fun children(sequence: EntitySequence): EntitySequence {
     return super.children(sequence)
       .then(walls)
@@ -62,30 +74,26 @@ class Level(
 
       // create left blast zone
       rect.setAsBox(0.0f, height, scratch.set(0.0f, height), 0.0f)
-      createBlastZone(body, rect, orientation = Orientation.Right)
+      createBlastZone(body, rect)
 
       // create right blast zone
       rect.setAsBox(0.0f, height, scratch.set(size.x, height), 0.0f)
-      createBlastZone(body, rect, orientation = Orientation.Left)
+      createBlastZone(body, rect)
 
-      // create top blast zone
-      rect.setAsBox(width, 0.0f, scratch.set(width, 0.0f), 0.0f)
-      createBlastZone(body, rect, orientation = Orientation.Bottom)
+      // create bottom blast zone
+      rect.setAsBox(width, 0.0f, scratch.set(width, size.y), 0.0f)
+      createBlastZone(body, rect)
 
       // dispose shapes
       rect.dispose()
     }
 
-    private fun createBlastZone(body: Body, rect: PolygonShape, orientation: Orientation): Fixture {
+    private fun createBlastZone(body: Body, rect: PolygonShape): Fixture {
       val blastZoneDef = FixtureDef()
       blastZoneDef.shape = rect
       blastZoneDef.isSensor = true
       blastZoneDef.filter.set(ContactType.Event)
-
-      val blastZone = body.createFixture(blastZoneDef)
-      blastZone.contactInfo = ContactInfo.Surface(orientation = orientation)
-
-      return blastZone
+      return body.createFixture(blastZoneDef)
     }
   }
 }

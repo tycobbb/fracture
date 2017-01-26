@@ -1,12 +1,12 @@
 package dev.wizrad.fracture.game.world.hero.forms
 
 import com.badlogic.gdx.physics.box2d.PolygonShape
-import dev.wizrad.fracture.game.world.components.contact.ContactInfo
+import dev.wizrad.fracture.game.world.components.contact.ContactType
+import dev.wizrad.fracture.game.world.components.contact.set
 import dev.wizrad.fracture.game.world.components.statemachine.State
 import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.hero.core.Form
 import dev.wizrad.fracture.game.world.hero.core.FormState
-import dev.wizrad.fracture.game.world.support.extensions.contactInfo
 
 class DebugForm(entity: Entity): Form(entity) {
   // MARK: Form
@@ -18,8 +18,9 @@ class DebugForm(entity: Entity): Form(entity) {
     val polygon = PolygonShape()
 
     // create fixtures
-    val box = createBox(defineBox(polygon))
-    box.contactInfo = ContactInfo.Hero(isPhasing = true)
+    val boxDef = defineBox(polygon)
+    boxDef.filter.set(ContactType.None)
+    createBox(boxDef)
 
     // dispose shapes
     polygon.dispose()

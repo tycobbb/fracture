@@ -10,6 +10,7 @@ sealed class Event {
     var start: LevelData.Feature): Event()
 
   class LevelFinished: Event()
+  class LevelFailed: Event()
 
   // MARK: Transition
   class TransitionStarted(
