@@ -14,15 +14,18 @@ import dev.wizrad.fracture.game.world.level.Level
 class Cycle(
   body: Body, size: Vector2): Entity(body, size) {
 
+  // MARK: Properties
+  private var offset = 0.0f
+
   // MARK: Children
   val hero: Hero
-  var level: Level; private set
+  var currentLevel: Level; private set
   var nextLevel: Level? = null; private set
 
   // MARK: Initialization
   init {
     hero = Hero.Factory(parent = this).entity()
-    level = buildLevel(session.loadLevel(), isNext = false)
+    currentLevel = buildLevel(session.loadLevel())
   }
 
   override fun start() {
@@ -33,28 +36,44 @@ class Cycle(
       toEvent<Event.TransitionFinished> { onTransitionFinished(it) }
     )
 
-    session.startLevel(level)
+    session.startLevel(currentLevel)
   }
 
   // MARK: Events
   private fun onLevelFinished(event: Event.LevelFinished) {
+    // keep positioning levels above the last; resetting position after transition
+    // requires more effort
+    offset -= size.y
+
     val data = session.loadLevel()
-    val level = buildLevel(data, isNext = true)
+    val level = buildLevel(data, offset = offset)
+
     nextLevel = level
+    nextLevel?.start()
+    invalidateChildren()
+
     session.startTransition(level)
   }
 
   private fun onTransitionFinished(event: Event.TransitionFinished) {
-    val nextLevel = checkNotNull(nextLevel)
-    level = nextLevel
-    session.startLevel(level)
+    val level = checkNotNull(nextLevel)
+
+    // clean up current level
+    nextLevel = null
+    currentLevel.destroy()
+
+    // migrate to next level
+    currentLevel = level
+    invalidateChildren()
+
+    session.startLevel(currentLevel)
   }
 
   // MARK: Level
-  private fun buildLevel(data: LevelData, isNext: Boolean): Level {
+  private fun buildLevel(data: LevelData, offset: Float = 0.0f): Level {
     return Level.Factory(this).entity(Level.Args(
       data = data,
-      offset = if (isNext) -size.y else 0.0f
+      offset = offset
     ))
   }
 
@@ -62,7 +81,8 @@ class Cycle(
   override fun children(sequence: EntitySequence): EntitySequence {
     return super.children(sequence)
       .then(hero)
-      .then(level)
+      .then(currentLevel)
+      .then(nextLevel)
   }
 
   // MARK: Factory

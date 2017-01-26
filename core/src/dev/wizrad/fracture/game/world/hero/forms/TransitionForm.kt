@@ -49,6 +49,7 @@ class TransitionForm(entity: Entity, target: Vector2): Form(entity) {
 
     override fun start() {
       super.start()
+
       cancelMomentum()
       stopGravity()
     }
@@ -63,6 +64,8 @@ class TransitionForm(entity: Entity, target: Vector2): Form(entity) {
 
     override fun destroy() {
       startGravity()
+      body.setTransform(body.position, 0.0f)
+
       super.destroy()
     }
 

@@ -4,12 +4,10 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
 import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.physics.box2d.World
-import dev.wizrad.fracture.game.world.components.session.Event
 import dev.wizrad.fracture.support.Tag
 import dev.wizrad.fracture.support.debug
 import dev.wizrad.fracture.support.debugPrefix
 import dev.wizrad.fracture.support.fmt
-import kotlin.reflect.KClass
 
 abstract class Entity(
   /** The scene body attached to this entity */
@@ -28,8 +26,11 @@ abstract class Entity(
   // MARK: Behavior
   override fun start() {
     super.start()
-
     debug(Tag.World, "initializing $debugPrefix")
+
+    // compute initial array of children
+    invalidateChildren()
+
     @Suppress("ConvertLambdaToReference")
     children.forEach { it.start() }
   }
@@ -50,9 +51,14 @@ abstract class Entity(
   }
 
   override fun destroy() {
+    // destory children
     @Suppress("ConvertLambdaToReference")
     children.forEach { it.destroy() }
+    // clean up physics body
+    world.destroyBody(body)
+    // remove any subscriptions
     unsubscribe?.invoke()
+
     super.destroy()
   }
 
@@ -62,11 +68,14 @@ abstract class Entity(
   }
 
   protected fun subscribe(vararg subscribers: Pair<Class<*>, Function1<*, Unit>>) {
-    subscribers
     unsubscribe = session.subscribe(subscribers)
   }
 
   // MARK: Geometry
+  fun setPostion(position: Vector2) {
+    body.setTransform(position, body.angle)
+  }
+
   /** Transforms a vector from the local -> absolute coordinate space */
   fun transform(point: Vector2): Vector2 {
     return scratch.set(point).add(center)
@@ -78,13 +87,16 @@ abstract class Entity(
   }
 
   // MARK: Relationships
-  /** Cached list for traversing children in prescribed order */
-  private val children: Array<Entity> by lazy {
-    children(EntitySequence()).toArray()
+  lateinit private var children: Array<Entity>
+
+  /** Defines the sequence of child entities to update */
+  open protected fun children(sequence: EntitySequence): EntitySequence {
+    return sequence
   }
 
-  open fun children(sequence: EntitySequence): EntitySequence {
-    return sequence
+  /** Recomputes the sequence of child entities to update */
+  protected fun invalidateChildren() {
+    children = children(EntitySequence()).toArray()
   }
 
   // MARK: Debugging

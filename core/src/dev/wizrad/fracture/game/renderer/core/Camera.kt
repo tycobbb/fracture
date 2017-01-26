@@ -55,6 +55,7 @@ class Camera(
   // MARK: Events
   private fun onLevelStarted(event: Event.LevelStarted) {
     position.set(calculateCenter(event.level))
+    needsUpdate = true
   }
 
   private fun onTransitionStarted(event: Event.TransitionStarted) {

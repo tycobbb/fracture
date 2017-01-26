@@ -6,6 +6,6 @@ import dev.wizrad.fracture.game.renderer.level.render
 import dev.wizrad.fracture.game.world.MainScene
 
 fun Renderer.render(world: MainScene, delta: Float) {
-  render(world.cycle.level, delta)
+  render(world.cycle.currentLevel, delta)
   render(world.cycle.hero, delta)
 }

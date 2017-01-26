@@ -1,22 +1,27 @@
 package dev.wizrad.fracture.game.world.core
 
+import dev.wizrad.fracture.support.extensions.append
+
 class EntitySequence {
   // MARK: Properties
-  private val collections = mutableListOf<Collection<Entity>>()
+  private val sequence = mutableListOf<Entity>()
 
   // MARK: Builder
-  fun then(entity: Entity): EntitySequence {
-    collections.add(listOf(entity))
+  fun then(entity: Entity?): EntitySequence {
+    if (entity != null) {
+      sequence.append(entity)
+    }
+
     return this
   }
 
   fun then(entities: Collection<Entity>): EntitySequence {
-    collections.add(entities)
+    sequence.addAll(entities)
     return this
   }
 
   // MARK: Output
   fun toArray(): Array<Entity> {
-    return collections.flatten().toTypedArray()
+    return sequence.toTypedArray()
   }
 }
