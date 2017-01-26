@@ -10,6 +10,7 @@ import dev.wizrad.fracture.game.world.components.statemachine.State
 import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.hero.core.Form
 import dev.wizrad.fracture.game.world.hero.core.FormState
+import dev.wizrad.fracture.support.Maths
 
 class TransitionForm(entity: Entity, target: Vector2): Form(entity) {
   // MARK: Properties
@@ -32,11 +33,18 @@ class TransitionForm(entity: Entity, target: Vector2): Form(entity) {
 
   // MARK: States
   class Transitioning(form: TransitionForm, target: Vector2): FormState<TransitionForm>(form) {
-    val animation = Animation(
+    val translation = Animation.Vector(
       start = body.position,
       end = target,
       duration = 2.0f,
       interpolation = Interpolation.pow2
+    )
+
+    val rotation = Animation.Value(
+      start = body.angle,
+      end = Maths.F_PI * 2,
+      duration = 2.0f,
+      interpolation = Interpolation.swing
     )
 
     override fun start() {
@@ -48,14 +56,14 @@ class TransitionForm(entity: Entity, target: Vector2): Form(entity) {
     override fun step(delta: Float) {
       super.step(delta)
 
-      if (!animation.isFinished) {
-        body.setTransform(animation.next(delta), body.angle)
-      }
+      val point = if (!translation.isFinished) translation.next(delta) else body.position
+      val angle = if (!rotation.isFinished) rotation.next(delta) else body.angle
+      body.setTransform(point, angle)
     }
 
     override fun destroy() {
-      super.destroy()
       startGravity()
+      super.destroy()
     }
 
     override fun nextState() = null

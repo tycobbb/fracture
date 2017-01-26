@@ -21,7 +21,7 @@ class Camera(
   scene: MainScene): OrthographicCamera(), Renderable {
 
   private val viewport: Viewport = ScreenViewport(this)
-  private var animation: Animation? = null
+  private var animation: Animation<Vector2>? = null
   private var needsUpdate: Boolean = false
 
   init {
@@ -59,11 +59,11 @@ class Camera(
 
   private fun onTransitionStarted(event: Event.TransitionStarted) {
     val end = calculateCenter(event.level)
-    animation = Animation(
+    animation = Animation.Vector(
       start = position,
       end = end,
       duration = 2.0f,
-      interpolation = Interpolation.smoother
+      interpolation = Interpolation.exp10
     )
   }
 
