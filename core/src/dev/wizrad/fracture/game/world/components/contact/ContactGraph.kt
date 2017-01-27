@@ -41,6 +41,10 @@ class ContactGraph: ContactListener, ContactFilter {
     }
   }
 
+  fun filter(fixture: Fixture, orientation: Orientation): List<Fixture> {
+    return contactSet(fixture).filter { it.surface?.orientation == orientation }
+  }
+
   fun any(fixture: Fixture, orientation: Orientation): Boolean {
     return contactSet(fixture).any { fixture ->
       val surface = fixture.surface
@@ -93,10 +97,11 @@ class ContactGraph: ContactListener, ContactFilter {
     // check filters first
     val filter1 = fixture1.filterData
     val filter2 = fixture2.filterData
-    val filtersMatch = filter1.categoryBits.and(filter2.maskBits) != 0.toShort()
-      && (filter2.categoryBits and filter1.maskBits) != 0.toShort()
 
-    if (!filtersMatch) {
+    val collision1 = filter1.categoryBits.and(filter2.maskBits)
+    val collision2 = filter2.categoryBits.and(filter1.maskBits)
+
+    if (collision1.eq(0) || collision2.eq(0)) {
       return false
     }
 

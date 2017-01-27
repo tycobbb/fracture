@@ -16,6 +16,7 @@ class Level(
   val walls: List<Wall>
   val platforms: List<Platform>
   val spikes: List<Spikes>
+  val collapser: Collapser
 
   // MARK: Lifecycle
   init {
@@ -27,6 +28,8 @@ class Level(
       .entities(data.platforms)
     spikes = Spikes.Factory(parent = this)
       .entities(data.spikes)
+    collapser = Collapser.Factory(parent = this)
+      .entity(Collapser.Args(y = size.y, width = size.x))
   }
 
   override fun update(delta: Float) {
@@ -46,6 +49,7 @@ class Level(
   // MARK: Relationships
   override fun children(sequence: EntitySequence): EntitySequence {
     return super.children(sequence)
+      .then(collapser)
       .then(walls)
       .then(platforms)
       .then(goal)

@@ -43,29 +43,10 @@ class Spikes(
     override fun defineFixtures(body: Body, args: Args) {
       super.defineFixtures(body, args)
 
-      // create list of vertex arrays
-      val height = args.size.y
-      val n = args.size.x.toInt()
-
-      val y = args.size.y / 2.0f
-      var x = -args.size.x / 2.0f
-      val vertices = (0..n-1).map { i ->
-        val x2 = x + 1.0f
-
-        val vertexes = FloatArray(6)
-        vertexes[0] = x
-        vertexes[1] = y
-        vertexes[2] = x + 0.5f
-        vertexes[3] = -y
-        vertexes[4] = x2
-        vertexes[5] = y
-
-        x = x2
-        vertexes
-      }
-
-      // create fixtures
+      // make fixtures
+      val vertices = makeVerticies(args.size)
       val triangle = PolygonShape()
+
       vertices.forEach { vertexes ->
         triangle.set(vertexes)
 
@@ -79,6 +60,28 @@ class Spikes(
 
       // dispose shapes
       triangle.dispose()
+    }
+
+    private fun makeVerticies(size: Vector2): List<FloatArray> {
+       // create list of vertex arrays
+      val n = size.x.toInt()
+      val y = size.y / 2.0f
+
+      var x = -size.x / 2.0f
+      return (0..n-1).map { i ->
+        val x2 = x + 1.0f
+
+        val vertexes = FloatArray(6)
+        vertexes[0] = x
+        vertexes[1] = y
+        vertexes[2] = x + 0.5f
+        vertexes[3] = -y
+        vertexes[4] = x2
+        vertexes[5] = y
+
+        x = x2
+        vertexes
+      }
     }
   }
 }

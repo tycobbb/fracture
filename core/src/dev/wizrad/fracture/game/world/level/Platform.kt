@@ -27,6 +27,7 @@ class Platform(
     override fun defineBody(args: Args): BodyDef {
       val body = super.defineBody(args)
       body.type = BodyDef.BodyType.StaticBody
+      body.gravityScale = 0.1f
       body.position.set(parent.transform(args.center))
       return body
     }

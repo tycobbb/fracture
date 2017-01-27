@@ -4,7 +4,8 @@ enum class ContactType(val value: Int) {
   None(0),
   Hero(1 shl 0),
   Terrain(1 shl 1),
-  Event(1 shl 2);
+  Event(1 shl 2),
+  Collapser(1 shl 3);
 
   // MARK: Representations
   val category: Short get()
@@ -15,5 +16,6 @@ enum class ContactType(val value: Int) {
     Hero -> !Hero
     Terrain -> !Terrain
     Event -> -1
+    Collapser -> Terrain.category
   }
 }
