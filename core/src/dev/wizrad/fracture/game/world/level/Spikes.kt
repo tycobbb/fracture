@@ -11,7 +11,7 @@ import dev.wizrad.fracture.game.world.components.loader.LevelData
 import dev.wizrad.fracture.game.world.core.Entity
 
 class Spikes(
-  body: Body, size: Vector2): Entity(body, size) {
+  body: Body, args: Spikes.Args): Feature(body, args) {
 
   override fun update(delta: Float) {
     super.update(delta)
@@ -30,24 +30,29 @@ class Spikes(
   // MARK: Factory
   class Args: LevelData.Feature()
 
-  class Factory(parent: Entity): Entity.Factory<Spikes, Args>(parent) {
-    override fun entity(args: Args) = Spikes(body(args), Vector2())
+  companion object: Factory<Spikes, Args>() {
+    override fun entity(parent: Entity?, args: Args)
+      = Spikes(body(parent, args), args)
 
-    override fun defineBody(args: Args): BodyDef {
-      val body = super.defineBody(args)
-      body.type = BodyDef.BodyType.StaticBody
-      body.position.set(parent.transform(args.center))
+    private fun body(parent: Entity?, args: Args): Body {
+      if (parent == null) error("parentRequired")
+
+      val bodyDef = BodyDef()
+      bodyDef.type = BodyDef.BodyType.StaticBody
+      bodyDef.gravityScale = 0.1f
+      bodyDef.position.set(parent.transform(args.center))
+
+      val body = parent.world.createBody(bodyDef)
+      fixtures(body, args)
+
       return body
     }
 
-    override fun defineFixtures(body: Body, args: Args) {
-      super.defineFixtures(body, args)
-
-      // make fixtures
-      val vertices = makeVerticies(args.size)
+    private fun fixtures(body: Body, args: Args) {
       val triangle = PolygonShape()
 
-      vertices.forEach { vertexes ->
+      // define fixtures
+      makeVerticies(args.size).forEach { vertexes ->
         triangle.set(vertexes)
 
         val spikeDef = FixtureDef()

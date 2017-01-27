@@ -14,29 +14,35 @@ import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.support.extensions.contactInfo
 
 class Wall(
-  body: Body, size: Vector2): Entity(body, size) {
+  body: Body, args: Wall.Args): Feature(body, args) {
 
   // MARK: Factory
   class Args: LevelData.Feature() {
     lateinit var orientation: Orientation
   }
 
-  class Factory(parent: Entity?): Entity.Factory<Wall, Args>(parent) {
-    // MARK: Output
-    override fun entity(args: Args) = Wall(body(args), args.size)
+  companion object: Entity.Factory<Wall, Args>() {
+    override fun entity(parent: Entity?, args: Args)
+      = Wall(body(parent, args), args)
 
     // MARK: Body
-    override fun defineBody(args: Args): BodyDef {
-      val body = super.defineBody(args)
-      body.type = BodyDef.BodyType.StaticBody
-      body.position.set(parent.transform(args.center))
+    private fun body(parent: Entity?, args: Args): Body {
+      if (parent == null) error("parent required")
+
+      val bodyDef = BodyDef()
+      bodyDef.type = BodyDef.BodyType.StaticBody
+      bodyDef.position.set(parent.transform(args.center))
+
+      val body = parent.world.createBody(bodyDef)
+      fixtures(body, args)
+
       return body
     }
 
-    override fun defineFixtures(body: Body, args: Args) {
-      super.defineFixtures(body, args)
-
+    private fun fixtures(body: Body, args: Args) {
       val rect = PolygonShape()
+
+      // create fixtures
       rect.setAsBox(args.size.x / 2, args.size.y / 2)
 
       val wallDef = FixtureDef()
@@ -49,6 +55,9 @@ class Wall(
       wall.contactInfo = ContactInfo.Surface(
         orientation = args.orientation
       )
+
+      // dispose shapes
+      rect.dispose()
     }
   }
 }

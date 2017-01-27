@@ -8,6 +8,7 @@ import dev.wizrad.fracture.game.world.components.session.Event
 import dev.wizrad.fracture.game.world.components.session.toEvent
 import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.core.EntitySequence
+import dev.wizrad.fracture.game.world.core.Scene
 import dev.wizrad.fracture.game.world.hero.Hero
 import dev.wizrad.fracture.game.world.level.Level
 
@@ -24,7 +25,7 @@ class Cycle(
 
   // MARK: Initialization
   init {
-    hero = Hero.Factory(parent = this).entity()
+    hero = Hero.entity(parent = this)
     currentLevel = buildLevel(session.loadLevel())
   }
 
@@ -89,7 +90,7 @@ class Cycle(
 
   // MARK: Level
   private fun buildLevel(data: LevelData, offset: Float = 0.0f): Level {
-    return Level.Factory(this).entity(Level.Args(
+    return Level.entity(this, Level.Args(
       data = data,
       size = size,
       offset = offset
@@ -105,20 +106,20 @@ class Cycle(
   }
 
   // MARK: Factory
-  class Factory: UnitFactory<Cycle>(null) {
-    // MARK: Output
-    override fun entity(args: Unit) = Cycle(body(), size)
+  companion object: Entity.UnitFactory<Cycle>() {
+    val size: Vector2 = Vector2(11.25f, 20.0f)
 
-    // MARK: Body
-    override fun defineBody(args: Unit): BodyDef {
-      val bodyDef = super.defineBody(args)
+    override fun entity(parent: Entity?, args: Unit)
+      = Cycle(body(), size)
+
+    private fun body(): Body {
+      val scene = checkNotNull(Scene.current) { "tried to create Cycle before scene was set" }
+
+      val bodyDef = BodyDef()
       bodyDef.type = BodyDef.BodyType.StaticBody
       bodyDef.position.set(size).scl(0.5f)
-      return bodyDef
-    }
-  }
 
-  companion object {
-    val size: Vector2 = Vector2(11.25f, 20.0f)
+      return scene.world.createBody(bodyDef)
+    }
   }
 }

@@ -1,6 +1,5 @@
 package dev.wizrad.fracture.game.world.level
 
-import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
 import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.physics.box2d.FixtureDef
@@ -14,47 +13,50 @@ import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.support.extensions.contactInfo
 
 class Platform(
-  body: Body, size: Vector2): Entity(body, size) {
+  body: Body, args: Platform.Args): Feature(body, args) {
 
   // MARK: Factory
   class Args: LevelData.Feature()
 
-  class Factory(parent: Entity?): Entity.Factory<Platform, Args>(parent) {
+  companion object: Entity.Factory<Platform, Args>() {
     // MARK: Output
-    override fun entity(args: Args) = Platform(body(args), args.size)
+    override fun entity(parent: Entity?, args: Args)
+      = Platform(body(parent, args), args)
 
-    // MARK: Body
-    override fun defineBody(args: Args): BodyDef {
-      val body = super.defineBody(args)
-      body.type = BodyDef.BodyType.StaticBody
-      body.gravityScale = 0.1f
-      body.position.set(parent.transform(args.center))
+    private fun body(parent: Entity?, args: Args): Body {
+      if (parent == null) error("parent required")
+
+      // create body
+      val bodyDef = BodyDef()
+      bodyDef.type = BodyDef.BodyType.StaticBody
+      bodyDef.gravityScale = 0.1f
+      bodyDef.position.set(parent.transform(args.center))
+
+      val body = parent.world.createBody(bodyDef)
+      fixtures(body, args)
+
       return body
     }
 
-    override fun defineFixtures(body: Body, args: Args) {
-      super.defineFixtures(body, args)
-
+    private fun fixtures(body: Body, args: Args) {
+      val edge = 0.05f
       val width = args.size.x / 2
       val height = args.size.y / 2
       val rect = PolygonShape()
 
-      // create edges
-      val edge = 0.05f
-
-      // create left edge
+      // left
       rect.setAsBox(edge, height - edge * 2, scratch.set(edge - width, 0.0f), 0.0f)
       createSurface(body, rect, orientation = Orientation.Left)
 
-      // create right edge
+      // right
       rect.setAsBox(edge, height - edge * 2, scratch.set(width - edge, 0.0f), 0.0f)
       createSurface(body, rect, orientation = Orientation.Right)
 
-      // create top edge
+      // top
       rect.setAsBox(width, edge, scratch.set(0.0f, edge - height), 0.0f)
       createSurface(body, rect, orientation = Orientation.Top)
 
-      // create bottom edge
+      // bottom
       rect.setAsBox(width, edge, scratch.set(0.0f, height - edge), 0.0f)
       createSurface(body, rect, orientation = Orientation.Bottom)
 

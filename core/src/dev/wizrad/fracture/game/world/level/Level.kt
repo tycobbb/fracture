@@ -12,24 +12,18 @@ class Level(
   body: Body, size: Vector2, data: LevelData): Entity(body, size) {
 
   // MARK: Children
-  val goal: Goal
+  val features: List<Entity>
   val walls: List<Wall>
-  val platforms: List<Platform>
-  val spikes: List<Spikes>
   val collapser: Collapser
 
   // MARK: Lifecycle
   init {
-    goal = Goal.Factory(parent = this)
-      .entity(data.hotspots.goal)
-    walls = Wall.Factory(parent = this)
-      .entities(data.walls)
-    platforms = Platform.Factory(parent = this)
-      .entities(data.platforms)
-    spikes = Spikes.Factory(parent = this)
-      .entities(data.spikes)
-    collapser = Collapser.Factory(parent = this)
-      .entity(Collapser.Args(y = size.y, width = size.x))
+    features = Feature.entities(parent = this, args = data.features)
+    walls = Wall.entities(parent = this, args = data.walls)
+    collapser = Collapser.entity(parent = this, args = Collapser.Args(
+      y = size.y,
+      width = size.x
+    ))
   }
 
   override fun update(delta: Float) {
@@ -50,48 +44,52 @@ class Level(
   override fun children(sequence: EntitySequence): EntitySequence {
     return super.children(sequence)
       .then(collapser)
+      .then(features)
       .then(walls)
-      .then(platforms)
-      .then(goal)
-      .then(spikes)
   }
 
   // MARK: Factory
   data class Args(val data: LevelData, val size: Vector2, val offset: Float)
 
-  class Factory(parent: Entity): Entity.Factory<Level, Args>(parent) {
-    // MARK: Output
-    override fun entity(args: Args) = Level(body(args), args.size, args.data)
+  companion object: Entity.Factory<Level, Args>() {
+    override fun entity(parent: Entity?, args: Args): Level {
+      return Level(body(parent, args), args.size, args.data)
+    }
 
-    // MARK: Body
-    override fun defineBody(args: Args): BodyDef {
-      val body = super.defineBody(args)
-      body.type = BodyDef.BodyType.StaticBody
-      body.position.set(parent.transform(0.0f, args.offset))
+    private fun body(parent: Entity?, args: Args): Body {
+      if (parent == null) error("parent required")
+
+      val bodyDef = BodyDef()
+      bodyDef.type = BodyDef.BodyType.StaticBody
+      bodyDef.position.set(parent.transform(0.0f, args.offset))
+
+      val body = parent.world.createBody(bodyDef)
+      fixtures(body, args)
+
       return body
     }
 
-    override fun defineFixtures(body: Body, args: Args) {
-      super.defineFixtures(body, args)
-
+    private fun fixtures(body: Body, args: Args): Body {
       val width = args.size.x / 2
       val height = args.size.y / 2
       val rect = PolygonShape()
 
-      // create left blast zone
+      // left
       rect.setAsBox(0.0f, height, scratch.set(0.0f, height), 0.0f)
       createBlastZone(body, rect)
 
-      // create right blast zone
+      // right
       rect.setAsBox(0.0f, height, scratch.set(args.size.x, height), 0.0f)
       createBlastZone(body, rect)
 
-      // create bottom blast zone
+      // bottom
       rect.setAsBox(width, 0.0f, scratch.set(width, args.size.y), 0.0f)
       createBlastZone(body, rect)
 
       // dispose shapes
       rect.dispose()
+
+      return body
     }
 
     private fun createBlastZone(body: Body, rect: PolygonShape): Fixture {

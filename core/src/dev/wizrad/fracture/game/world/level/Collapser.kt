@@ -25,7 +25,7 @@ class Collapser(
     if (elapsed < delay) {
       elapsed += delta
       if (elapsed > delay) {
-        body.setLinearVelocity(0.0f, -0.2f)
+        body.setLinearVelocity(0.0f, -0.4f)
       }
     }
 
@@ -37,20 +37,26 @@ class Collapser(
 
   // MARK: Factory
   class Args(val y: Float, val width: Float)
-  class Factory(parent: Entity): Entity.Factory<Collapser, Args>(parent) {
-    override fun entity(args: Args) = Collapser(body(args), Vector2(args.width, 0.0f))
 
-    override fun defineBody(args: Args): BodyDef {
-      val body = super.defineBody(args)
-      body.type = BodyDef.BodyType.DynamicBody
-      body.gravityScale = 0.0f
-      body.position.set(parent.transform(parent.size.x / 2, parent.size.y))
+  companion object: Entity.Factory<Collapser, Args>() {
+    override fun entity(parent: Entity?, args: Args)
+      = Collapser(body(parent, args), Vector2(args.width, 0.0f))
+
+    private fun body(parent: Entity?, args: Args): Body {
+      if (parent == null) error("parent required")
+
+      val bodyDef = BodyDef()
+      bodyDef.type = BodyDef.BodyType.DynamicBody
+      bodyDef.gravityScale = 0.0f
+      bodyDef.position.set(parent.transform(parent.size.x / 2, parent.size.y))
+
+      val body = parent.world.createBody(bodyDef)
+      fixtures(body, args)
+
       return body
     }
 
-    override fun defineFixtures(body: Body, args: Args) {
-      super.defineFixtures(body, args)
-
+    private fun fixtures(body: Body, args: Args) {
       // create fixtures
       val rect = PolygonShape()
       rect.setAsBox(args.width / 2, 0.0f)

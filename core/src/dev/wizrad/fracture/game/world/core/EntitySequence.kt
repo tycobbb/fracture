@@ -15,8 +15,10 @@ class EntitySequence {
     return this
   }
 
-  fun then(entities: Collection<Entity>): EntitySequence {
-    sequence.addAll(entities)
+  fun then(entities: Collection<Entity>?): EntitySequence {
+    if (entities != null) {
+      sequence.addAll(entities)
+    }
     return this
   }
 

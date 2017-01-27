@@ -93,21 +93,22 @@ class Hero(
   }
 
   // MARK: Factory
-  class Factory(parent: Entity?): Entity.UnitFactory<Hero>(parent) {
-    // MARK: Output
-    override fun entity(args: Unit) = Hero(body(args), size)
+  companion object: Entity.UnitFactory<Hero>() {
+    val size = Vector2(1.0f, 1.0f)
 
-    // MARK: Body
-    override fun defineBody(args: Unit): BodyDef {
-      val body = super.defineBody(args)
-      body.type = BodyType.DynamicBody
-      body.fixedRotation = true
+    override fun entity(parent: Entity?, args: Unit)
+      = Hero(body(parent, args), size)
+
+    private fun body(parent: Entity?, args: Unit): Body {
+      if (parent == null) error("parent required")
+
+      val bodyDef = BodyDef()
+      bodyDef.type = BodyType.DynamicBody
+      bodyDef.fixedRotation = true
+
+      val body = parent.world.createBody(bodyDef)
+
       return body
     }
-  }
-
-  // MARK: Companion
-  companion object {
-    val size = Vector2(1.0f, 1.0f)
   }
 }

@@ -24,7 +24,7 @@ class Session {
 
     bus.post(Event.LevelStarted(
       level = level,
-      start = data.hotspots.start
+      start = data.start
     ))
   }
 
@@ -51,15 +51,15 @@ class Session {
     val duration = 2.0f
     bus.post(Event.TransitionStarted(
       level = level,
-      start = data.hotspots.start,
-      duration = 2.0f
+      start = data.start,
+      duration = duration
     ))
 
     Timer.schedule(object: Timer.Task() {
       override fun run() {
         finishTransition()
       }
-    }, 2.0f)
+    }, duration)
   }
 
   private fun finishTransition() {

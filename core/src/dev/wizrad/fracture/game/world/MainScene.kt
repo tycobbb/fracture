@@ -8,7 +8,6 @@ import dev.wizrad.fracture.game.world.components.contact.ContactGraph
 import dev.wizrad.fracture.game.world.components.controls.Controls
 import dev.wizrad.fracture.game.world.components.session.Session
 import dev.wizrad.fracture.game.world.core.Scene
-import dev.wizrad.fracture.game.world.Cycle
 import dev.wizrad.fracture.game.world.support.Physics
 import dev.wizrad.fracture.support.extensions.min
 
@@ -32,7 +31,7 @@ class MainScene: Scene {
     world.setContactFilter( contact)
 
     // boostrap cycle
-    cycle = Cycle.Factory().entity()
+    cycle = Cycle.entity(parent = null)
     cycle.start()
 
     // set the world coordinate space transform

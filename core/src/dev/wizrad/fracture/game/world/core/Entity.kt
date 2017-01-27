@@ -2,8 +2,6 @@ package dev.wizrad.fracture.game.world.core
 
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
-import com.badlogic.gdx.physics.box2d.BodyDef
-import com.badlogic.gdx.physics.box2d.World
 import dev.wizrad.fracture.support.Tag
 import dev.wizrad.fracture.support.debug
 import dev.wizrad.fracture.support.debugPrefix
@@ -110,46 +108,15 @@ abstract class Entity(
   }
 
   // MARK: Factory
-  abstract class Factory<out E, in A>(
-    parent: Entity?,
-    private val world: World = Scene.instance.world) {
+  abstract class Factory<out E: Entity, in A> {
+    abstract fun entity(parent: Entity?, args: A): E
 
-    // MARK: Properties
-    private val _parent = parent
-    protected val parent: Entity get() = checkNotNull(_parent) { "$this is missing parent" }
-
-    // MARK: Output
-    abstract fun entity(args: A): E
-
-    fun entities(args: Iterable<A>): List<E> {
-      return args.map { entity(args = it) }
-    }
-
-    // MARK: Body
-    protected fun body(args: A): Body {
-      val definition = defineBody(args)
-      val body = world.createBody(definition)
-      defineFixtures(body, args)
-      return body
-    }
-
-    protected open fun defineBody(args: A): BodyDef {
-      return BodyDef()
-    }
-
-    protected open fun defineFixtures(body: Body, args: A) {
+    fun entities(parent: Entity?, args: Iterable<A>): List<E> {
+      return args.map { entity(parent, args = it) }
     }
   }
 
-  abstract class UnitFactory<out E: Entity>(parent: Entity?): Factory<E, Unit>(parent) {
-    // MARK: Output
-    fun entity(): E {
-      return entity(args = Unit)
-    }
-
-    // MARK: Body
-    protected fun body(): Body {
-      return body(args = Unit)
-    }
+  abstract class UnitFactory<out E: Entity>: Factory<E, Unit>() {
+    fun entity(parent: Entity?): E = entity(parent, args = Unit)
   }
 }
