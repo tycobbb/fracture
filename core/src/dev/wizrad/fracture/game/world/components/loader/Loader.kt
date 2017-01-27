@@ -20,6 +20,14 @@ class Loader {
   fun load(): LevelData {
     val file = Gdx.files.internal("level.json")
     val level = json.fromJson(LevelData::class.java, file)
+
+    // offset all non-wall entities by the width of the left wall
+    val offset = 0.125f
+    level.hotspots.start.center.add(offset, 0.0f)
+    level.hotspots.goal.center.add(offset, 0.0f)
+    level.platforms.forEach { it.center.add(offset, 0.0f) }
+    level.spikes.forEach { it.center.add(offset, 0.0f) }
+
     return level
   }
 

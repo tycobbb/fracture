@@ -95,7 +95,7 @@ class Camera(
   }
 
   companion object {
-    val scale = Vector2(41.66f, 41.66f)
+    val scale = Vector2(33.35f, 33.35f)
     val scratch = Vector2()
   }
 }

@@ -48,7 +48,8 @@ abstract class Form(
   }
 
   protected fun defineBox(polygon: PolygonShape): FixtureDef {
-    polygon.setAsBox(entity.size.x / 2, entity.size.y / 2)
+    val size = scratch1.set(entity.size).scl(0.45f, 0.5f)
+    polygon.setAsBox(size.x, size.y)
 
     val boxDef = FixtureDef()
     boxDef.shape = polygon
@@ -60,7 +61,7 @@ abstract class Form(
   }
 
   protected fun createFoot(polygon: PolygonShape): Fixture {
-    val size = scratch1.set(entity.size).scl(0.49f, 0.17f)
+    val size = scratch1.set(entity.size).scl(0.43f, 0.17f)
     val offset = scratch2.set(entity.size).scl(0.0f, 0.5f)
     polygon.setAsBox(size.x, size.y, offset, 0.0f)
 

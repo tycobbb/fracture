@@ -91,6 +91,7 @@ class Cycle(
   private fun buildLevel(data: LevelData, offset: Float = 0.0f): Level {
     return Level.Factory(this).entity(Level.Args(
       data = data,
+      size = size,
       offset = offset
     ))
   }
@@ -105,8 +106,6 @@ class Cycle(
 
   // MARK: Factory
   class Factory: UnitFactory<Cycle>(null) {
-    private val size: Vector2 = Vector2(9.0f, 16.0f)
-
     // MARK: Output
     override fun entity(args: Unit) = Cycle(body(), size)
 
@@ -117,5 +116,9 @@ class Cycle(
       bodyDef.position.set(size).scl(0.5f)
       return bodyDef
     }
+  }
+
+  companion object {
+    val size: Vector2 = Vector2(11.25f, 20.0f)
   }
 }

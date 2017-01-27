@@ -43,7 +43,7 @@ class Wall(
       wallDef.shape = rect
       wallDef.density = 1.0f
       wallDef.friction = 0.2f
-      wallDef.filter.set(ContactType.Wall)
+      wallDef.filter.set(ContactType.Terrain)
 
       val wall = body.createFixture(wallDef)
       wall.contactInfo = ContactInfo.Surface(

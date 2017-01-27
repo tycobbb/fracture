@@ -15,15 +15,18 @@ class Level(
   val goal: Goal
   val walls: List<Wall>
   val platforms: List<Platform>
+  val spikes: List<Spikes>
 
   // MARK: Lifecycle
   init {
+    goal = Goal.Factory(parent = this)
+      .entity(data.hotspots.goal)
     walls = Wall.Factory(parent = this)
       .entities(data.walls)
     platforms = Platform.Factory(parent = this)
       .entities(data.platforms)
-    goal = Goal.Factory(parent = this)
-      .entity(data.hotspots.goal)
+    spikes = Spikes.Factory(parent = this)
+      .entities(data.spikes)
   }
 
   override fun update(delta: Float) {
@@ -46,16 +49,15 @@ class Level(
       .then(walls)
       .then(platforms)
       .then(goal)
+      .then(spikes)
   }
 
   // MARK: Factory
-  data class Args(val data: LevelData, val offset: Float)
+  data class Args(val data: LevelData, val size: Vector2, val offset: Float)
 
   class Factory(parent: Entity): Entity.Factory<Level, Args>(parent) {
-    private val size: Vector2 = Vector2(9.0f, 16.0f)
-
     // MARK: Output
-    override fun entity(args: Args) = Level(body(args), size, args.data)
+    override fun entity(args: Args) = Level(body(args), args.size, args.data)
 
     // MARK: Body
     override fun defineBody(args: Args): BodyDef {
@@ -68,8 +70,8 @@ class Level(
     override fun defineFixtures(body: Body, args: Args) {
       super.defineFixtures(body, args)
 
-      val width = size.x / 2
-      val height = size.y / 2
+      val width = args.size.x / 2
+      val height = args.size.y / 2
       val rect = PolygonShape()
 
       // create left blast zone
@@ -77,11 +79,11 @@ class Level(
       createBlastZone(body, rect)
 
       // create right blast zone
-      rect.setAsBox(0.0f, height, scratch.set(size.x, height), 0.0f)
+      rect.setAsBox(0.0f, height, scratch.set(args.size.x, height), 0.0f)
       createBlastZone(body, rect)
 
       // create bottom blast zone
-      rect.setAsBox(width, 0.0f, scratch.set(width, size.y), 0.0f)
+      rect.setAsBox(width, 0.0f, scratch.set(width, args.size.y), 0.0f)
       createBlastZone(body, rect)
 
       // dispose shapes
