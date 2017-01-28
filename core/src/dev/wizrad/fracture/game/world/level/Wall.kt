@@ -1,6 +1,5 @@
 package dev.wizrad.fracture.game.world.level
 
-import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
 import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.physics.box2d.FixtureDef
@@ -21,7 +20,7 @@ class Wall(
     lateinit var orientation: Orientation
   }
 
-  companion object: Entity.Factory<Wall, Args>() {
+  companion object: Factory<Wall, Args>() {
     override fun entity(parent: Entity?, args: Args)
       = Wall(body(parent, args), args)
 

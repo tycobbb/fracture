@@ -1,23 +1,33 @@
 package dev.wizrad.fracture.game.world.level
 
-import com.badlogic.gdx.physics.box2d.Body
-import com.badlogic.gdx.physics.box2d.BodyDef
-import com.badlogic.gdx.physics.box2d.FixtureDef
-import com.badlogic.gdx.physics.box2d.PolygonShape
+import com.badlogic.gdx.physics.box2d.*
 import dev.wizrad.fracture.game.world.components.contact.ContactType
 import dev.wizrad.fracture.game.world.components.contact.set
 import dev.wizrad.fracture.game.world.components.loader.LevelData
 import dev.wizrad.fracture.game.world.core.Entity
+import dev.wizrad.fracture.game.world.support.extensions.hero
 
 class Goal(
   body: Body, args: Goal.Args): Feature(body, args) {
 
-  override fun lateUpdate(delta: Float) {
-    super.lateUpdate(delta)
+  // MARK: Behavior
+  private var shouldFinishLevel = false
 
-    val fixture = body.fixtureList.first()
-    if (contact.any(fixture, type = ContactType.Hero)) {
+  override fun update(delta: Float) {
+    super.update(delta)
+
+    if (shouldFinishLevel) {
+      shouldFinishLevel = false
       session.finishLevel()
+    }
+  }
+
+  // MARK: Contact
+  override fun onContact(fixture: Fixture, other: Entity, otherFixture: Fixture, didStart: Boolean) {
+    super.onContact(fixture, other, otherFixture, didStart)
+
+    if (didStart && session.isActive && otherFixture.hero != null) {
+      shouldFinishLevel = true
     }
   }
 

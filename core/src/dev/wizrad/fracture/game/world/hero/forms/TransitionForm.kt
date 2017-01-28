@@ -7,12 +7,12 @@ import dev.wizrad.fracture.game.support.Animation
 import dev.wizrad.fracture.game.world.components.contact.ContactType
 import dev.wizrad.fracture.game.world.components.contact.set
 import dev.wizrad.fracture.game.world.components.statemachine.State
-import dev.wizrad.fracture.game.world.core.Entity
+import dev.wizrad.fracture.game.world.hero.Hero
 import dev.wizrad.fracture.game.world.hero.core.Form
 import dev.wizrad.fracture.game.world.hero.core.FormState
 import dev.wizrad.fracture.support.Maths
 
-class TransitionForm(entity: Entity, target: Vector2): Form(entity) {
+class TransitionForm(hero: Hero, target: Vector2): Form(hero) {
   // MARK: Properties
   val target = Vector2(target)
 

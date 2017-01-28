@@ -2,30 +2,50 @@ package dev.wizrad.fracture.game.world.level
 
 import com.badlogic.gdx.physics.box2d.Body
 import com.badlogic.gdx.physics.box2d.BodyDef
+import com.badlogic.gdx.physics.box2d.Fixture
+import dev.wizrad.fracture.game.world.components.contact.ContactType
+import dev.wizrad.fracture.game.world.components.contact.Orientation
 import dev.wizrad.fracture.game.world.components.loader.LevelData
 import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.core.EntitySequence
+import dev.wizrad.fracture.game.world.support.extensions.surface
 
 abstract class Feature(
   body: Body, args: LevelData.Feature): Entity(body, args.size) {
 
-  // MARK: Properties
+  // MARK: Children
   protected val features = args.features?.let { entities(this, args = it) }
-  protected var isFalling = false
 
   // MARK: Behavior
-  // TODO: real hacky, bodies should probably attach their entity as
-  // the user data so that this kind of feature so that specific hooks
-  // can be called. either that, or emit an event
+  private var shouldFall = false
+
   override fun update(delta: Float) {
     super.update(delta)
 
-    if (!isFalling && body.type == BodyDef.BodyType.DynamicBody) {
-      isFalling = true
-      features?.forEach {
-        it.body.type = BodyDef.BodyType.DynamicBody
-      }
+    if (shouldFall) {
+      shouldFall = false
+      startFalling()
     }
+  }
+
+  // MARK: Collision
+  override fun onContact(fixture: Fixture, other: Entity, otherFixture: Fixture, didStart: Boolean) {
+    super.onContact(fixture, other, otherFixture, didStart)
+
+    if (didStart && shouldFall(fixture, otherFixture)) {
+      shouldFall = true
+    }
+  }
+
+  private fun shouldFall(fixture: Fixture, other: Fixture): Boolean {
+    return fixture.surface?.orientation == Orientation.Top
+        && other.filterData.categoryBits == ContactType.Collapser.category
+  }
+
+  // MARK: Actions
+  private fun startFalling() {
+    body.type = BodyDef.BodyType.DynamicBody
+    features?.forEach(Feature::startFalling)
   }
 
   // MARK: Relationships

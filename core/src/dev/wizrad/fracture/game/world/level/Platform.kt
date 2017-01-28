@@ -18,7 +18,7 @@ class Platform(
   // MARK: Factory
   class Args: LevelData.Feature()
 
-  companion object: Entity.Factory<Platform, Args>() {
+  companion object: Factory<Platform, Args>() {
     // MARK: Output
     override fun entity(parent: Entity?, args: Args)
       = Platform(body(parent, args), args)

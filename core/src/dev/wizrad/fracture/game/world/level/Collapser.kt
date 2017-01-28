@@ -6,7 +6,6 @@ import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.physics.box2d.FixtureDef
 import com.badlogic.gdx.physics.box2d.PolygonShape
 import dev.wizrad.fracture.game.world.components.contact.ContactType
-import dev.wizrad.fracture.game.world.components.contact.Orientation
 import dev.wizrad.fracture.game.world.components.contact.set
 import dev.wizrad.fracture.game.world.core.Entity
 
@@ -28,17 +27,12 @@ class Collapser(
         body.setLinearVelocity(0.0f, -0.4f)
       }
     }
-
-    val fixture = body.fixtureList.first()
-    contact.filter(fixture, Orientation.Top).forEach {
-      it.body.type = BodyDef.BodyType.DynamicBody
-    }
   }
 
   // MARK: Factory
   class Args(val y: Float, val width: Float)
 
-  companion object: Entity.Factory<Collapser, Args>() {
+  companion object: Factory<Collapser, Args>() {
     override fun entity(parent: Entity?, args: Args)
       = Collapser(body(parent, args), Vector2(args.width, 0.0f))
 

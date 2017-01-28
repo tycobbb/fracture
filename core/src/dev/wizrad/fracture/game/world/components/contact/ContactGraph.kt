@@ -1,79 +1,38 @@
 package dev.wizrad.fracture.game.world.components.contact
 
 import com.badlogic.gdx.physics.box2d.*
+import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.support.extensions.contactInfo
-import dev.wizrad.fracture.game.world.support.extensions.surface
 import dev.wizrad.fracture.support.Tag
 import dev.wizrad.fracture.support.debug
 import dev.wizrad.fracture.support.debugPrefix
-import dev.wizrad.fracture.support.extensions.findMapped
 
 class ContactGraph: ContactListener, ContactFilter {
-  // MARK: Properties
-  private val map = mutableMapOf<Fixture, MutableSet<Fixture>>()
-  private val defaultSet = { mutableSetOf<Fixture>() }
-
-  // MARK: Category
-  fun any(fixture: Fixture): Boolean {
-    return contactSet(fixture).size != 0
-  }
-
-  fun any(fixture: Fixture, type: ContactType): Boolean {
-    return contactSet(fixture).any {
-      it.filterData.categoryBits == type.category
-    }
-  }
-
-  fun none(fixture: Fixture): Boolean {
-    return !any(fixture)
-  }
-
-  // MARK: Surfaces
-  fun nearestSurface(fixture: Fixture): ContactInfo.Surface? {
-    return contactSet(fixture).findMapped { it.surface }
-  }
-
-  fun nearestSurface(fixture: Fixture, filter: (ContactInfo.Surface) -> Boolean): ContactInfo.Surface? {
-    return contactSet(fixture).findMapped { fixture ->
-      fixture.surface?.let {
-        if (filter(it)) it else null
-      }
-    }
-  }
-
-  fun filter(fixture: Fixture, orientation: Orientation): List<Fixture> {
-    return contactSet(fixture).filter { it.surface?.orientation == orientation }
-  }
-
-  fun any(fixture: Fixture, orientation: Orientation): Boolean {
-    return contactSet(fixture).any { fixture ->
-      val surface = fixture.surface
-      when (surface) {
-        null -> false
-        else -> surface.orientation == orientation
-      }
-    }
-  }
-
-  private fun contactSet(fixture: Fixture): MutableSet<Fixture> {
-    return map.getOrPut(fixture, defaultSet)
-  }
-
   // MARK: ContactListener
   override fun beginContact(contact: Contact?) {
-    val contact = contact ?: return
+    val fixture1 = contact?.fixtureA ?: return
+    val fixture2 = contact?.fixtureB ?: return
 
-//    debug(Tag.Physics, "$this begin contact: ${contact.fixtureA.contactInfo} on ${contact.fixtureB.contactInfo}")
-    contactSet(contact.fixtureA).add(contact.fixtureB)
-    contactSet(contact.fixtureB).add(contact.fixtureA)
+    val entity1 = fixture1.body?.userData as? Entity
+    val entity2 = fixture2.body?.userData as? Entity
+
+    if (entity1 != null && entity2 != null) {
+      entity1.onContact(fixture1, entity2, fixture2, didStart = true)
+      entity2.onContact(fixture2, entity1, fixture1, didStart = true)
+    }
   }
 
   override fun endContact(contact: Contact?) {
-    val contact = contact ?: return
+    val fixture1 = contact?.fixtureA ?: return
+    val fixture2 = contact?.fixtureB ?: return
 
-//    debug(Tag.Physics, "$this end contact: ${contact.fixtureA.contactInfo} on ${contact.fixtureB.contactInfo}")
-    contactSet(contact.fixtureA).remove(contact.fixtureB)
-    contactSet(contact.fixtureB).remove(contact.fixtureA)
+    val entity1 = fixture1.body?.userData as? Entity
+    val entity2 = fixture2.body?.userData as? Entity
+
+    if (entity1 != null && entity2 != null) {
+      entity1.onContact(fixture1, entity2, fixture2, didStart = false)
+      entity2.onContact(fixture2, entity1, fixture1, didStart = false)
+    }
   }
 
   override fun preSolve(contact: Contact?, oldManifold: Manifold?) {
@@ -94,7 +53,7 @@ class ContactGraph: ContactListener, ContactFilter {
     val fixture1 = fixtureA ?: return true
     val fixture2 = fixtureB ?: return true
 
-    // check filters first
+    // check category filters first
     val filter1 = fixture1.filterData
     val filter2 = fixture2.filterData
 

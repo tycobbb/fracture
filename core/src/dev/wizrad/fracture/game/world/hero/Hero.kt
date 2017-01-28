@@ -4,12 +4,19 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
 import com.badlogic.gdx.physics.box2d.BodyDef
 import com.badlogic.gdx.physics.box2d.BodyDef.BodyType
+import com.badlogic.gdx.physics.box2d.Fixture
+import dev.wizrad.fracture.game.world.components.contact.ContactInfo
+import dev.wizrad.fracture.game.world.components.contact.and
+import dev.wizrad.fracture.game.world.components.contact.not
 import dev.wizrad.fracture.game.world.components.session.Event
 import dev.wizrad.fracture.game.world.components.session.toEvent
 import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.hero.core.Form
 import dev.wizrad.fracture.game.world.hero.forms.*
 import dev.wizrad.fracture.game.world.support.extensions.destroyAllFixtures
+import dev.wizrad.fracture.game.world.support.extensions.foot
+import dev.wizrad.fracture.game.world.support.extensions.hero
+import dev.wizrad.fracture.game.world.support.extensions.surface
 import dev.wizrad.fracture.support.Tag
 import dev.wizrad.fracture.support.info
 
@@ -17,7 +24,7 @@ class Hero(
   body: Body, size: Vector2): Entity(body, size) {
 
   // MARK: Properties
-  var form: Form = FlutterForm(this); private set
+  var form: Form = DebugForm(this); private set
 
   // MARK: Behavior
   override fun start() {
@@ -48,6 +55,36 @@ class Hero(
   override fun destroy() {
     super.destroy()
     form.destroy()
+  }
+
+  // MARK: Contact
+  var isOnGround = false; private set
+  var orientations: Short = 0; private set
+  var numberOfContacts = 0; private set
+
+  override fun onContact(fixture: Fixture, other: Entity, otherFixture: Fixture, didStart: Boolean) {
+    super.onContact(fixture, other, otherFixture, didStart)
+
+    if (didStart) {
+      numberOfContacts++
+    } else {
+      numberOfContacts--
+    }
+
+    val surface = otherFixture.surface
+    if (surface != null) {
+      onContactSurface(fixture, surface, didStart)
+    }
+  }
+
+  private fun onContactSurface(fixture: Fixture, surface: ContactInfo.Surface, didStart: Boolean) {
+    if (surface.orientation.isTop && fixture.foot != null) {
+      isOnGround = didStart
+    } else if(fixture.hero != null) {
+      val bit = surface.orientation.bit
+      val mask = if (didStart) bit else !bit
+      orientations = orientations and mask
+    }
   }
 
   // MARK: Events

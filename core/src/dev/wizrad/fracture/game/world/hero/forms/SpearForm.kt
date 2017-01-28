@@ -3,7 +3,7 @@ package dev.wizrad.fracture.game.world.hero.forms
 import com.badlogic.gdx.physics.box2d.PolygonShape
 import dev.wizrad.fracture.game.world.components.contact.Orientation
 import dev.wizrad.fracture.game.world.components.statemachine.State
-import dev.wizrad.fracture.game.world.core.Entity
+import dev.wizrad.fracture.game.world.hero.Hero
 import dev.wizrad.fracture.game.world.hero.core.Direction
 import dev.wizrad.fracture.game.world.hero.core.Form
 import dev.wizrad.fracture.game.world.hero.core.FormState
@@ -11,7 +11,7 @@ import dev.wizrad.fracture.game.world.support.extensions.applyImpulseToCenter
 import dev.wizrad.fracture.support.Tag
 import dev.wizrad.fracture.support.debug
 
-class SpearForm(entity: Entity): Form(entity) {
+class SpearForm(hero: Hero): Form(hero) {
   // MARK: Behavior
   override fun start() {
     super.start()

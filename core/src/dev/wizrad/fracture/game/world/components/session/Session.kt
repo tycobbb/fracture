@@ -15,6 +15,9 @@ class Session {
   private var levelsFinished = 0
   private var nextLevelData: LevelData? = null
 
+  // MARK: Checks
+  val isActive: Boolean get() = currentLevel >= levelsFinished
+
   // MARK: Actions
   fun startLevel(level: Entity) {
     val data = checkNotNull(nextLevelData)

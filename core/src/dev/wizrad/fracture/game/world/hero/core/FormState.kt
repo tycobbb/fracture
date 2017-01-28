@@ -4,6 +4,8 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
 import com.badlogic.gdx.physics.box2d.Fixture
 import dev.wizrad.fracture.game.world.components.contact.Orientation
+import dev.wizrad.fracture.game.world.components.contact.and
+import dev.wizrad.fracture.game.world.components.contact.eq
 import dev.wizrad.fracture.game.world.components.statemachine.State
 import dev.wizrad.fracture.game.world.core.Scene
 import dev.wizrad.fracture.game.world.core.SceneAware
@@ -69,13 +71,12 @@ abstract class FormState<out F: Form>(
     return frame > frameTimeout && abs(body.linearVelocity.x) <= threshold
   }
 
-  protected fun isOnGround(frameTimeout: Int = 0, usesFoot: Boolean = true): Boolean {
-    val fixture = if (usesFoot) findFoot() else findHero()
-    return frame >= frameTimeout && contact.any(fixture, Orientation.Top)
+  protected fun isOnGround(frameTimeout: Int = 0): Boolean {
+    return frame >= frameTimeout && form.hero.isOnGround
   }
 
   protected fun isAirborne(): Boolean {
-    return contact.none(findHero())
+    return form.hero.numberOfContacts == 0
   }
 
   protected fun isFalling(): Boolean {
@@ -105,18 +106,32 @@ abstract class FormState<out F: Form>(
 
   // MARK: Collisions
   protected fun currentContactOrientation(): Orientation? {
-    return contact.nearestSurface(findHero())?.orientation
+    val orientations = form.hero.orientations
+
+    // TODO: this needs to be more sophisticated than a precedence ordering
+    if (orientations.and(Orientation.Top.bit).eq(0)) {
+      return Orientation.Top
+    } else if (orientations.and(Orientation.Right.bit).eq(0)) {
+      return Orientation.Right
+    } else if (orientations.and(Orientation.Left.bit).eq(0)) {
+      return Orientation.Left
+    } else if (orientations.and(Orientation.Bottom.bit).eq(0)) {
+      return Orientation.Bottom
+    }
+
+    return null
   }
 
   protected fun currentWallContactOrientation(): Orientation? {
-    val hero = findHero()
-    val isOnLeftWall = contact.any(hero, Orientation.Right)
-    val isOnRightWall = contact.any(hero, Orientation.Left)
+    val orientations = form.hero.orientations
+    val isOnLeftWall = orientations.and(Orientation.Right.bit).eq(0)
+    val isOnRightWall = orientations.and(Orientation.Left.bit).eq(0)
 
     return when {
-      isOnLeftWall && !isOnRightWall -> Orientation.Right
-      !isOnLeftWall && isOnRightWall -> Orientation.Left
-      else -> null
+      isOnLeftWall == isOnRightWall -> null
+      isOnLeftWall -> Orientation.Right
+      isOnRightWall -> Orientation.Left
+      else -> error("this is impossible")
     }
   }
 

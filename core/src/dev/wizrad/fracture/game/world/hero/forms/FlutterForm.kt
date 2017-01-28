@@ -2,11 +2,11 @@ package dev.wizrad.fracture.game.world.hero.forms
 
 import com.badlogic.gdx.physics.box2d.PolygonShape
 import dev.wizrad.fracture.game.world.components.statemachine.State
-import dev.wizrad.fracture.game.world.core.Entity
+import dev.wizrad.fracture.game.world.hero.Hero
 import dev.wizrad.fracture.game.world.hero.core.Form
 import dev.wizrad.fracture.game.world.hero.core.FormState
 
-class FlutterForm(entity: Entity): Form(entity) {
+class FlutterForm(hero: Hero): Form(hero) {
   // MARK: Form
   override fun initialState(): State {
     return Standing(this)

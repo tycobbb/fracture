@@ -1,29 +1,34 @@
 package dev.wizrad.fracture.game.world.level
 
 import com.badlogic.gdx.math.Vector2
-import com.badlogic.gdx.physics.box2d.Body
-import com.badlogic.gdx.physics.box2d.BodyDef
-import com.badlogic.gdx.physics.box2d.FixtureDef
-import com.badlogic.gdx.physics.box2d.PolygonShape
+import com.badlogic.gdx.physics.box2d.*
 import dev.wizrad.fracture.game.world.components.contact.ContactType
 import dev.wizrad.fracture.game.world.components.contact.set
 import dev.wizrad.fracture.game.world.components.loader.LevelData
 import dev.wizrad.fracture.game.world.core.Entity
+import dev.wizrad.fracture.game.world.support.extensions.hero
 
 class Spikes(
   body: Body, args: Spikes.Args): Feature(body, args) {
 
+  // MARK: Behavior
+  private var shouldFailLevel = false
+
   override fun update(delta: Float) {
     super.update(delta)
 
-    if (isTouchingHero()) {
+    if (shouldFailLevel) {
+      shouldFailLevel = false
       session.failLevel()
     }
   }
 
-  private fun isTouchingHero(): Boolean {
-    return body.fixtureList.any {
-      contact.any(it, ContactType.Hero)
+  // MARK: Collisions
+  override fun onContact(fixture: Fixture, other: Entity, otherFixture: Fixture, didStart: Boolean) {
+    super.onContact(fixture, other, otherFixture, didStart)
+
+    if (didStart && session.isActive && otherFixture.hero != null) {
+      shouldFailLevel = true
     }
   }
 

@@ -7,6 +7,7 @@ import dev.wizrad.fracture.game.world.components.contact.set
 import dev.wizrad.fracture.game.world.components.loader.LevelData
 import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.core.EntitySequence
+import dev.wizrad.fracture.game.world.support.extensions.hero
 
 class Level(
   body: Body, size: Vector2, data: LevelData): Entity(body, size) {
@@ -26,17 +27,25 @@ class Level(
     ))
   }
 
+  // MARK: Behavior
+  private var shouldFailLevel = false
+
   override fun update(delta: Float) {
     super.update(delta)
 
-    if (isInBlastzone()) {
+    if (shouldFailLevel) {
+      shouldFailLevel = false
       session.failLevel()
     }
   }
 
-  private fun isInBlastzone(): Boolean {
-    return body.fixtureList.any {
-      contact.any(it, type = ContactType.Hero)
+  // MARK: Collisions
+  override fun onContact(fixture: Fixture, other: Entity, otherFixture: Fixture, didStart: Boolean) {
+    super.onContact(fixture, other, otherFixture, didStart)
+
+    // blowing up
+    if (didStart && session.isActive && otherFixture.hero != null) {
+      shouldFailLevel = true
     }
   }
 
@@ -51,7 +60,7 @@ class Level(
   // MARK: Factory
   data class Args(val data: LevelData, val size: Vector2, val offset: Float)
 
-  companion object: Entity.Factory<Level, Args>() {
+  companion object: Factory<Level, Args>() {
     override fun entity(parent: Entity?, args: Args): Level {
       return Level(body(parent, args), args.size, args.data)
     }

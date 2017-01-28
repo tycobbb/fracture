@@ -7,6 +7,7 @@ import dev.wizrad.fracture.game.world.components.contact.ContactInfo
 import dev.wizrad.fracture.game.world.components.contact.Orientation
 import dev.wizrad.fracture.game.world.components.statemachine.State
 import dev.wizrad.fracture.game.world.core.Entity
+import dev.wizrad.fracture.game.world.hero.Hero
 import dev.wizrad.fracture.game.world.hero.core.Form
 import dev.wizrad.fracture.game.world.hero.core.FormState
 import dev.wizrad.fracture.game.world.support.extensions.contactInfo
@@ -18,7 +19,7 @@ import dev.wizrad.fracture.support.debug
 import dev.wizrad.fracture.support.extensions.Polar
 import dev.wizrad.fracture.support.extensions.angleTo
 
-class PhasingForm(entity: Entity): Form(entity) {
+class PhasingForm(hero: Hero): Form(hero) {
   // MARK: Form
   override fun initialState(): State {
     return Standing(this, phasesLeft = 3)

@@ -10,22 +10,22 @@ import dev.wizrad.fracture.game.world.components.contact.ContactType
 import dev.wizrad.fracture.game.world.components.contact.set
 import dev.wizrad.fracture.game.world.components.statemachine.State
 import dev.wizrad.fracture.game.world.components.statemachine.StateMachine
-import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.core.Scene
 import dev.wizrad.fracture.game.world.core.SceneAware
+import dev.wizrad.fracture.game.world.hero.Hero
 import dev.wizrad.fracture.game.world.support.extensions.contactInfo
 import dev.wizrad.fracture.support.debugPrefix
 
 abstract class Form(
-  entity: Entity, scene: Scene = Scene.instance): StateMachine(), SceneAware {
+  hero: Hero, scene: Scene = Scene.instance): StateMachine(), SceneAware {
 
   // MARK: SceneAware
   override val scene = scene
 
   // MARK: Properties
-  val entity: Entity = entity
-  val body: Body get() = entity.body
-  val size: Vector2 get() = entity.size
+  val hero: Hero = hero
+  val body: Body get() = hero.body
+  val size: Vector2 get() = hero.size
 
   // MARK: Lifecycle
   protected abstract fun initialState(): State
@@ -48,7 +48,7 @@ abstract class Form(
   }
 
   protected fun defineBox(polygon: PolygonShape): FixtureDef {
-    val size = scratch1.set(entity.size).scl(0.45f, 0.5f)
+    val size = scratch1.set(hero.size).scl(0.45f, 0.5f)
     polygon.setAsBox(size.x, size.y)
 
     val boxDef = FixtureDef()
@@ -61,8 +61,8 @@ abstract class Form(
   }
 
   protected fun createFoot(polygon: PolygonShape): Fixture {
-    val size = scratch1.set(entity.size).scl(0.43f, 0.17f)
-    val offset = scratch2.set(entity.size).scl(0.0f, 0.5f)
+    val size = scratch1.set(hero.size).scl(0.43f, 0.17f)
+    val offset = scratch2.set(hero.size).scl(0.0f, 0.5f)
     polygon.setAsBox(size.x, size.y, offset, 0.0f)
 
     val footDef = FixtureDef()

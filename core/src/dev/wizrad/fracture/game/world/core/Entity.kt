@@ -2,13 +2,14 @@ package dev.wizrad.fracture.game.world.core
 
 import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
+import com.badlogic.gdx.physics.box2d.Fixture
 import dev.wizrad.fracture.support.Tag
 import dev.wizrad.fracture.support.debug
 import dev.wizrad.fracture.support.debugPrefix
 import dev.wizrad.fracture.support.fmt
 
 abstract class Entity(
-  /** The scene body attached to this entity */
+  /** The scene body attached to this hero */
   val body: Body,
   /** Size in scene coords */
   val size: Vector2,
@@ -26,11 +27,10 @@ abstract class Entity(
     super.start()
     debug(Tag.World, "initializing $debugPrefix")
 
-    // compute initial array of children
+    body.userData = this
     invalidateChildren()
 
-    @Suppress("ConvertLambdaToReference")
-    children.forEach { it.start() }
+    children.forEach(Entity::start)
   }
 
   override fun update(delta: Float) {
@@ -49,15 +49,17 @@ abstract class Entity(
   }
 
   override fun destroy() {
-    // destory children
-    @Suppress("ConvertLambdaToReference")
-    children.forEach { it.destroy() }
-    // clean up physics body
-    world.destroyBody(body)
-    // remove any subscriptions
+    children.forEach(Entity::destroy)
+
+    body.userData = null
     unsubscribe?.invoke()
+    world.destroyBody(body)
 
     super.destroy()
+  }
+
+  // MARK: Collisions
+  open fun onContact(fixture: Fixture, other: Entity, otherFixture: Fixture, didStart: Boolean) {
   }
 
   // MARK: Events
