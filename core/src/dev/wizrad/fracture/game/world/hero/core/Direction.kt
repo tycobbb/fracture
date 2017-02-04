@@ -6,4 +6,10 @@ enum class Direction {
   val isNone: Boolean get() = this == None
   val isLeft: Boolean get() = this == Left
   val isRight: Boolean get() = this == Right
+
+  fun reverse() = when(this) {
+    Left -> Right
+    Right -> Left
+    None -> None
+  }
 }

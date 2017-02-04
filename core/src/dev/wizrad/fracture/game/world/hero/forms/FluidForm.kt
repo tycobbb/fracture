@@ -4,7 +4,6 @@ import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.PolygonShape
 import dev.wizrad.fracture.game.world.components.contact.Orientation
 import dev.wizrad.fracture.game.world.components.statemachine.State
-import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.hero.Hero
 import dev.wizrad.fracture.game.world.hero.core.Form
 import dev.wizrad.fracture.game.world.hero.core.FormState
@@ -94,7 +93,7 @@ class FluidForm(hero: Hero): Form(hero) {
       }
 
       return when {
-        isStopping() ->
+        isStopping(frameTimeout = 10) ->
           Standing(form) // TODO: probably go into a run-stop type state
         !isOnGround() ->
           Jumping(form)

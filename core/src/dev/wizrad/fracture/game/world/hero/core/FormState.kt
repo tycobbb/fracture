@@ -58,6 +58,11 @@ abstract class FormState<out F: Form>(
     }
   }
 
+  protected fun inputDirectionOrNull(isUniqueInput: Boolean = false): Direction? {
+    val direction = inputDirection(isUniqueInput)
+    return if (direction != Direction.None) direction else null
+  }
+
   // MARK: Helpers - Checks
   protected fun hasReachedApex(frameTimeout: Int = 10, velocityPeak: Float = -2.7f): Boolean {
     return frame > frameTimeout && body.linearVelocity.y > velocityPeak
@@ -67,7 +72,7 @@ abstract class FormState<out F: Form>(
     return body.linearVelocity.len2() <= threshold
   }
 
-  protected fun isStopping(frameTimeout: Int = 10, threshold: Float = 1.0f): Boolean {
+  protected fun isStopping(frameTimeout: Int = 0, threshold: Float = 1.0f): Boolean {
     return frame > frameTimeout && abs(body.linearVelocity.x) <= threshold
   }
 
@@ -153,6 +158,19 @@ abstract class FormState<out F: Form>(
   protected fun applyFastfallImpulse(magnitude: Float) {
     debug(Tag.World, "$this applying fall impulse: $magnitude")
     body.applyImpulseToCenter(0.0f, magnitude)
+  }
+
+  protected fun applyMovementImpulse(magnitude: Float, direction: Direction) {
+    val impulse = when (direction) {
+      Direction.Left -> -magnitude
+      Direction.Right -> magnitude
+      else -> null
+    }
+
+    if (impulse != null) {
+      debug(Tag.World, "$this applying movement impulse: $impulse")
+      body.applyImpulseToCenter(impulse, 0.0f)
+    }
   }
 
   protected fun applyImpulse(magnitude: Float, angle: Float) {
