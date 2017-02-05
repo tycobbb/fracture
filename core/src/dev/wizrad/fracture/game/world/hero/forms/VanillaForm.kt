@@ -20,6 +20,7 @@ class VanillaForm(hero: Hero): Form(hero) {
 
     // create fixtures
     val boxDef = defineBox(polygon)
+    boxDef.friction = 0.2f
     createBox(boxDef)
     createFoot(polygon)
 
@@ -29,12 +30,17 @@ class VanillaForm(hero: Hero): Form(hero) {
 
   // MARK: States
   class Standing(form: VanillaForm): FormState<VanillaForm>(form) {
+    override fun start() {
+      super.start()
+      requireUniqueMovement()
+    }
+
     override fun nextState(): State? = when {
       !isOnGround() ->
         Jumping(form)
       controls.jump.isPressedUnique ->
         JumpWindup(form)
-      else -> inputDirectionOrNull()?.let {
+      else -> inputDirectionOrNull(isUniqueInput = true)?.let {
         RunStart(form, direction = it)
       }
     }
@@ -42,57 +48,45 @@ class VanillaForm(hero: Hero): Form(hero) {
 
   class RunStart(form: VanillaForm, direction: Direction): FormState<VanillaForm>(form) {
     private val direction = direction
-    private val frameLength = 14
-    private val dashImpulse = 3.0f
+    private val frameLength = 10
+    private val dashSpeed = 3.0f
 
     override fun start() {
       super.start()
-      cancelComponentMomentum(x = true)
-      applyMovementImpulse(dashImpulse, direction)
+      debug(Tag.Hero, "$this direction: $direction")
+      requireUniqueMovement()
+    }
+
+    override fun step(delta: Float) {
+      super.step(delta)
+      applyMovementSpeed(dashSpeed, direction)
     }
 
     override fun nextState() = when {
       !isOnGround() ->
         Jumping(form)
       frame >= frameLength ->
+        finalState()
+      controls.jump.isPressedUnique ->
+        JumpWindup(form)
+      inputDirection(isUniqueInput = true).opposes(direction) ->
+        RunStart(form, direction.reverse())
+      else -> null
+    }
+
+    private fun finalState() = when (inputDirection()) {
+      direction ->
         Running(form, direction)
-      controls.jump.isPressedUnique ->
-        JumpWindup(form)
-      else -> inputDirectionOrNull()?.let {
-        if (it != direction) RunStart(form, direction = it) else null
-      }
+      else -> RunCancel(form)
     }
   }
 
-  class Running(form: VanillaForm, direction: Direction): FormState<VanillaForm>(form) {
-    private val direction = direction
-    private val runMag = 7.5f
-
-    override fun step(delta: Float) {
-      super.step(delta)
-      applyMovementForce(runMag)
-    }
-
-    override fun nextState() = when {
-      !isOnGround() ->
-        Jumping(form)
-      isStopping(frameTimeout = 5, threshold = 0.0f) ->
-        Stopping(form, direction.reverse())
-      controls.jump.isPressedUnique ->
-        JumpWindup(form)
-      else -> inputDirectionOrNull()?.let {
-        if (it != direction) Stopping(form, it) else null
-      }
-    }
-  }
-
-  class Stopping(form: VanillaForm, direction: Direction): FormState<VanillaForm>(form) {
-    private val direction = direction
-    private val damping = 5.0f
+  class RunCancel(form: VanillaForm): FormState<VanillaForm>(form) {
+    private val dashDamping = 1.5f
 
     override fun start() {
       super.start()
-      startDamping(damping)
+      startDamping(dashDamping)
     }
 
     override fun destroy() {
@@ -101,11 +95,41 @@ class VanillaForm(hero: Hero): Form(hero) {
     }
 
     override fun nextState() = when {
-      isStopping(threshold = 0.1f) -> {
-        debug(Tag.World, "d: $direction vs ${inputDirection()}")
-        if (direction == inputDirection()) Running(form, direction) else Standing(form)
+      isStopping(threshold = 0.0f) ->
+        Standing(form)
+      else -> inputDirectionOrNull()?.let {
+        RunStart(form, direction = it)
       }
+    }
+  }
+
+  class Running(form: VanillaForm, direction: Direction): FormState<VanillaForm>(form) {
+    private val direction = direction
+    private val runMag = 9.5f
+    private val maxSpeed = 6.0f
+
+    override fun step(delta: Float) {
+      super.step(delta)
+      applyMovementForce(runMag)
+      applyMaxSpeed(maxSpeed)
+    }
+
+    override fun nextState() = when {
+      !isOnGround() ->
+        Jumping(form)
+      controls.jump.isPressedUnique ->
+        JumpWindup(form)
+      currentDirection().opposes(direction) ->
+        Running(form, direction.reverse())
+      isStopping(threshold = 0.0f) ->
+        stoppingState()
       else -> null
+    }
+
+    private fun stoppingState() = when {
+      inputDirection().opposes(direction) ->
+        Running(form, direction.reverse())
+      else -> Standing(form)
     }
   }
 
@@ -121,7 +145,7 @@ class VanillaForm(hero: Hero): Form(hero) {
 
   class JumpStart(form: VanillaForm, isShort: Boolean): FormState<VanillaForm>(form) {
     private val frameLength = 3
-    private val jumpMag = if (isShort) 4.75f else 8.25f
+    private val jumpMag = if (isShort) 4.75f else 6.75f
 
     override fun start() {
       super.start()
@@ -137,10 +161,12 @@ class VanillaForm(hero: Hero): Form(hero) {
 
   class Jumping(form: VanillaForm): FormState<VanillaForm>(form) {
     private val driftMag = 7.0f
+    private val maxSpeed = 6.0f
 
     override fun step(delta: Float) {
       super.step(delta)
       applyMovementForce(driftMag)
+      applyMaxSpeed(maxSpeed)
     }
 
     override fun nextState() = when {
@@ -158,12 +184,25 @@ class VanillaForm(hero: Hero): Form(hero) {
       requireUniqueJump()
     }
 
-    override fun nextState(): State? = when {
+    override fun nextState() = when {
       frame >= frameLength ->
-        if (isStopping()) Standing(form) else Running(form, currentDirection())
+        finalState()
       controls.jump.isPressedUnique ->
         JumpWindup(form)
       else -> null
+    }
+
+    private fun finalState(): State {
+      var direction = currentDirection()
+      if (direction == Direction.None) {
+        direction = inputDirection()
+      }
+
+      return when (direction) {
+        Direction.Left, Direction.Right ->
+          Running(form, direction)
+        else -> Standing(form)
+      }
     }
   }
 }

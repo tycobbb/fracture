@@ -14,6 +14,7 @@ class Logging {
 // MARK: Functions
 enum class Tag(val key: String) {
   General("STD"),
+  Hero("HRO"),
   World("WRL"),
   Physics("PHY"),
   Interface("GUI"),

@@ -151,12 +151,12 @@ abstract class FormState<out F: Form>(
 
   // MARK: Helpers - Physics
   protected fun applyJumpImpulse(magnitude: Float) {
-    debug(Tag.World, "$this applying jump impulse: $magnitude")
+    debug(Tag.Hero, "$this applying jump impulse: $magnitude")
     body.applyImpulseToCenter(0.0f, -magnitude)
   }
 
   protected fun applyFastfallImpulse(magnitude: Float) {
-    debug(Tag.World, "$this applying fall impulse: $magnitude")
+    debug(Tag.Hero, "$this applying fall impulse: $magnitude")
     body.applyImpulseToCenter(0.0f, magnitude)
   }
 
@@ -168,13 +168,13 @@ abstract class FormState<out F: Form>(
     }
 
     if (impulse != null) {
-      debug(Tag.World, "$this applying movement impulse: $impulse")
+      debug(Tag.Hero, "$this applying movement impulse: $impulse")
       body.applyImpulseToCenter(impulse, 0.0f)
     }
   }
 
   protected fun applyImpulse(magnitude: Float, angle: Float) {
-    debug(Tag.World, "$this applying angled impulse: $magnitude")
+    debug(Tag.Hero, "$this applying angled impulse: $magnitude")
     val impulse = Polar.vector(magnitude = magnitude, angle = angle)
     body.applyImpulseToCenter(impulse.x, impulse.y)
   }
@@ -190,6 +190,20 @@ abstract class FormState<out F: Form>(
     }
 
     body.applyForceToCenter(force, true)
+  }
+
+  protected fun applyMovementSpeed(magnitude: Float, direction: Direction) {
+    when (direction) {
+      Direction.Left ->
+        body.setLinearVelocity(-magnitude, 0.0f)
+      Direction.Right ->
+        body.setLinearVelocity(magnitude, 0.0f)
+      else -> return
+    }
+  }
+
+  protected fun applyMaxSpeed(magnitude: Float) {
+    body.linearVelocity = body.linearVelocity.clamp(0.0f, magnitude)
   }
 
   protected fun cancelMomentum() {

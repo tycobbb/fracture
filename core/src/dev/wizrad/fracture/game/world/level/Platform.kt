@@ -68,7 +68,7 @@ class Platform(
       val surfaceDef = FixtureDef()
       surfaceDef.shape = rect
       surfaceDef.density = 1.0f
-      surfaceDef.friction = 0.8f
+      surfaceDef.friction = 0.7f
       surfaceDef.filter.set(ContactType.Terrain)
 
       val surface = body.createFixture(surfaceDef)

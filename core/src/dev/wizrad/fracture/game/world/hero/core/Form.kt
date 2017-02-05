@@ -54,7 +54,7 @@ abstract class Form(
     val boxDef = FixtureDef()
     boxDef.shape = polygon
     boxDef.density = 1.0f
-    boxDef.friction = 0.6f
+    boxDef.friction = 0.5f
     boxDef.filter.set(ContactType.Hero)
 
     return boxDef

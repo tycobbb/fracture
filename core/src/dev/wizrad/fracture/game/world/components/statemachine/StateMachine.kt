@@ -32,8 +32,8 @@ open class StateMachine(
 
     state.lateUpdate(delta)
     state.nextState()?.let {
-      debug(Tag.World, "$state ended -> ${it.className}")
       state.destroy()
+      debug(Tag.Hero, "$state -> ${it.className}")
       state = it
       state.start()
     }
