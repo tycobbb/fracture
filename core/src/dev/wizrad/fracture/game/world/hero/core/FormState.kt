@@ -5,7 +5,7 @@ import com.badlogic.gdx.physics.box2d.Body
 import com.badlogic.gdx.physics.box2d.Fixture
 import dev.wizrad.fracture.game.world.components.contact.Orientation
 import dev.wizrad.fracture.game.world.components.contact.and
-import dev.wizrad.fracture.game.world.components.contact.eq
+import dev.wizrad.fracture.game.world.components.contact.neq
 import dev.wizrad.fracture.game.world.components.statemachine.State
 import dev.wizrad.fracture.game.world.core.Scene
 import dev.wizrad.fracture.game.world.core.SceneAware
@@ -114,13 +114,13 @@ abstract class FormState<out F: Form>(
     val orientations = form.hero.orientations
 
     // TODO: this needs to be more sophisticated than a precedence ordering
-    if (orientations.and(Orientation.Top.bit).eq(0)) {
+    if (orientations.and(Orientation.Top).neq(0)) {
       return Orientation.Top
-    } else if (orientations.and(Orientation.Right.bit).eq(0)) {
+    } else if (orientations.and(Orientation.Right).neq(0)) {
       return Orientation.Right
-    } else if (orientations.and(Orientation.Left.bit).eq(0)) {
+    } else if (orientations.and(Orientation.Left).neq(0)) {
       return Orientation.Left
-    } else if (orientations.and(Orientation.Bottom.bit).eq(0)) {
+    } else if (orientations.and(Orientation.Bottom).neq(0)) {
       return Orientation.Bottom
     }
 
@@ -129,8 +129,8 @@ abstract class FormState<out F: Form>(
 
   protected fun currentWallContactOrientation(): Orientation? {
     val orientations = form.hero.orientations
-    val isOnLeftWall = orientations.and(Orientation.Right.bit).eq(0)
-    val isOnRightWall = orientations.and(Orientation.Left.bit).eq(0)
+    val isOnLeftWall = orientations.and(Orientation.Right).neq(0)
+    val isOnRightWall = orientations.and(Orientation.Left).neq(0)
 
     return when {
       isOnLeftWall == isOnRightWall -> null
@@ -203,7 +203,10 @@ abstract class FormState<out F: Form>(
   }
 
   protected fun applyMaxSpeed(magnitude: Float) {
-    body.linearVelocity = body.linearVelocity.clamp(0.0f, magnitude)
+    val velocity = body.linearVelocity
+    if (velocity.x > magnitude) {
+      body.setLinearVelocity(magnitude, velocity.y)
+    }
   }
 
   protected fun cancelMomentum() {

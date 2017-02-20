@@ -8,6 +8,7 @@ import com.badlogic.gdx.physics.box2d.Fixture
 import dev.wizrad.fracture.game.world.components.contact.ContactInfo
 import dev.wizrad.fracture.game.world.components.contact.and
 import dev.wizrad.fracture.game.world.components.contact.not
+import dev.wizrad.fracture.game.world.components.contact.or
 import dev.wizrad.fracture.game.world.components.session.Event
 import dev.wizrad.fracture.game.world.components.session.toEvent
 import dev.wizrad.fracture.game.world.core.Entity
@@ -18,6 +19,7 @@ import dev.wizrad.fracture.game.world.support.extensions.foot
 import dev.wizrad.fracture.game.world.support.extensions.hero
 import dev.wizrad.fracture.game.world.support.extensions.surface
 import dev.wizrad.fracture.support.Tag
+import dev.wizrad.fracture.support.debug
 import dev.wizrad.fracture.support.info
 
 class Hero(
@@ -79,11 +81,16 @@ class Hero(
 
   private fun onContactSurface(fixture: Fixture, surface: ContactInfo.Surface, didStart: Boolean) {
     if (surface.orientation.isTop && fixture.foot != null) {
+      debug(Tag.Hero, "$this Ground contact: ${if (didStart) "started" else "ended"}")
       isOnGround = didStart
     } else if(fixture.hero != null) {
-      val bit = surface.orientation.bit
-      val mask = if (didStart) bit else !bit
-      orientations = orientations and mask
+      debug(Tag.Hero, "$this ${surface.orientation} contact: ${if (didStart) "started" else "ended"}")
+      val bits = surface.orientation.bits
+      orientations = if (didStart) {
+        orientations or bits
+      } else {
+        orientations and !bits
+      }
     }
   }
 

@@ -4,11 +4,14 @@ import com.badlogic.gdx.utils.Json
 import com.badlogic.gdx.utils.JsonValue
 
 // MARK: Orientation
-enum class Orientation(val bit: Short) {
+enum class Orientation(val value: Int) {
   Bottom(1 shl 0),
   Left(1 shl 1),
   Top(1 shl 2),
   Right(1 shl 3);
+
+  val bits: Short get()
+    = value.toShort()
 
   // MARK: Checks
   val isTop: Boolean get() = this == Top

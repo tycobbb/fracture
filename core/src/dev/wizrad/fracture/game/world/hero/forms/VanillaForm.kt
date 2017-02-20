@@ -1,11 +1,13 @@
 package dev.wizrad.fracture.game.world.hero.forms
 
 import com.badlogic.gdx.physics.box2d.PolygonShape
+import dev.wizrad.fracture.game.world.components.contact.Orientation
 import dev.wizrad.fracture.game.world.components.statemachine.State
 import dev.wizrad.fracture.game.world.hero.Hero
 import dev.wizrad.fracture.game.world.hero.core.Direction
 import dev.wizrad.fracture.game.world.hero.core.Form
 import dev.wizrad.fracture.game.world.hero.core.FormState
+import dev.wizrad.fracture.support.Maths
 import dev.wizrad.fracture.support.Tag
 import dev.wizrad.fracture.support.debug
 
@@ -163,6 +165,11 @@ class VanillaForm(hero: Hero): Form(hero) {
     private val driftMag = 7.0f
     private val maxSpeed = 6.0f
 
+    override fun start() {
+      super.start()
+      requireUniqueJump()
+    }
+
     override fun step(delta: Float) {
       super.step(delta)
       applyMovementForce(driftMag)
@@ -172,6 +179,30 @@ class VanillaForm(hero: Hero): Form(hero) {
     override fun nextState() = when {
       isOnGround() ->
         Landing(form)
+      else -> currentWallContactOrientation()?.let {
+        if (controls.jump.isPressedUnique) WallJumpStart(form, orientation = it) else null
+      }
+    }
+  }
+
+  class WallJumpStart(form: VanillaForm, orientation: Orientation): FormState<VanillaForm>(form) {
+    private val frameLength = 16
+    private val wallJumpMag = 5.0f
+    private val wallJumpAngle = if (orientation.isLeft) {
+      Maths.F_PI * 11 / 8
+    } else {
+      Maths.F_PI * 13 / 8
+    }
+
+    override fun start() {
+      super.start()
+      cancelMomentum()
+      applyImpulse(magnitude = wallJumpMag, angle = wallJumpAngle)
+    }
+
+    override fun nextState() = when {
+      frame >= frameLength ->
+        Jumping(form)
       else -> null
     }
   }
