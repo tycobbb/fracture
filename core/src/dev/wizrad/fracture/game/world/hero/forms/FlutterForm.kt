@@ -4,9 +4,10 @@ import com.badlogic.gdx.physics.box2d.PolygonShape
 import dev.wizrad.fracture.game.world.components.statemachine.State
 import dev.wizrad.fracture.game.world.hero.Hero
 import dev.wizrad.fracture.game.world.hero.core.Form
+import dev.wizrad.fracture.game.world.hero.core.FormContext
 import dev.wizrad.fracture.game.world.hero.core.FormState
 
-class FlutterForm(hero: Hero): Form(hero) {
+class FlutterForm(hero: Hero): Form(hero), FormContext {
   // MARK: Form
   override fun initialState(): State {
     return Standing(this)
@@ -24,7 +25,7 @@ class FlutterForm(hero: Hero): Form(hero) {
   }
 
   // MARK: States
-  class Standing(form: FlutterForm): FormState<FlutterForm>(form) {
+  class Standing(context: FlutterForm): FormState<FlutterForm>(context) {
     private val runMag = 5.0f
 
     override fun step(delta: Float) {
@@ -34,26 +35,26 @@ class FlutterForm(hero: Hero): Form(hero) {
 
     override fun nextState() = when {
       !isOnGround() ->
-        Jumping(form)
+        Jumping(context)
       controls.jump.isJustPressed ->
-        Windup(form)
+        Windup(context)
       else -> null
     }
   }
 
-  class Windup(form: FlutterForm): FormState<FlutterForm>(form) {
+  class Windup(context: FlutterForm): FormState<FlutterForm>(context) {
     private val frameLength = 4
 
     override fun nextState(): State? {
       if (frame >= frameLength) {
-        return JumpStart(form, isShort = !controls.jump.isPressed)
+        return JumpStart(context, isShort = !controls.jump.isPressed)
       }
 
       return null
     }
   }
 
-  class JumpStart(form: FlutterForm, isShort: Boolean): FormState<FlutterForm>(form) {
+  class JumpStart(context: FlutterForm, isShort: Boolean): FormState<FlutterForm>(context) {
     private val frameLength = 3
     private val jumpMag = if (isShort) 3.75f else 5.0f
 
@@ -62,11 +63,11 @@ class FlutterForm(hero: Hero): Form(hero) {
     }
 
     override fun nextState(): State? {
-      return if (frame >= frameLength) Jumping(form) else null
+      return if (frame >= frameLength) Jumping(context) else null
     }
   }
 
-  class Jumping(form: FlutterForm): FormState<FlutterForm>(form) {
+  class Jumping(context: FlutterForm): FormState<FlutterForm>(context) {
     private val driftMag = 5.0f
     private val flutterMag = 3.5f
     private var shouldFlutter = false
@@ -87,12 +88,14 @@ class FlutterForm(hero: Hero): Form(hero) {
       }
     }
 
-    override fun nextState(): State? {
-      return if (isOnGround()) Landing(form) else null
+    override fun nextState() = when {
+      isOnGround() ->
+        Landing(context)
+      else -> null
     }
   }
 
-  class Landing(form: FlutterForm): FormState<FlutterForm>(form) {
+  class Landing(context: FlutterForm): FormState<FlutterForm>(context) {
     private val frameLength = 3
 
     override fun start() {
@@ -100,8 +103,10 @@ class FlutterForm(hero: Hero): Form(hero) {
       requireUniqueJump()
     }
 
-    override fun nextState(): State? {
-      return if (frame >= frameLength) Standing(form) else null
+    override fun nextState() = when {
+      frame >= frameLength ->
+        Standing(context)
+      else -> null
     }
   }
 }

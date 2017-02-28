@@ -6,12 +6,13 @@ import dev.wizrad.fracture.game.world.components.statemachine.State
 import dev.wizrad.fracture.game.world.hero.Hero
 import dev.wizrad.fracture.game.world.hero.core.Direction
 import dev.wizrad.fracture.game.world.hero.core.Form
+import dev.wizrad.fracture.game.world.hero.core.FormContext
 import dev.wizrad.fracture.game.world.hero.core.FormState
 import dev.wizrad.fracture.game.world.support.extensions.applyImpulseToCenter
 import dev.wizrad.fracture.support.Tag
 import dev.wizrad.fracture.support.debug
 
-class SpearForm(hero: Hero): Form(hero) {
+class SpearForm(hero: Hero): Form(hero), FormContext {
   // MARK: Behavior
   override fun start() {
     super.start()
@@ -40,7 +41,7 @@ class SpearForm(hero: Hero): Form(hero) {
 
   // MARK: States
   class Standing(
-    form: SpearForm, orientation: Orientation): FormState<SpearForm>(form) {
+    context: SpearForm, orientation: Orientation): FormState<SpearForm>(context) {
 
     private val orientation = orientation
 
@@ -49,17 +50,14 @@ class SpearForm(hero: Hero): Form(hero) {
       requireUniqueMovement()
     }
 
-    override fun nextState(): State? {
-      val direction = inputDirection(isUniqueInput = true)
-      return when (direction) {
-        Direction.None -> null
-        else -> Prepare(form, orientation, direction)
+    override fun nextState() =
+      inputDirectionOrNull(isUniqueInput = true)?.let {
+        Prepare(context, orientation, it)
       }
-    }
   }
 
   class Prepare(
-    form: SpearForm, orientation: Orientation, direction: Direction): FormState<SpearForm>(form) {
+    context: SpearForm, orientation: Orientation, direction: Direction): FormState<SpearForm>(context) {
 
     private val orientation = orientation
     private val direction = direction
@@ -93,19 +91,17 @@ class SpearForm(hero: Hero): Form(hero) {
       }
     }
 
-    override fun nextState(): State? {
-      if (preparedFrames >= frameLength) {
-        return Ready(form, orientation, direction)
-      } else if (preparedFrames < 0) {
-        return Standing(form, orientation)
-      } else {
-        return null
-      }
+    override fun nextState() = when {
+      preparedFrames >= frameLength ->
+        Ready(context, orientation, direction)
+      preparedFrames < 0 ->
+        Standing(context, orientation)
+      else -> null
     }
   }
 
   class Ready(
-    form: SpearForm, orientation: Orientation, direction: Direction): FormState<SpearForm>(form) {
+    context: SpearForm, orientation: Orientation, direction: Direction): FormState<SpearForm>(context) {
 
     private val orientation = orientation
     private val direction = direction
@@ -116,38 +112,31 @@ class SpearForm(hero: Hero): Form(hero) {
       cancelMomentum()
     }
 
-    override fun nextState(): State? {
-      if (controls.jump.isPressedUnique) {
-        return Windup(form, orientation, direction)
+    override fun nextState() = when {
+      controls.jump.isPressedUnique ->
+        Windup(context, orientation, direction)
+      else -> inputDirectionOrNull(isUniqueInput = true)?.let {
+        if (it != direction) Standing(context, orientation) else null
       }
-
-      val inputDirection = inputDirection(isUniqueInput =  true)
-      if (inputDirection != Direction.None && inputDirection != direction) {
-        return Standing(form, orientation)
-      }
-
-      return null
     }
   }
 
   class Windup(
-    form: SpearForm, orientation: Orientation, direction: Direction): FormState<SpearForm>(form) {
+    context: SpearForm, orientation: Orientation, direction: Direction): FormState<SpearForm>(context) {
 
     private val orientation = orientation
     private val direction = direction
     private val frameLength = 4
 
-    override fun nextState(): State? {
-      if (frame >= frameLength) {
-        return JumpStart(form, orientation, direction, isShort = !controls.jump.isPressed)
-      }
-
-      return null
+    override fun nextState() = when {
+      frame >= frameLength ->
+        JumpStart(context, orientation, direction, isShort = !controls.jump.isPressed)
+      else -> null
     }
   }
 
   class JumpStart(
-    form: SpearForm, orientation: Orientation, direction: Direction, isShort: Boolean): FormState<SpearForm>(form) {
+    context: SpearForm, orientation: Orientation, direction: Direction, isShort: Boolean): FormState<SpearForm>(context) {
 
     private val orientation = orientation
     private val frameLength = 3
@@ -168,20 +157,20 @@ class SpearForm(hero: Hero): Form(hero) {
       }
     }
 
-    override fun nextState(): State? {
-      return if (frame >= frameLength) Jumping(form) else null
+    override fun nextState() = when {
+      frame >= frameLength ->
+        Jumping(context)
+      else -> null
     }
   }
 
-  class Jumping(form: SpearForm): FormState<SpearForm>(form) {
-    override fun nextState(): State? {
-      val orientation = currentContactOrientation()
-      return if (orientation != null) Landing(form, orientation) else null
-    }
+  class Jumping(context: SpearForm): FormState<SpearForm>(context) {
+    override fun nextState() =
+      currentContactOrientation()?.let { Landing(context, orientation = it) }
   }
 
   class Landing(
-    form: SpearForm, orientation: Orientation): FormState<SpearForm>(form) {
+    context: SpearForm, orientation: Orientation): FormState<SpearForm>(context) {
 
     private val orientation = orientation
     private val frameLength = 3
@@ -194,8 +183,10 @@ class SpearForm(hero: Hero): Form(hero) {
       requireUniqueJump()
     }
 
-    override fun nextState(): State? {
-      return if (frame >= frameLength) Standing(form, orientation) else null
+    override fun nextState() = when {
+      frame >= frameLength ->
+        Standing(context, orientation)
+      else -> null
     }
   }
 }

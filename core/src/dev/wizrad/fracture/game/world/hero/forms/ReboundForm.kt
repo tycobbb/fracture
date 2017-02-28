@@ -2,12 +2,12 @@ package dev.wizrad.fracture.game.world.hero.forms
 
 import com.badlogic.gdx.physics.box2d.PolygonShape
 import dev.wizrad.fracture.game.world.components.statemachine.State
-import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.hero.Hero
 import dev.wizrad.fracture.game.world.hero.core.Form
+import dev.wizrad.fracture.game.world.hero.core.FormContext
 import dev.wizrad.fracture.game.world.hero.core.FormState
 
-class ReboundForm(hero: Hero): Form(hero) {
+class ReboundForm(hero: Hero): Form(hero), FormContext {
   // MARK: Form
   override fun initialState(): State {
     return Standing(this)
@@ -27,7 +27,7 @@ class ReboundForm(hero: Hero): Form(hero) {
   }
 
   // MARK: States
-  class Standing(form: ReboundForm): FormState<ReboundForm>(form) {
+  class Standing(context: ReboundForm): FormState<ReboundForm>(context) {
     private val runMagnitude = 7.5f
 
     override fun step(delta: Float) {
@@ -35,28 +35,26 @@ class ReboundForm(hero: Hero): Form(hero) {
       applyMovementForce(runMagnitude)
     }
 
-    override fun nextState(): State? {
-      return if (!isOnGround()) {
-        Jumping(form)
-      } else if (controls.jump.isPressedUnique) {
-        Windup(form)
-      } else null
+    override fun nextState() = when {
+      !isOnGround() ->
+        Jumping(context)
+      controls.jump.isPressedUnique ->
+        Windup(context)
+      else -> null
     }
   }
 
-  class Windup(form: ReboundForm): FormState<ReboundForm>(form) {
+  class Windup(context: ReboundForm): FormState<ReboundForm>(context) {
     private val frameLength = 4
 
-    override fun nextState(): State? {
-      if (frame >= frameLength) {
-        return JumpStart(form, isShort = !controls.jump.isPressed)
-      }
-
-      return null
+    override fun nextState() = when {
+      frame >= frameLength ->
+        JumpStart(context, isShort = !controls.jump.isPressed)
+      else -> null
     }
   }
 
-  class JumpStart(form: ReboundForm, isShort: Boolean): FormState<ReboundForm>(form) {
+  class JumpStart(context: ReboundForm, isShort: Boolean): FormState<ReboundForm>(context) {
     private val frameLength = 3
     private val jumpMagnitude = if (isShort) 3.75f else 5.0f
 
@@ -65,12 +63,14 @@ class ReboundForm(hero: Hero): Form(hero) {
       applyJumpImpulse(jumpMagnitude)
     }
 
-    override fun nextState(): State? {
-      return if (frame >= frameLength) Jumping(form) else null
+    override fun nextState() = when {
+      frame >= frameLength ->
+        Jumping(context)
+      else -> null
     }
   }
 
-  class Jumping(form: ReboundForm): FormState<ReboundForm>(form) {
+  class Jumping(context: ReboundForm): FormState<ReboundForm>(context) {
     private val restingFrameLength = 10
     private val driftMagnitude = 5.0f
 
@@ -95,19 +95,17 @@ class ReboundForm(hero: Hero): Form(hero) {
       }
     }
 
-    override fun nextState(): State? {
+    override fun nextState() = when {
       // land once we've rested for enough frames (no longer bouncing)
-      if (restingFrames >= restingFrameLength) {
-        return Landing(form)
-      } else if (controls.jump.isPressedUnique && canFastfall) {
-        return FastFalling(form)
-      }
-
-      return null
+      restingFrames >= restingFrameLength ->
+        Landing(context)
+      controls.jump.isPressedUnique && canFastfall ->
+        FastFalling(context)
+      else -> null
     }
   }
 
-  class FastFalling(form: ReboundForm): FormState<ReboundForm>(form) {
+  class FastFalling(context: ReboundForm): FormState<ReboundForm>(context) {
     private val magnitude = 12.5f
     private val driftMagnitude = 5.0f
 
@@ -121,13 +119,15 @@ class ReboundForm(hero: Hero): Form(hero) {
       applyMovementForce(driftMagnitude)
     }
 
-    override fun nextState(): State? {
+    override fun nextState() = when {
       // return to jumping at first contact to allow for re-falling
-      return if (isOnGround()) Jumping(form) else null
+      isOnGround() ->
+        Jumping(context)
+      else -> null
     }
   }
 
-  class Landing(form: ReboundForm): FormState<ReboundForm>(form) {
+  class Landing(context: ReboundForm): FormState<ReboundForm>(context) {
     private val frameLength = 3
 
     override fun start() {
@@ -135,8 +135,10 @@ class ReboundForm(hero: Hero): Form(hero) {
       requireUniqueJump()
     }
 
-    override fun nextState(): State? {
-      return if (frame >= frameLength) Standing(form) else null
+    override fun nextState() = when {
+      frame >= frameLength ->
+        Standing(context)
+      else -> null
     }
   }
 }

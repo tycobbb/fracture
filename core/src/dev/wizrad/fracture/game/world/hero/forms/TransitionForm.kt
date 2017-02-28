@@ -9,10 +9,11 @@ import dev.wizrad.fracture.game.world.components.contact.set
 import dev.wizrad.fracture.game.world.components.statemachine.State
 import dev.wizrad.fracture.game.world.hero.Hero
 import dev.wizrad.fracture.game.world.hero.core.Form
+import dev.wizrad.fracture.game.world.hero.core.FormContext
 import dev.wizrad.fracture.game.world.hero.core.FormState
 import dev.wizrad.fracture.support.Maths
 
-class TransitionForm(hero: Hero, target: Vector2): Form(hero) {
+class TransitionForm(hero: Hero, target: Vector2): Form(hero), FormContext {
   // MARK: Properties
   val target = Vector2(target)
 
@@ -32,7 +33,7 @@ class TransitionForm(hero: Hero, target: Vector2): Form(hero) {
   }
 
   // MARK: States
-  class Transitioning(form: TransitionForm, target: Vector2): FormState<TransitionForm>(form) {
+  class Transitioning(context: TransitionForm, target: Vector2): FormState<TransitionForm>(context) {
     val translation = Animation.Vector(
       start = body.position,
       end = target,

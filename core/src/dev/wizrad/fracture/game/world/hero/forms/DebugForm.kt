@@ -6,9 +6,10 @@ import dev.wizrad.fracture.game.world.components.contact.set
 import dev.wizrad.fracture.game.world.components.statemachine.State
 import dev.wizrad.fracture.game.world.hero.Hero
 import dev.wizrad.fracture.game.world.hero.core.Form
+import dev.wizrad.fracture.game.world.hero.core.FormContext
 import dev.wizrad.fracture.game.world.hero.core.FormState
 
-class DebugForm(hero: Hero): Form(hero) {
+class DebugForm(hero: Hero): Form(hero), FormContext {
   // MARK: Form
   override fun initialState(): State {
     return Floating(this)
@@ -27,7 +28,7 @@ class DebugForm(hero: Hero): Form(hero) {
   }
 
   // MARK: States
-  class Floating(form: DebugForm): FormState<DebugForm>(form) {
+  class Floating(context: DebugForm): FormState<DebugForm>(context) {
     override fun start() {
       super.start()
       stopGravity()
@@ -47,6 +48,6 @@ class DebugForm(hero: Hero): Form(hero) {
       startGravity()
     }
 
-    override fun nextState(): State? = null
+    override fun nextState() = null
   }
 }

@@ -1,6 +1,5 @@
 package dev.wizrad.fracture.game.world.hero.core
 
-import com.badlogic.gdx.math.Vector2
 import com.badlogic.gdx.physics.box2d.Body
 import com.badlogic.gdx.physics.box2d.Fixture
 import dev.wizrad.fracture.game.world.components.contact.Orientation
@@ -9,6 +8,7 @@ import dev.wizrad.fracture.game.world.components.contact.neq
 import dev.wizrad.fracture.game.world.components.statemachine.State
 import dev.wizrad.fracture.game.world.core.Scene
 import dev.wizrad.fracture.game.world.core.SceneAware
+import dev.wizrad.fracture.game.world.hero.Hero
 import dev.wizrad.fracture.game.world.support.extensions.applyImpulseToCenter
 import dev.wizrad.fracture.game.world.support.extensions.foot
 import dev.wizrad.fracture.game.world.support.extensions.hero
@@ -18,16 +18,16 @@ import dev.wizrad.fracture.support.debug
 import dev.wizrad.fracture.support.extensions.Polar
 import com.badlogic.gdx.physics.box2d.World as PhysicsWorld
 
-abstract class FormState<out F: Form>(
-  form: F, scene: Scene = Scene.instance): State(), SceneAware {
+abstract class FormState<out F: FormContext>(
+  context: F, scene: Scene = Scene.instance): State(), SceneAware {
+
+  // MARK: Properties
+  protected val context = context
+  protected val hero: Hero get() = context.hero
+  protected val body: Body get() = hero.body
 
   // MARK: SceneAware
   override val scene = scene
-
-  // MARK: Properties
-  protected val form: F = form
-  protected val size: Vector2 = form.size
-  protected val body: Body get() = form.body
 
   // MARK: Helpers- Input
   protected fun requireUniqueJump() {
@@ -77,11 +77,11 @@ abstract class FormState<out F: Form>(
   }
 
   protected fun isOnGround(frameTimeout: Int = 0): Boolean {
-    return frame >= frameTimeout && form.hero.isOnGround
+    return frame >= frameTimeout && hero.isOnGround
   }
 
   protected fun isAirborne(): Boolean {
-    return form.hero.numberOfContacts == 0
+    return hero.numberOfContacts == 0
   }
 
   protected fun isFalling(): Boolean {
@@ -111,7 +111,7 @@ abstract class FormState<out F: Form>(
 
   // MARK: Collisions
   protected fun currentContactOrientation(): Orientation? {
-    val orientations = form.hero.orientations
+    val orientations = hero.orientations
 
     // TODO: this needs to be more sophisticated than a precedence ordering
     if (orientations.and(Orientation.Top).neq(0)) {
@@ -128,7 +128,7 @@ abstract class FormState<out F: Form>(
   }
 
   protected fun currentWallContactOrientation(): Orientation? {
-    val orientations = form.hero.orientations
+    val orientations = hero.orientations
     val isOnLeftWall = orientations.and(Orientation.Right).neq(0)
     val isOnRightWall = orientations.and(Orientation.Left).neq(0)
 

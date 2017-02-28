@@ -2,14 +2,14 @@ package dev.wizrad.fracture.game.world.hero.forms
 
 import com.badlogic.gdx.physics.box2d.PolygonShape
 import dev.wizrad.fracture.game.world.components.statemachine.State
-import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.hero.Hero
 import dev.wizrad.fracture.game.world.hero.core.Direction
 import dev.wizrad.fracture.game.world.hero.core.Form
+import dev.wizrad.fracture.game.world.hero.core.FormContext
 import dev.wizrad.fracture.game.world.hero.core.FormState
 import dev.wizrad.fracture.support.Maths
 
-class AirDashForm(hero: Hero): Form(hero) {
+class AirDashForm(hero: Hero): Form(hero), FormContext {
   // MARK: Form
   override fun initialState(): State {
     return Standing(this)
@@ -27,7 +27,7 @@ class AirDashForm(hero: Hero): Form(hero) {
   }
 
   // MARK: States
-  class Standing(form: AirDashForm): FormState<AirDashForm>(form) {
+  class Standing(context: AirDashForm): FormState<AirDashForm>(context) {
     private val runMag = 7.5f
 
     override fun step(delta: Float) {
@@ -35,28 +35,26 @@ class AirDashForm(hero: Hero): Form(hero) {
       applyMovementForce(runMag)
     }
 
-    override fun nextState(): State? {
-      return if (!isOnGround()) {
-        Jumping(form)
-      } else if (controls.jump.isPressedUnique) {
-        Windup(form)
-      } else null
+    override fun nextState() = when {
+      !isOnGround() ->
+        Jumping(context)
+      controls.jump.isPressedUnique ->
+        Windup(context)
+      else -> null
     }
   }
 
-  class Windup(form: AirDashForm): FormState<AirDashForm>(form) {
+  class Windup(context: AirDashForm): FormState<AirDashForm>(context) {
     private val frameLength = 4
 
-    override fun nextState(): State? {
-      if (frame >= frameLength) {
-        return JumpStart(form, isShort = !controls.jump.isPressed)
-      }
-
-      return null
+    override fun nextState() = when {
+      frame >= frameLength ->
+        JumpStart(context, isShort = !controls.jump.isPressed)
+      else -> null
     }
   }
 
-  class JumpStart(form: AirDashForm, isShort: Boolean): FormState<AirDashForm>(form) {
+  class JumpStart(context: AirDashForm, isShort: Boolean): FormState<AirDashForm>(context) {
     private val frameLength = 3
     private val jumpMag = if (isShort) 3.75f else 7.5f
 
@@ -64,12 +62,14 @@ class AirDashForm(hero: Hero): Form(hero) {
       applyJumpImpulse(jumpMag)
     }
 
-    override fun nextState(): State? {
-      return if (frame >= frameLength) Jumping(form) else null
+    override fun nextState() = when {
+      frame >= frameLength ->
+        Jumping(context)
+      else -> null
     }
   }
 
-  class Jumping(form: AirDashForm): FormState<AirDashForm>(form) {
+  class Jumping(context: AirDashForm): FormState<AirDashForm>(context) {
     private val driftMag = 5.0f
 
     override fun start() {
@@ -82,30 +82,27 @@ class AirDashForm(hero: Hero): Form(hero) {
       applyMovementForce(driftMag)
     }
 
-    override fun nextState(): State? {
-      val direction = inputDirection()
-      return if (controls.jump.isPressedUnique && direction != Direction.None) {
-        AirDashStart(form, direction)
-      } else if(isOnGround()) {
-        Landing(form)
-      } else null
+    override fun nextState() = when {
+      isOnGround() ->
+        Landing(context)
+      else -> inputDirectionOrNull()?.let {
+        if (controls.jump.isPressedUnique) AirDashStart(context, direction = it) else null
+      }
     }
   }
 
-  class AirDashStart(form: AirDashForm, direction: Direction): FormState<AirDashForm>(form) {
+  class AirDashStart(context: AirDashForm, direction: Direction): FormState<AirDashForm>(context) {
     private val direction = direction
     private val frameLength = 4
 
-    override fun nextState(): State? {
-      if (frame >= frameLength) {
-        return AirDash(form, direction, isShort = !controls.jump.isPressed)
-      }
-
-      return null
+    override fun nextState() = when {
+      frame >= frameLength ->
+        AirDash(context, direction, isShort = !controls.jump.isPressed)
+      else -> null
     }
   }
 
-  class AirDash(form: AirDashForm, direction: Direction, isShort: Boolean): FormState<AirDashForm>(form) {
+  class AirDash(context: AirDashForm, direction: Direction, isShort: Boolean): FormState<AirDashForm>(context) {
     private val dashMag = if (isShort) 15.0f else 25.0f
     private val dashDamping = 10.0f
     private val dashAngle = if (direction == Direction.Left) {
@@ -131,12 +128,14 @@ class AirDashForm(hero: Hero): Form(hero) {
       stopDamping()
     }
 
-    override fun nextState(): State? {
-      return if (isNearStationary()) AirDashEnd(form) else null
+    override fun nextState() = when {
+      isNearStationary() ->
+        AirDashEnd(context)
+      else -> null
     }
   }
 
-  class AirDashEnd(form: AirDashForm): FormState<AirDashForm>(form) {
+  class AirDashEnd(context: AirDashForm): FormState<AirDashForm>(context) {
     private val driftMag = 5.0f
 
     override fun step(delta: Float) {
@@ -144,12 +143,14 @@ class AirDashForm(hero: Hero): Form(hero) {
       applyMovementForce(driftMag)
     }
 
-    override fun nextState(): State? {
-      return if (isOnGround()) Landing(form) else null
+    override fun nextState() = when {
+      isOnGround() ->
+        Landing(context)
+      else -> null
     }
   }
 
-  class Landing(form: AirDashForm): FormState<AirDashForm>(form) {
+  class Landing(context: AirDashForm): FormState<AirDashForm>(context) {
     private val frameLength = 3
 
     override fun start() {
@@ -157,8 +158,10 @@ class AirDashForm(hero: Hero): Form(hero) {
       requireUniqueJump()
     }
 
-    override fun nextState(): State? {
-      return if (frame >= frameLength) Standing(form) else null
+    override fun nextState() = when {
+      frame >= frameLength ->
+        Standing(context)
+      else -> null
     }
   }
 }

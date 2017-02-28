@@ -6,9 +6,9 @@ import com.badlogic.gdx.physics.box2d.PolygonShape
 import dev.wizrad.fracture.game.world.components.contact.ContactInfo
 import dev.wizrad.fracture.game.world.components.contact.Orientation
 import dev.wizrad.fracture.game.world.components.statemachine.State
-import dev.wizrad.fracture.game.world.core.Entity
 import dev.wizrad.fracture.game.world.hero.Hero
 import dev.wizrad.fracture.game.world.hero.core.Form
+import dev.wizrad.fracture.game.world.hero.core.FormContext
 import dev.wizrad.fracture.game.world.hero.core.FormState
 import dev.wizrad.fracture.game.world.support.extensions.contactInfo
 import dev.wizrad.fracture.game.world.support.extensions.hero
@@ -19,7 +19,7 @@ import dev.wizrad.fracture.support.debug
 import dev.wizrad.fracture.support.extensions.Polar
 import dev.wizrad.fracture.support.extensions.angleTo
 
-class PhasingForm(hero: Hero): Form(hero) {
+class PhasingForm(hero: Hero): Form(hero), FormContext {
   // MARK: Form
   override fun initialState(): State {
     return Standing(this, phasesLeft = 3)
@@ -37,7 +37,7 @@ class PhasingForm(hero: Hero): Form(hero) {
   }
 
   // MARK: States
-  class Standing(form: PhasingForm, phasesLeft: Int): PhasingState(form, phasesLeft) {
+  class Standing(context: PhasingForm, phasesLeft: Int): PhasingState(context, phasesLeft) {
     private val runMag = 7.5f
 
     override fun step(delta: Float) {
@@ -45,30 +45,28 @@ class PhasingForm(hero: Hero): Form(hero) {
       applyMovementForce(runMag)
     }
 
-    override fun nextState(): State? {
-      return if(canPhase()) {
+    override fun nextState() = when {
+      canPhase() ->
         phasingState()
-      }else if (!isOnGround()) {
-        Jumping(form, phasesLeft)
-      } else if (controls.jump.isPressedUnique) {
-        Windup(form, phasesLeft)
-      } else null
+      !isOnGround() ->
+        Jumping(context, phasesLeft)
+      controls.jump.isPressedUnique ->
+        Windup(context, phasesLeft)
+      else -> null
     }
   }
 
-  class Windup(form: PhasingForm, phasesLeft: Int): PhasingState(form, phasesLeft) {
+  class Windup(context: PhasingForm, phasesLeft: Int): PhasingState(context, phasesLeft) {
     private val frameLength = 4
 
-    override fun nextState(): State? {
-      if (frame >= frameLength) {
-        return JumpStart(form, phasesLeft, isShort = !controls.jump.isPressed)
-      }
-
-      return null
+    override fun nextState() = when {
+      frame >= frameLength ->
+        JumpStart(context, phasesLeft, isShort = !controls.jump.isPressed)
+      else -> null
     }
   }
 
-  class JumpStart(form: PhasingForm, phasesLeft: Int, isShort: Boolean): PhasingState(form, phasesLeft) {
+  class JumpStart(context: PhasingForm, phasesLeft: Int, isShort: Boolean): PhasingState(context, phasesLeft) {
     private val frameLength = 3
     private val jumpMag = if (isShort) 2.5f else 5.0f
 
@@ -76,12 +74,14 @@ class PhasingForm(hero: Hero): Form(hero) {
       applyJumpImpulse(jumpMag)
     }
 
-    override fun nextState(): State? {
-      return if (frame >= frameLength) Jumping(form, phasesLeft) else null
+    override fun nextState() = when {
+      frame >= frameLength ->
+        Jumping(context, phasesLeft)
+      else -> null
     }
   }
 
-  class Jumping(form: PhasingForm, phasesLeft: Int): PhasingState(form, phasesLeft) {
+  class Jumping(context: PhasingForm, phasesLeft: Int): PhasingState(context, phasesLeft) {
     private val driftMag = 5.0f
 
     override fun step(delta: Float) {
@@ -89,16 +89,16 @@ class PhasingForm(hero: Hero): Form(hero) {
       applyMovementForce(driftMag)
     }
 
-    override fun nextState(): State? {
-      return if (canPhase()) {
+    override fun nextState() = when {
+      canPhase() ->
         phasingState()
-      } else if (isOnGround()) {
-        Landing(form, phasesLeft)
-      } else null
+      isOnGround() ->
+        Landing(context, phasesLeft)
+      else -> null
     }
   }
 
-  class Phasing(form: PhasingForm, phasesLeft: Int, target: Target): PhasingState(form, phasesLeft) {
+  class Phasing(context: PhasingForm, phasesLeft: Int, target: Target): PhasingState(context, phasesLeft) {
     private val target = target
     private val start = body.position.cpy()
     private val end = destination()
@@ -139,12 +139,10 @@ class PhasingForm(hero: Hero): Form(hero) {
       body.linearVelocity = velocity
     }
 
-    override fun nextState(): State? {
-      if (phaseElapsed >= phaseDuration) {
-        return PhasingEnd(form, phasesLeft - 1)
-      }
-
-      return null
+    override fun nextState() = when {
+      phaseElapsed >= phaseDuration ->
+        PhasingEnd(context, phasesLeft - 1)
+      else -> null
     }
 
     private fun destination(): Vector2 {
@@ -153,7 +151,7 @@ class PhasingForm(hero: Hero): Form(hero) {
         error("attempted to phase to a phasingTarget that is not a Surface")
       }
 
-      val size = size
+      val size = hero.size
       val point = target.point.cpy()
 
       return when (contact.orientation) {
@@ -165,7 +163,7 @@ class PhasingForm(hero: Hero): Form(hero) {
     }
   }
 
-  class PhasingEnd(form: PhasingForm, phasesLeft: Int): PhasingState(form, phasesLeft) {
+  class PhasingEnd(context: PhasingForm, phasesLeft: Int): PhasingState(context, phasesLeft) {
     private val phasingDamping = 10.0f
 
     override fun start() {
@@ -181,16 +179,14 @@ class PhasingForm(hero: Hero): Form(hero) {
       stopPhasing()
     }
 
-    override fun nextState(): State? {
-      if (isNearStationary()) {
-        return if (isOnGround()) Landing(form, phasesLeft) else Jumping(form, phasesLeft)
-      }
-
-      return null
+    override fun nextState() = when {
+      isNearStationary() ->
+        if (isOnGround()) Landing(context, phasesLeft) else Jumping(context, phasesLeft)
+      else -> null
     }
   }
 
-  class Landing(form: PhasingForm, phasesLeft: Int): PhasingState(form, phasesLeft) {
+  class Landing(context: PhasingForm, phasesLeft: Int): PhasingState(context, phasesLeft) {
     private val frameLength = 3
 
     override fun start() {
@@ -199,7 +195,7 @@ class PhasingForm(hero: Hero): Form(hero) {
     }
 
     override fun nextState(): State? {
-      return if (frame >= frameLength) Standing(form, phasesLeft) else null
+      return if (frame >= frameLength) Standing(context, phasesLeft) else null
     }
   }
 
@@ -208,7 +204,7 @@ class PhasingForm(hero: Hero): Form(hero) {
     val fixture: Fixture, val point: Vector2, val fraction: Float
   )
 
-  abstract class PhasingState(form: PhasingForm, phasesLeft: Int): FormState<PhasingForm>(form) {
+  abstract class PhasingState(context: PhasingForm, phasesLeft: Int): FormState<PhasingForm>(context) {
     // MARK: Properties
     val phasesLeft = phasesLeft
     var phasingTarget: Target? = null; private set
@@ -237,7 +233,7 @@ class PhasingForm(hero: Hero): Form(hero) {
     }
 
     fun phasingState(): Phasing {
-      return Phasing(form, phasesLeft, phasingTarget!!)
+      return Phasing(context, phasesLeft, phasingTarget!!)
     }
 
     fun startPhasing() {
