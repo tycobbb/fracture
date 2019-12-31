@@ -16,14 +16,16 @@ import dev.wizrad.fracture.game.world.hero.Hero
 import dev.wizrad.fracture.game.world.support.extensions.contactInfo
 import dev.wizrad.fracture.support.debugPrefix
 
-abstract class Form(
-  hero: Hero, scene: Scene = Scene.instance): StateMachine(), SceneAware {
+abstract class Form<out C: FormContext>(
+  context: C,
+  scene: Scene = Scene.instance): StateMachine(), SceneAware {
 
   // MARK: SceneAware
   override val scene = scene
 
   // MARK: Properties
-  val hero: Hero = hero
+  val context = context
+  val hero: Hero get() = context.hero
   val body: Body get() = hero.body
   val size: Vector2 get() = hero.size
 

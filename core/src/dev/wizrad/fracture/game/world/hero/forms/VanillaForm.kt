@@ -8,14 +8,34 @@ import dev.wizrad.fracture.game.world.hero.core.Direction
 import dev.wizrad.fracture.game.world.hero.core.Form
 import dev.wizrad.fracture.game.world.hero.core.FormContext
 import dev.wizrad.fracture.game.world.hero.core.FormState
+import dev.wizrad.fracture.game.world.hero.forms.VanillaForm.Context
 import dev.wizrad.fracture.support.Maths
 import dev.wizrad.fracture.support.Tag
 import dev.wizrad.fracture.support.debug
 
-class VanillaForm(hero: Hero): Form(hero) {
+class VanillaForm(context: Context): Form<Context>(context) {
+  class Context(
+    override val hero: Hero): FormContext {
+
+    var runStartFrames = 10
+    var runStartDashSpeed = 3.0f
+    var runCancelDashDamping = 1.5f
+    var runningMag = 9.5f
+    var runningMaxSpeed = 6.0f
+    var jumpWindupFrames = 7
+    var jumpStartFrames = 3
+    var jumpStartShortMag = 4.75f
+    var jumpStartMag = 6.75f
+    var jumpingDriftMag = 7.0f
+    var jumpingMaxSpeed = 6.0f
+    var wallJumpFrames = 16
+    var wallJumpMag = 5.0f
+    var landingFrames = 3
+  }
+
   // MARK: Form
   override fun initialState(): State {
-    return Standing(Context(hero))
+    return Standing(context)
   }
 
   override fun defineFixtures() {
@@ -30,26 +50,6 @@ class VanillaForm(hero: Hero): Form(hero) {
     // dispose shapes
     polygon.dispose()
   }
-
-  // MARK: Context
-  class Context(
-    override val hero: Hero,
-
-    val runStartFrames: Int = 10,
-    val runStartDashSpeed: Float = 3.0f,
-    val runCancelDashDamping: Float = 1.5f,
-    val runningMag: Float = 9.5f,
-    val runningMaxSpeed: Float = 6.0f,
-    val jumpWindupFrames: Int = 7,
-    val jumpStartFrames: Int = 3,
-    val jumpStartShortMag: Float = 4.75f,
-    val jumpStartMag: Float = 6.75f,
-    val jumpingDriftMag: Float = 7.0f,
-    val jumpingMaxSpeed: Float = 6.0f,
-    val wallJumpFrames: Int = 16,
-    val wallJumpMag: Float = 5.0f,
-    val landingFrames: Int = 3
-  ): FormContext
 
   // MARK: States
   abstract class GroundState(context: Context): FormState<Context>(context) {

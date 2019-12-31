@@ -7,11 +7,15 @@ import dev.wizrad.fracture.game.world.hero.core.Direction
 import dev.wizrad.fracture.game.world.hero.core.Form
 import dev.wizrad.fracture.game.world.hero.core.FormContext
 import dev.wizrad.fracture.game.world.hero.core.FormState
+import dev.wizrad.fracture.game.world.hero.forms.SpaceJumpForm.Context
 
-class SpaceJumpForm(hero: Hero): Form(hero), FormContext {
+class SpaceJumpForm(context: Context): Form<Context>(context) {
+  class Context(
+    override val hero: Hero): FormContext
+
   // MARK: Form
   override fun initialState(): State {
-    return Standing(this)
+    return Standing(context)
   }
 
   override fun defineFixtures() {
@@ -26,7 +30,7 @@ class SpaceJumpForm(hero: Hero): Form(hero), FormContext {
   }
 
   // MARK: States
-  class Standing(context: SpaceJumpForm): FormState<SpaceJumpForm>(context) {
+  class Standing(context: Context): FormState<Context>(context) {
     private val runMag = 7.5f
 
     override fun step(delta: Float) {
@@ -43,7 +47,7 @@ class SpaceJumpForm(hero: Hero): Form(hero), FormContext {
     }
   }
 
-  class Windup(context: SpaceJumpForm): FormState<SpaceJumpForm>(context) {
+  class Windup(context: SpaceJumpForm.Context): FormState<SpaceJumpForm.Context>(context) {
     private val frameLength = 4
 
     override fun nextState() = when {
@@ -53,7 +57,7 @@ class SpaceJumpForm(hero: Hero): Form(hero), FormContext {
     }
   }
 
-  class JumpStart(context: SpaceJumpForm, isShort: Boolean): FormState<SpaceJumpForm>(context) {
+  class JumpStart(context: SpaceJumpForm.Context, isShort: Boolean): FormState<SpaceJumpForm.Context>(context) {
     private val frameLength = 3
     private val jumpMag = if (isShort) 4.0f else 5.5f
 
@@ -69,7 +73,7 @@ class SpaceJumpForm(hero: Hero): Form(hero), FormContext {
     }
   }
 
-  class Jumping(context: SpaceJumpForm): FormState<SpaceJumpForm>(context) {
+  class Jumping(context: SpaceJumpForm.Context): FormState<SpaceJumpForm.Context>(context) {
     private val driftMag = 10.0f
     private var canJump: Boolean = false
 
@@ -93,7 +97,7 @@ class SpaceJumpForm(hero: Hero): Form(hero), FormContext {
     }
   }
 
-  class Windup2(context: SpaceJumpForm): FormState<SpaceJumpForm>(context) {
+  class Windup2(context: SpaceJumpForm.Context): FormState<SpaceJumpForm.Context>(context) {
     private val frameLength = 4
 
     override fun nextState() = when {

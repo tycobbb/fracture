@@ -8,11 +8,15 @@ import dev.wizrad.fracture.game.world.hero.core.Direction
 import dev.wizrad.fracture.game.world.hero.core.Form
 import dev.wizrad.fracture.game.world.hero.core.FormContext
 import dev.wizrad.fracture.game.world.hero.core.FormState
+import dev.wizrad.fracture.game.world.hero.forms.SpearForm.Context
 import dev.wizrad.fracture.game.world.support.extensions.applyImpulseToCenter
 import dev.wizrad.fracture.support.Tag
 import dev.wizrad.fracture.support.debug
 
-class SpearForm(hero: Hero): Form(hero), FormContext {
+class SpearForm(context: Context): Form<Context>(context) {
+  class Context(
+    override val hero: Hero): FormContext
+
   // MARK: Behavior
   override fun start() {
     super.start()
@@ -26,7 +30,7 @@ class SpearForm(hero: Hero): Form(hero), FormContext {
 
   // MARK: Form
   override fun initialState(): State {
-    return Standing(this, Orientation.Top)
+    return Standing(context, Orientation.Top)
   }
 
   override fun defineFixtures() {
@@ -41,7 +45,7 @@ class SpearForm(hero: Hero): Form(hero), FormContext {
 
   // MARK: States
   class Standing(
-    context: SpearForm, orientation: Orientation): FormState<SpearForm>(context) {
+    context: Context, orientation: Orientation): FormState<Context>(context) {
 
     private val orientation = orientation
 
@@ -57,7 +61,7 @@ class SpearForm(hero: Hero): Form(hero), FormContext {
   }
 
   class Prepare(
-    context: SpearForm, orientation: Orientation, direction: Direction): FormState<SpearForm>(context) {
+    context: Context, orientation: Orientation, direction: Direction): FormState<Context>(context) {
 
     private val orientation = orientation
     private val direction = direction
@@ -101,7 +105,7 @@ class SpearForm(hero: Hero): Form(hero), FormContext {
   }
 
   class Ready(
-    context: SpearForm, orientation: Orientation, direction: Direction): FormState<SpearForm>(context) {
+    context: Context, orientation: Orientation, direction: Direction): FormState<Context>(context) {
 
     private val orientation = orientation
     private val direction = direction
@@ -122,7 +126,7 @@ class SpearForm(hero: Hero): Form(hero), FormContext {
   }
 
   class Windup(
-    context: SpearForm, orientation: Orientation, direction: Direction): FormState<SpearForm>(context) {
+    context: Context, orientation: Orientation, direction: Direction): FormState<Context>(context) {
 
     private val orientation = orientation
     private val direction = direction
@@ -136,7 +140,7 @@ class SpearForm(hero: Hero): Form(hero), FormContext {
   }
 
   class JumpStart(
-    context: SpearForm, orientation: Orientation, direction: Direction, isShort: Boolean): FormState<SpearForm>(context) {
+    context: Context, orientation: Orientation, direction: Direction, isShort: Boolean): FormState<Context>(context) {
 
     private val orientation = orientation
     private val frameLength = 3
@@ -164,13 +168,13 @@ class SpearForm(hero: Hero): Form(hero), FormContext {
     }
   }
 
-  class Jumping(context: SpearForm): FormState<SpearForm>(context) {
+  class Jumping(context: Context): FormState<Context>(context) {
     override fun nextState() =
       currentContactOrientation()?.let { Landing(context, orientation = it) }
   }
 
   class Landing(
-    context: SpearForm, orientation: Orientation): FormState<SpearForm>(context) {
+    context: Context, orientation: Orientation): FormState<Context>(context) {
 
     private val orientation = orientation
     private val frameLength = 3

@@ -2,6 +2,7 @@ package dev.wizrad.fracture.game.ui.core
 
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.scenes.scene2d.Stage
+import com.badlogic.gdx.scenes.scene2d.ui.Dialog
 import com.badlogic.gdx.scenes.scene2d.ui.Label
 import com.badlogic.gdx.scenes.scene2d.ui.Skin
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton
@@ -11,6 +12,8 @@ import dev.wizrad.fracture.game.ui.support.onChange
 import dev.wizrad.fracture.game.world.MainScene
 import dev.wizrad.fracture.game.world.hero.Hero
 import dev.wizrad.fracture.game.world.hero.forms.PhasingForm
+import dev.wizrad.fracture.support.Tag
+import dev.wizrad.fracture.support.debug
 
 class MainStage(
   private val scene: MainScene): Stage(ScreenViewport()) {
@@ -18,11 +21,13 @@ class MainStage(
   // MARK: Properties
   private val skin = Skin(Gdx.files.internal("uiskin.json"))
   private val formButton = TextButton("form", skin)
+  private val formConfigButton = TextButton("(#)", skin)
   private val phasesLeftLabel = Label("phases", skin)
 
   // MARK: Lifecycle
   init {
     addFormButton()
+    addFormConfigButton()
     addPhasesLeftLabel()
   }
 
@@ -47,6 +52,17 @@ class MainStage(
     formButton.onChange { event, actor ->
       model.randomizeForm()
       updateFormButtonText(model)
+    }
+  }
+
+  private fun addFormConfigButton() {
+    formConfigButton.setPosition(width - formConfigButton.width, height - formConfigButton.height)
+    addActor(formConfigButton)
+
+    val model = scene.cycle.hero.form.state
+    formConfigButton.onChange { event, actor ->
+      Dialog("")
+      debug(Tag.Interface, "config")
     }
   }
 

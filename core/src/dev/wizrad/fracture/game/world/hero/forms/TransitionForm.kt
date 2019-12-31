@@ -11,15 +11,17 @@ import dev.wizrad.fracture.game.world.hero.Hero
 import dev.wizrad.fracture.game.world.hero.core.Form
 import dev.wizrad.fracture.game.world.hero.core.FormContext
 import dev.wizrad.fracture.game.world.hero.core.FormState
+import dev.wizrad.fracture.game.world.hero.forms.TransitionForm.Context
 import dev.wizrad.fracture.support.Maths
 
-class TransitionForm(hero: Hero, target: Vector2): Form(hero), FormContext {
-  // MARK: Properties
-  val target = Vector2(target)
+class TransitionForm(context: Context): Form<Context>(context) {
+  class Context(
+    override val hero: Hero,
+    val target: Vector2): FormContext
 
   // MARK: Form
   override fun initialState(): State {
-    return Transitioning(this, target)
+    return Transitioning(context)
   }
 
   override fun defineFixtures() {
@@ -33,10 +35,10 @@ class TransitionForm(hero: Hero, target: Vector2): Form(hero), FormContext {
   }
 
   // MARK: States
-  class Transitioning(context: TransitionForm, target: Vector2): FormState<TransitionForm>(context) {
+  class Transitioning(context: Context): FormState<Context>(context) {
     val translation = Animation.Vector(
       start = body.position,
-      end = target,
+      end = context.target,
       duration = 2.0f,
       interpolation = Interpolation.pow2
     )
