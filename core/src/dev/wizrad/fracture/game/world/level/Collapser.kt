@@ -24,7 +24,7 @@ class Collapser(
     if (elapsed < delay) {
       elapsed += delta
       if (elapsed > delay) {
-//        body.setLinearVelocity(0.0f, -0.4f)
+        body.setLinearVelocity(0.0f, -0.4f)
       }
     }
   }

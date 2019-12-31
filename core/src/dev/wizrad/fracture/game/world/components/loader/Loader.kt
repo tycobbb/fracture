@@ -18,7 +18,7 @@ class Loader {
   }
 
   fun load(): LevelData {
-    val file = Gdx.files.internal("level-test.json")
+    val file = Gdx.files.internal("level.json")
     val level = json.fromJson(LevelData::class.java, file)
 
     // offset all non-wall entities by the width of the left wall
