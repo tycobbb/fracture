@@ -56,7 +56,7 @@ class FlutterForm(hero: Hero): Form(hero), FormContext {
 
   class JumpStart(context: FlutterForm, isShort: Boolean): FormState<FlutterForm>(context) {
     private val frameLength = 3
-    private val jumpMag = if (isShort) 3.75f else 5.0f
+    private val jumpMag = if (isShort) 3.0f else 4.0f
 
     override fun start() {
       applyJumpImpulse(jumpMag)

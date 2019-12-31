@@ -9,7 +9,9 @@ import dev.wizrad.fracture.game.world.hero.core.Form
 import dev.wizrad.fracture.game.world.hero.core.FormContext
 import dev.wizrad.fracture.game.world.hero.core.FormState
 import dev.wizrad.fracture.support.Maths
+import dev.wizrad.fracture.support.Tag
 import dev.wizrad.fracture.support.abs
+import dev.wizrad.fracture.support.debug
 
 class FluidForm(hero: Hero): Form(hero), FormContext {
   // MARK: Form
@@ -182,7 +184,7 @@ class FluidForm(hero: Hero): Form(hero), FormContext {
 
   class WallRunning(context: FluidForm, impact: Impact): FormState<FluidForm>(context) {
     private val impact = impact
-    private val landingFrameTimeout = 5
+    private val landingFrameTimeout = 8
     private val transferDecay = 0.85f
     private var lastVelocity = body.linearVelocity.cpy()
 
@@ -208,10 +210,11 @@ class FluidForm(hero: Hero): Form(hero), FormContext {
     }
 
     private fun initialSpeed(): Float {
+      debug(Tag.Hero, "impact speed ${impact.velocity}")
       val impactSpeed = impact.velocity.y
       val transferredSpeed = abs(impact.velocity.x) * transferDecay
 
-      return if (impactSpeed > 0.0) {
+      return if (impactSpeed > 0.1) {
         impactSpeed + transferredSpeed
       } else {
         impactSpeed - transferredSpeed

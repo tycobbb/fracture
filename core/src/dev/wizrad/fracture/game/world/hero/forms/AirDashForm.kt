@@ -56,7 +56,7 @@ class AirDashForm(hero: Hero): Form(hero), FormContext {
 
   class JumpStart(context: AirDashForm, isShort: Boolean): FormState<AirDashForm>(context) {
     private val frameLength = 3
-    private val jumpMag = if (isShort) 3.75f else 7.5f
+    private val jumpMag = if (isShort) 3.75f else 5.5f
 
     override fun start() {
       applyJumpImpulse(jumpMag)

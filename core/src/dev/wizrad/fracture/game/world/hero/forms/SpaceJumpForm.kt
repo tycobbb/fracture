@@ -106,7 +106,7 @@ class SpaceJumpForm(hero: Hero): Form(hero), FormContext {
   class JumpStart2(context: SpaceJumpForm, isShort: Boolean, direction: Direction): FormState<SpaceJumpForm>(context) {
     private val frameLength = 3
     private val direction = direction
-    private val jumpMag = if (isShort) 5.0f else 7.5f
+    private val jumpMag = if (isShort) 4.0f else 6.0f
 
     override fun start() {
       super.start()

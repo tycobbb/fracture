@@ -13,7 +13,7 @@ import dev.wizrad.fracture.game.world.hero.core.FormContext
 import dev.wizrad.fracture.game.world.hero.core.FormState
 import dev.wizrad.fracture.support.Maths
 
-class TransitionForm(hero: Hero, target: Vector2): Form(hero), FormContext {
+class TransitionForm(val source: Form, hero: Hero, target: Vector2): Form(hero), FormContext {
   // MARK: Properties
   val target = Vector2(target)
 

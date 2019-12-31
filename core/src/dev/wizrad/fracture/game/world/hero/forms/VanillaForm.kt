@@ -43,7 +43,7 @@ class VanillaForm(hero: Hero): Form(hero) {
     val jumpWindupFrames: Int = 7,
     val jumpStartFrames: Int = 3,
     val jumpStartShortMag: Float = 4.75f,
-    val jumpStartMag: Float = 6.75f,
+    val jumpStartMag: Float = 7.0f,
     val jumpingDriftMag: Float = 7.0f,
     val jumpingMaxSpeed: Float = 6.0f,
     val wallJumpFrames: Int = 16,

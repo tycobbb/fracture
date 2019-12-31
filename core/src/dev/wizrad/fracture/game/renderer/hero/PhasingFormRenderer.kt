@@ -3,6 +3,7 @@ package dev.wizrad.fracture.game.renderer.hero
 import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.GL20
+import com.badlogic.gdx.math.Vector2
 import dev.wizrad.fracture.game.renderer.core.Renderer
 import dev.wizrad.fracture.game.renderer.support.pause
 import dev.wizrad.fracture.game.world.components.statemachine.State
@@ -25,7 +26,7 @@ fun Renderer.render(hero: Hero, form: PhasingForm, delta: Float) {
 
 private fun Renderer.render(target: PhasingForm.Target?, delta: Float) {
   if (target != null) {
-    drawRect(target.point, Renderer.scratch1.set(0.25f, 0.25f), 0.0f, Color.SCARLET)
+    drawRect(target.point, Vector2(0.25f, 0.25f), 0.0f, Color.SCARLET)
   }
 }
 

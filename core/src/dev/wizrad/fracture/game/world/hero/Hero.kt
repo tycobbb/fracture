@@ -105,12 +105,16 @@ class Hero(
 
   private fun onTransitionStarted(event: Event.TransitionStarted) {
     val target = event.level.transform(event.start.center)
-    updateForm(next = TransitionForm(this, target))
+    updateForm(next = TransitionForm(form, this, target))
   }
 
   // MARK: Actions
   fun randomizeForm() {
     updateForm(next = sampleForm())
+  }
+
+  fun setDebugForm() {
+    updateForm(next = DebugForm(this))
   }
 
   private fun updateForm(next: Form) {
@@ -122,8 +126,8 @@ class Hero(
     form.start()
   }
 
-  private fun sampleForm(): Form {
-    return when (form) {
+  private fun sampleForm(previous: Form = form): Form {
+    return when (previous) {
       is VanillaForm -> SpaceJumpForm(this)
       is SpaceJumpForm -> ReboundForm(this)
       is ReboundForm -> SpearForm(this)
@@ -131,7 +135,8 @@ class Hero(
       is PhasingForm -> AirDashForm(this)
       is AirDashForm -> FluidForm(this)
       is FluidForm -> FlutterForm(this)
-      is FlutterForm -> DebugForm(this)
+      is FlutterForm -> VanillaForm(this)
+      is TransitionForm -> sampleForm(previous.source)
       else -> VanillaForm(this)
     }
   }
